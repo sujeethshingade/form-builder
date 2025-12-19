@@ -16,18 +16,24 @@ import "survey-core/defaultV2.min.css";
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { InspectorPanel } from "./components/inspector/InspectorPanel";
 import { LibraryPanel } from "./components/library/LibraryPanel";
+import { TemplatesSidebar } from "./components/sidebar/TemplatesSidebar";
 import { TopBar } from "./components/navbar/TopBar";
-import { fieldToSurveyJSON, library, makeField } from "./lib/form";
-import type { FormField, LibraryItem } from "./lib/form";
+import { fieldToSurveyJSON, library, makeField, makeFieldFromTemplate, templates, defaultStyles } from "./lib/form";
+import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/form";
+
+type ViewMode = "desktop" | "tablet" | "mobile";
 
 export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(
-    null
-  );
+  const [jsonOpen, setJsonOpen] = useState(false);
+  const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(null);
+  const [styles, setStyles] = useState<FormStyles>(defaultStyles);
+  const [viewMode, setViewMode] = useState<ViewMode>("desktop");
+  const [rightTab, setRightTab] = useState<"components" | "styles">("components");
+  const [undoStack, setUndoStack] = useState<FormField[][]>([]);
+  const [redoStack, setRedoStack] = useState<FormField[][]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -39,6 +45,29 @@ export default function Home() {
 
   const surveyJson = useMemo(() => fieldToSurveyJSON(fields), [fields]);
   const surveyModel = useMemo(() => new SurveyModel(surveyJson), [surveyJson]);
+
+  const pushUndo = (prev: FormField[]) => {
+    setUndoStack((stack) => [...stack.slice(-19), prev]);
+    setRedoStack([]);
+  };
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    const prev = undoStack[undoStack.length - 1];
+    setRedoStack((stack) => [...stack, fields]);
+    setUndoStack((stack) => stack.slice(0, -1));
+    setFields(prev);
+    setSelectedId(null);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setUndoStack((stack) => [...stack, fields]);
+    setRedoStack((stack) => stack.slice(0, -1));
+    setFields(next);
+    setSelectedId(null);
+  };
 
   const handleDragStart = (event: any) => {
     const activeType = event?.active?.data?.current?.type;
@@ -63,6 +92,7 @@ export default function Home() {
       const libItem = library.find((l) => l.type === activeData.type);
       if (!libItem) return;
 
+      pushUndo(fields);
       const newField = makeField(libItem);
       if (!overId || overId === "canvas") {
         setFields((prev) => [...prev, newField]);
@@ -82,6 +112,7 @@ export default function Home() {
 
     // Reorder inside canvas
     if (activeData?.from === "canvas" && overId && active.id !== overId) {
+      pushUndo(fields);
       setFields((prev) => {
         const oldIndex = prev.findIndex((f) => f.id === active.id);
         const newIndex = prev.findIndex((f) => f.id === overId);
@@ -95,6 +126,7 @@ export default function Home() {
 
   const handleFieldUpdate = (patch: Partial<FormField>) => {
     if (!selectedId) return;
+    pushUndo(fields);
     setFields((prev) =>
       prev.map((f) => (f.id === selectedId ? { ...f, ...patch } : f))
     );
@@ -102,8 +134,19 @@ export default function Home() {
 
   const handleDelete = () => {
     if (!selectedId) return;
+    pushUndo(fields);
     setFields((prev) => prev.filter((f) => f.id !== selectedId));
     setSelectedId(null);
+  };
+
+  const handleTemplateSelect = (template: FormTemplate) => {
+    pushUndo(fields);
+    setFields(template.fields.map(makeFieldFromTemplate));
+    setSelectedId(null);
+  };
+
+  const handleStyleUpdate = (patch: Partial<FormStyles>) => {
+    setStyles((prev) => ({ ...prev, ...patch }));
   };
 
   const exportString = useMemo(
@@ -112,10 +155,16 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] text-slate-900">
+    <div className="flex h-screen flex-col bg-slate-100">
       <TopBar
         onPreview={() => setPreviewOpen(true)}
-        onExport={() => setExportOpen(true)}
+        onExport={() => setJsonOpen(true)}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        canUndo={undoStack.length > 0}
+        canRedo={redoStack.length > 0}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
 
       <DndContext
@@ -124,80 +173,234 @@ export default function Home() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-7xl grid-cols-[260px,1fr,260px] gap-4 px-6 py-6">
-          <LibraryPanel items={library} />
-          <FormCanvas
-            fields={fields}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left Sidebar - Templates */}
+          <TemplatesSidebar
+            templates={templates}
+            onSelect={handleTemplateSelect}
           />
-          <InspectorPanel
-            selectedField={selectedField}
-            onUpdate={handleFieldUpdate}
-            onDelete={handleDelete}
-          />
-        </main>
+
+          {/* Center - Canvas */}
+          <main className="flex flex-1 flex-col overflow-hidden">
+            <FormCanvas
+              fields={fields}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              viewMode={viewMode}
+              styles={styles}
+            />
+          </main>
+
+          {/* Right Sidebar - Components & Styles */}
+          <aside className="flex w-72 flex-col border-l border-slate-200 bg-white">
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200">
+              <button
+                onClick={() => setRightTab("components")}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                  rightTab === "components"
+                    ? "border-b-2 border-sky-500 text-sky-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Components
+              </button>
+              <button
+                onClick={() => setRightTab("styles")}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                  rightTab === "styles"
+                    ? "border-b-2 border-sky-500 text-sky-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Styles
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto">
+              {rightTab === "components" ? (
+                selectedField ? (
+                  <InspectorPanel
+                    selectedField={selectedField}
+                    onUpdate={handleFieldUpdate}
+                    onDelete={handleDelete}
+                  />
+                ) : (
+                  <LibraryPanel items={library} />
+                )
+              ) : (
+                <div className="p-4 space-y-5">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                      Background Color
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={styles.backgroundColor}
+                        onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
+                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                      />
+                      <input
+                        type="text"
+                        value={styles.backgroundColor}
+                        onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
+                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                      Text Color
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={styles.textColor}
+                        onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
+                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                      />
+                      <input
+                        type="text"
+                        value={styles.textColor}
+                        onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
+                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                      Primary Color
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={styles.primaryColor}
+                        onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
+                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                      />
+                      <input
+                        type="text"
+                        value={styles.primaryColor}
+                        onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
+                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                      Border Radius
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="24"
+                        value={styles.borderRadius}
+                        onChange={(e) => handleStyleUpdate({ borderRadius: parseInt(e.target.value) })}
+                        className="flex-1"
+                      />
+                      <span className="w-12 text-right text-sm text-slate-600">{styles.borderRadius}px</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                      Font Family
+                    </label>
+                    <select
+                      value={styles.fontFamily}
+                      onChange={(e) => handleStyleUpdate({ fontFamily: e.target.value })}
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    >
+                      <option value="Inter, sans-serif">Inter (Modern Sans)</option>
+                      <option value="Georgia, serif">Georgia (Classic Serif)</option>
+                      <option value="system-ui, sans-serif">System Default</option>
+                      <option value="Monaco, monospace">Monaco (Monospace)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            <div className="rounded-2xl border border-sky-200 bg-white px-4 py-3 text-slate-900 shadow-lg">
-              {activeDrag.label}
+            <div className="rounded-xl border border-sky-200 bg-white px-4 py-3 text-slate-900 shadow-lg">
+              {"icon" in activeDrag ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{activeDrag.icon}</span>
+                  <span>{activeDrag.label}</span>
+                </div>
+              ) : (
+                activeDrag.label
+              )}
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
 
-      {previewOpen ? (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/60 backdrop-blur">
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
+      {/* Preview Modal */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Preview</p>
-                <h3 className="text-lg font-semibold text-slate-900">SurveyJS runtime</h3>
+                <h3 className="text-lg font-semibold text-slate-900">Form Preview</h3>
+                <p className="text-sm text-slate-500">Live preview of your form</p>
               </div>
               <button
-                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-semibold text-slate-700 hover:border-slate-300"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                 onClick={() => setPreviewOpen(false)}
               >
                 Close
               </button>
             </div>
-            <div className="overflow-y-auto">
+            <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-6">
               <Survey model={surveyModel} />
             </div>
           </div>
         </div>
-      ) : null}
+      )}
 
-      {exportOpen ? (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/60 backdrop-blur">
-          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
+      {/* JSON Export Modal */}
+      {jsonOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Export</p>
-                <h3 className="text-lg font-semibold text-slate-900">Survey JSON</h3>
+                <h3 className="text-lg font-semibold text-slate-900">Export JSON</h3>
+                <p className="text-sm text-slate-500">Copy the form configuration</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-semibold text-slate-700 hover:border-slate-300"
+                  className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600"
                   onClick={() => navigator.clipboard.writeText(exportString)}
                 >
-                  Copy
+                  Copy to Clipboard
                 </button>
                 <button
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-semibold text-slate-700 hover:border-slate-300"
-                  onClick={() => setExportOpen(false)}
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  onClick={() => setJsonOpen(false)}
                 >
                   Close
                 </button>
               </div>
             </div>
-            <pre className="max-h-[60vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-800">
-              {exportString}
-            </pre>
+            <div className="p-6">
+              <pre className="max-h-[60vh] overflow-y-auto rounded-xl bg-slate-900 p-4 text-sm text-emerald-400">
+                {exportString}
+              </pre>
+            </div>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
+

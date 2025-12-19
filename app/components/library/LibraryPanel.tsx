@@ -5,7 +5,7 @@ import type { LibraryItem } from "../../lib/form";
 
 function LibraryCard({ item }: { item: LibraryItem }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `palette-${item.type}-${item.label}`,
+    id: `palette-${item.type}`,
     data: { from: "palette", type: item.type },
   });
 
@@ -14,36 +14,65 @@ function LibraryCard({ item }: { item: LibraryItem }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        isDragging ? "opacity-70" : ""
+      className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white p-3 cursor-grab transition hover:border-sky-300 hover:shadow-sm active:cursor-grabbing ${
+        isDragging ? "opacity-50 border-sky-400" : ""
       }`}
     >
-      <div className="text-sm font-semibold text-slate-900">{item.label}</div>
-      <p className="text-xs text-slate-500">{item.description}</p>
-      <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-2 py-1 text-[11px] uppercase tracking-[0.08em] text-slate-600">
-        Drag to canvas
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-lg">
+        {item.icon}
       </div>
+      <span className="text-xs font-medium text-slate-600 text-center">{item.label}</span>
     </div>
   );
 }
 
 export function LibraryPanel({ items }: { items: LibraryItem[] }) {
+  const inputFields = items.filter((i) => i.category === "input");
+  const choiceFields = items.filter((i) => i.category === "choice");
+  const layoutFields = items.filter((i) => i.category === "layout");
+  const advancedFields = items.filter((i) => i.category === "advanced");
+
   return (
-    <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Components</p>
-          <h2 className="text-lg font-semibold text-slate-900">Library</h2>
-        </div>
-        <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
-          Drag & drop
+    <div className="p-4 space-y-6">
+      {/* Input Fields */}
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Input Fields</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {inputFields.map((item) => (
+            <LibraryCard key={item.type} item={item} />
+          ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-3">
-        {items.map((item) => (
-          <LibraryCard key={item.type} item={item} />
-        ))}
+
+      {/* Choice Fields */}
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Choice Fields</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {choiceFields.map((item) => (
+            <LibraryCard key={item.type} item={item} />
+          ))}
+        </div>
       </div>
-    </aside>
+
+      {/* Layout Elements */}
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Layout</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {layoutFields.map((item) => (
+            <LibraryCard key={item.type} item={item} />
+          ))}
+        </div>
+      </div>
+
+      {/* Advanced */}
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Advanced</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {advancedFields.map((item) => (
+            <LibraryCard key={item.type} item={item} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

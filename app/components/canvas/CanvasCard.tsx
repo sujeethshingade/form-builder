@@ -2,16 +2,38 @@
 
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import type { FormField } from "../../lib/form";
+import type { FormField, FormStyles } from "../../lib/form";
+
+const fieldIcons: Record<string, string> = {
+  text: "T",
+  email: "@",
+  number: "#",
+  phone: "📞",
+  textarea: "¶",
+  select: "▼",
+  checkbox: "☑",
+  radio: "◉",
+  date: "📅",
+  time: "⏰",
+  file: "📎",
+  rating: "★",
+  signature: "✍",
+  heading: "H",
+  paragraph: "≡",
+  divider: "—",
+  spacer: "⬚",
+};
 
 export function CanvasCard({
   field,
   selected,
   onSelect,
+  styles,
 }: {
   field: FormField;
   selected: boolean;
   onSelect: (id: string) => void;
+  styles: FormStyles;
 }) {
   const {
     attributes,
@@ -30,41 +52,243 @@ export function CanvasCard({
     transition,
   };
 
+  // Render layout elements differently
+  if (field.type === "divider") {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={() => onSelect(field.id)}
+        className={`group relative cursor-pointer py-4 ${isDragging ? "opacity-50" : ""}`}
+      >
+        <div className={`border-t border-slate-300 ${selected ? "border-sky-500" : ""}`} />
+        {selected && (
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 rounded-full bg-sky-500" />
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === "spacer") {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={() => onSelect(field.id)}
+        className={`group relative cursor-pointer ${isDragging ? "opacity-50" : ""}`}
+      >
+        <div className={`h-12 rounded-lg border-2 border-dashed ${selected ? "border-sky-400 bg-sky-50" : "border-slate-200"}`} />
+        {selected && (
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 rounded-full bg-sky-500" />
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === "heading") {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={() => onSelect(field.id)}
+        className={`group relative cursor-pointer rounded-lg p-3 transition ${
+          selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
+        } ${isDragging ? "opacity-50" : ""}`}
+      >
+        <h2 className="text-xl font-bold" style={{ color: styles.textColor }}>
+          {field.label}
+        </h2>
+        {selected && (
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === "paragraph") {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={() => onSelect(field.id)}
+        className={`group relative cursor-pointer rounded-lg p-3 transition ${
+          selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
+        } ${isDragging ? "opacity-50" : ""}`}
+      >
+        <p className="text-sm" style={{ color: styles.textColor }}>
+          {field.placeholder || field.label}
+        </p>
+        {selected && (
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <article
+    <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        selected ? "border-sky-400 ring-2 ring-sky-100" : "border-slate-200"
-      } ${isDragging ? "opacity-60" : ""}`}
       {...attributes}
       {...listeners}
       onClick={() => onSelect(field.id)}
+      className={`group relative cursor-pointer rounded-lg border bg-white p-4 transition ${
+        selected
+          ? "border-sky-500 ring-2 ring-sky-100"
+          : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
+      } ${isDragging ? "opacity-50 shadow-lg" : ""}`}
     >
-      <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.08em] text-slate-500">
-        <span>{field.type}</span>
-        <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-500">Drag</span>
+      {/* Selection indicator */}
+      {selected && (
+        <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+      )}
+
+      {/* Field Label */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-slate-100 text-xs">
+          {fieldIcons[field.type] || "?"}
+        </span>
+        <label className="text-sm font-medium" style={{ color: styles.textColor }}>
+          {field.label}
+          {field.required && <span className="ml-1 text-red-500">*</span>}
+        </label>
       </div>
-      <h3 className="mt-2 text-sm font-semibold text-slate-900">{field.label}</h3>
-      {field.helper ? (
-        <p className="text-xs text-slate-500">{field.helper}</p>
-      ) : null}
-      <div className="mt-3 text-sm text-slate-600">
-        {field.type === "text" || field.type === "textarea" ? (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-slate-400">
-            {field.placeholder || "Placeholder"}
-          </div>
-        ) : (
-          <ul className="space-y-1 text-slate-600">
-            {(field.options ?? []).map((opt) => (
-              <li key={opt} className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full border border-slate-300" />
-                {opt}
-              </li>
+
+      {/* Field Helper */}
+      {field.helper && (
+        <p className="mb-2 text-xs text-slate-500">{field.helper}</p>
+      )}
+
+      {/* Field Preview */}
+      <div className="mt-2">
+        {(field.type === "text" || field.type === "email" || field.type === "number" || field.type === "phone") && (
+          <input
+            type="text"
+            placeholder={field.placeholder}
+            disabled
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          />
+        )}
+
+        {field.type === "textarea" && (
+          <textarea
+            placeholder={field.placeholder}
+            disabled
+            rows={3}
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 resize-none"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          />
+        )}
+
+        {field.type === "date" && (
+          <input
+            type="text"
+            placeholder="mm/dd/yyyy"
+            disabled
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          />
+        )}
+
+        {field.type === "time" && (
+          <input
+            type="text"
+            placeholder="--:-- --"
+            disabled
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          />
+        )}
+
+        {field.type === "select" && (
+          <select
+            disabled
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          >
+            <option>Select an option...</option>
+            {(field.options || []).map((opt) => (
+              <option key={opt}>{opt}</option>
             ))}
-          </ul>
+          </select>
+        )}
+
+        {field.type === "checkbox" && (
+          <div className="space-y-2">
+            {(field.options || []).map((opt) => (
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
+                <input type="checkbox" disabled className="rounded border-slate-300" />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {field.type === "radio" && (
+          <div className="space-y-2">
+            {(field.options || []).map((opt) => (
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
+                <input type="radio" disabled name={field.id} className="border-slate-300" />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {field.type === "file" && (
+          <div
+            className="flex items-center justify-center rounded-md border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          >
+            <div className="text-center">
+              <svg className="mx-auto h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p className="mt-1">Click to upload or drag and drop</p>
+            </div>
+          </div>
+        )}
+
+        {field.type === "rating" && (
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <svg
+                key={star}
+                className="h-6 w-6 text-slate-300"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            ))}
+          </div>
+        )}
+
+        {field.type === "signature" && (
+          <div
+            className="flex items-center justify-center rounded-md border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-400"
+            style={{ borderRadius: `${styles.borderRadius}px` }}
+          >
+            <p>Click to sign</p>
+          </div>
         )}
       </div>
-    </article>
+
+      {/* Drag handle indicator */}
+      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition">
+        <svg className="h-4 w-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+        </svg>
+      </div>
+    </div>
   );
 }

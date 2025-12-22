@@ -23,6 +23,8 @@ import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/for
 
 type ViewMode = "desktop" | "tablet" | "mobile";
 
+const NAVBAR_HEIGHT = 56;
+
 export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -30,10 +32,13 @@ export default function Home() {
   const [jsonOpen, setJsonOpen] = useState(false);
   const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(null);
   const [styles, setStyles] = useState<FormStyles>(defaultStyles);
-  const [viewMode, setViewMode] = useState<ViewMode>("desktop");
   const [rightTab, setRightTab] = useState<"components" | "styles">("components");
   const [undoStack, setUndoStack] = useState<FormField[][]>([]);
   const [redoStack, setRedoStack] = useState<FormField[][]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const viewMode: ViewMode = "desktop";
+  const workspaceHeight = `calc(100vh - ${NAVBAR_HEIGHT}px)`;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -159,12 +164,12 @@ export default function Home() {
       <TopBar
         onPreview={() => setPreviewOpen(true)}
         onExport={() => setJsonOpen(true)}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         canUndo={undoStack.length > 0}
         canRedo={redoStack.length > 0}
         onUndo={handleUndo}
         onRedo={handleRedo}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
 
       <DndContext
@@ -173,15 +178,17 @@ export default function Home() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden" style={{ height: workspaceHeight }}>
           {/* Left Sidebar - Templates */}
-          <TemplatesSidebar
-            templates={templates}
-            onSelect={handleTemplateSelect}
-          />
+          {isSidebarOpen && (
+            <TemplatesSidebar
+              templates={templates}
+              onSelect={handleTemplateSelect}
+            />
+          )}
 
           {/* Center - Canvas */}
-          <main className="flex flex-1 flex-col overflow-hidden">
+          <main className="flex h-full flex-1 flex-col overflow-hidden">
             <FormCanvas
               fields={fields}
               selectedId={selectedId}
@@ -192,7 +199,7 @@ export default function Home() {
           </main>
 
           {/* Right Sidebar - Components & Styles */}
-          <aside className="flex w-72 flex-col border-l border-slate-200 bg-white">
+          <aside className="flex h-full w-72 flex-col border-l border-slate-200 bg-white">
             {/* Tabs */}
             <div className="flex border-b border-slate-200">
               <button

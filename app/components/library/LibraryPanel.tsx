@@ -14,11 +14,11 @@ function LibraryCard({ item }: { item: LibraryItem }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white p-3 cursor-grab transition hover:border-sky-300 hover:shadow-sm active:cursor-grabbing ${
+      className={`flex flex-col items-center justify-center gap-2 border border-slate-200 bg-white p-3 cursor-grab transition hover:border-sky-300 hover:shadow-sm active:cursor-grabbing ${
         isDragging ? "opacity-50 border-sky-400" : ""
       }`}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-lg">
+      <div className="flex h-10 w-10 items-center justify-center bg-slate-100 text-lg">
         {item.icon}
       </div>
       <span className="text-xs font-medium text-slate-600 text-center">{item.label}</span>

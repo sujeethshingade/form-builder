@@ -84,7 +84,7 @@ export function TemplatesSidebar({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-3 rounded-full bg-slate-100 p-3">
+              <div className="mb-3 bg-slate-100 p-3">
                 <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                 </svg>

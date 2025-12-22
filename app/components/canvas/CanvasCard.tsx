@@ -65,7 +65,7 @@ export function CanvasCard({
       >
         <div className={`border-t border-slate-300 ${selected ? "border-sky-500" : ""}`} />
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 rounded-full bg-sky-500" />
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500" />
         )}
       </div>
     );
@@ -81,9 +81,9 @@ export function CanvasCard({
         onClick={() => onSelect(field.id)}
         className={`group relative cursor-pointer ${isDragging ? "opacity-50" : ""}`}
       >
-        <div className={`h-12 rounded-lg border-2 border-dashed ${selected ? "border-sky-400 bg-sky-50" : "border-slate-200"}`} />
+        <div className={`h-12 border-2 border-dashed ${selected ? "border-sky-400 bg-sky-50" : "border-slate-200"}`} />
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 rounded-full bg-sky-500" />
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500" />
         )}
       </div>
     );
@@ -97,7 +97,7 @@ export function CanvasCard({
         {...attributes}
         {...listeners}
         onClick={() => onSelect(field.id)}
-        className={`group relative cursor-pointer rounded-lg p-3 transition ${
+        className={`group relative cursor-pointer p-3 transition ${
           selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
         } ${isDragging ? "opacity-50" : ""}`}
       >
@@ -105,7 +105,7 @@ export function CanvasCard({
           {field.label}
         </h2>
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
         )}
       </div>
     );
@@ -119,7 +119,7 @@ export function CanvasCard({
         {...attributes}
         {...listeners}
         onClick={() => onSelect(field.id)}
-        className={`group relative cursor-pointer rounded-lg p-3 transition ${
+        className={`group relative cursor-pointer p-3 transition ${
           selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
         } ${isDragging ? "opacity-50" : ""}`}
       >
@@ -127,7 +127,7 @@ export function CanvasCard({
           {field.placeholder || field.label}
         </p>
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
         )}
       </div>
     );
@@ -140,7 +140,7 @@ export function CanvasCard({
       {...attributes}
       {...listeners}
       onClick={() => onSelect(field.id)}
-      className={`group relative cursor-pointer rounded-lg border bg-white p-4 transition ${
+      className={`group relative cursor-pointer border bg-white p-4 transition ${
         selected
           ? "border-sky-500 ring-2 ring-sky-100"
           : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
@@ -148,12 +148,12 @@ export function CanvasCard({
     >
       {/* Selection indicator */}
       {selected && (
-        <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-sky-500" />
+        <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
       )}
 
       {/* Field Label */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-slate-100 text-xs">
+        <span className="inline-flex h-6 w-6 items-center justify-center bg-slate-100 text-xs">
           {fieldIcons[field.type] || "?"}
         </span>
         <label className="text-sm font-medium" style={{ color: styles.textColor }}>
@@ -174,8 +174,7 @@ export function CanvasCard({
             type="text"
             placeholder={field.placeholder}
             disabled
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
           />
         )}
 
@@ -184,8 +183,7 @@ export function CanvasCard({
             placeholder={field.placeholder}
             disabled
             rows={3}
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 resize-none"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 resize-none"
           />
         )}
 
@@ -194,8 +192,7 @@ export function CanvasCard({
             type="text"
             placeholder="mm/dd/yyyy"
             disabled
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
           />
         )}
 
@@ -204,16 +201,14 @@ export function CanvasCard({
             type="text"
             placeholder="--:-- --"
             disabled
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
           />
         )}
 
         {field.type === "select" && (
           <select
             disabled
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
           >
             <option>Select an option...</option>
             {(field.options || []).map((opt) => (
@@ -226,7 +221,7 @@ export function CanvasCard({
           <div className="space-y-2">
             {(field.options || []).map((opt) => (
               <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" disabled className="rounded border-slate-300" />
+                <input type="checkbox" disabled className="border-slate-300" />
                 {opt}
               </label>
             ))}
@@ -246,8 +241,7 @@ export function CanvasCard({
 
         {field.type === "file" && (
           <div
-            className="flex items-center justify-center rounded-md border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="flex items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-400"
           >
             <div className="text-center">
               <svg className="mx-auto h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,8 +269,7 @@ export function CanvasCard({
 
         {field.type === "signature" && (
           <div
-            className="flex items-center justify-center rounded-md border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-400"
-            style={{ borderRadius: `${styles.borderRadius}px` }}
+            className="flex items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-400"
           >
             <p>Click to sign</p>
           </div>

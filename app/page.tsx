@@ -18,7 +18,7 @@ import { JsonPreview } from "./components/canvas/JsonPreview";
 import { InspectorPanel } from "./components/inspector/InspectorPanel";
 import { LibraryPanel } from "./components/library/LibraryPanel";
 import { TemplatesSidebar } from "./components/sidebar/TemplatesSidebar";
-import { TopBar} from "./components/navbar/TopBar";
+import { TopBar, type WorkspaceView } from "./components/navbar/TopBar";
 import { fieldToSurveyJSON, library, makeField, makeFieldFromTemplate, templates, defaultStyles } from "./lib/form";
 import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/form";
 
@@ -29,7 +29,6 @@ const NAVBAR_HEIGHT = 56;
 export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(null);
   const [styles, setStyles] = useState<FormStyles>(defaultStyles);
   const [rightTab, setRightTab] = useState<"components" | "styles">("components");
@@ -37,7 +36,7 @@ export default function Home() {
   const [redoStack, setRedoStack] = useState<FormField[][]>([]);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-  const [workspaceView, setWorkspaceView] = useState<"edit" | "preview">("edit");
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("edit");
   const viewMode: ViewMode = "desktop";
   const workspaceHeight = `calc(100vh - ${NAVBAR_HEIGHT}px)`;
 
@@ -163,14 +162,16 @@ export default function Home() {
   return (
     <div className="flex h-screen flex-col bg-slate-100">
       <TopBar
-        onPreview={() => setPreviewOpen(true)}
-        onExport={() => navigator.clipboard.writeText(exportString)}
         canUndo={undoStack.length > 0}
         canRedo={redoStack.length > 0}
         onUndo={handleUndo}
         onRedo={handleRedo}
-        isSidebarOpen={isLeftSidebarOpen}
-        onToggleSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+        isLeftSidebarOpen={isLeftSidebarOpen}
+        onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+        isRightSidebarOpen={isRightSidebarOpen}
+        onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
+        workspaceView={workspaceView}
+        onWorkspaceViewChange={setWorkspaceView}
       />
 
       <DndContext
@@ -357,7 +358,7 @@ export default function Home() {
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            <div className="rounded-xl border border-sky-200 bg-white px-4 py-3 text-slate-900 shadow-lg">
+            <div className="border border-sky-200 bg-white px-4 py-3 text-slate-900 shadow-lg">
               {"icon" in activeDrag ? (
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{activeDrag.icon}</span>
@@ -370,29 +371,6 @@ export default function Home() {
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      {/* Preview Modal */}
-      {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Form Preview</h3>
-                <p className="text-sm text-slate-500">Live preview of your form</p>
-              </div>
-              <button
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                onClick={() => setPreviewOpen(false)}
-              >
-                Close
-              </button>
-            </div>
-            <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-6">
-              <Survey model={surveyModel} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

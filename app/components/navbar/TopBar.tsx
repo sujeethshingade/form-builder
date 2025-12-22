@@ -1,58 +1,85 @@
 "use client";
 
+export type WorkspaceView = "edit" | "json";
+
+const viewTabs: { key: WorkspaceView; label: string }[] = [
+  { key: "edit", label: "Edit" },
+  { key: "json", label: "JSON" },
+];
+
 export function TopBar({
-  onExport,
   canUndo,
   canRedo,
   onUndo,
   onRedo,
-  isSidebarOpen,
-  onToggleSidebar,
+  isLeftSidebarOpen,
+  onToggleLeftSidebar,
+  isRightSidebarOpen,
+  onToggleRightSidebar,
+  workspaceView,
+  onWorkspaceViewChange,
 }: {
-  onPreview: () => void;
-  onExport: () => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  isSidebarOpen: boolean;
-  onToggleSidebar: () => void;
+  isLeftSidebarOpen: boolean;
+  onToggleLeftSidebar: () => void;
+  isRightSidebarOpen: boolean;
+  onToggleRightSidebar: () => void;
+  workspaceView: WorkspaceView;
+  onWorkspaceViewChange: (view: WorkspaceView) => void;
 }) {
   return (
     <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
       {/* Left Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <button
-          onClick={onToggleSidebar}
-          aria-pressed={isSidebarOpen}
-          title={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          onClick={onToggleLeftSidebar}
+          aria-pressed={isLeftSidebarOpen}
+          title={isLeftSidebarOpen ? "Hide templates" : "Show templates"}
+          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {isSidebarOpen ? (
+            {isLeftSidebarOpen ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
             ) : (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
             )}
           </svg>
         </button>
+        <button
+          onClick={onToggleRightSidebar}
+          aria-pressed={isRightSidebarOpen}
+          title={isRightSidebarOpen ? "Hide inspector" : "Show inspector"}
+          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {isRightSidebarOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            )}
+          </svg>
+        </button>
+      </div>
 
-        {/* Divider */}
-        <div className="h-6 w-px bg-slate-200" />
-
-        {/* Tool buttons */}
-        <div className="flex items-center gap-1">
-          <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700" title="Edit">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+      {/* View Toggle */}
+      <div className="flex items-center gap-1 border border-slate-200 bg-slate-50 p-1 shadow-inner">
+        {viewTabs.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => onWorkspaceViewChange(key)}
+            aria-pressed={workspaceView === key}
+            className={`px-4 py-1.5 text-sm font-medium transition ${
+              workspaceView === key
+                ? "bg-white text-slate-900 shadow"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {label}
           </button>
-          <button onClick={onExport} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700" title="Export Code">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-          </button>
-        </div>
+        ))}
       </div>
 
       {/* Right Section */}
@@ -62,7 +89,7 @@ export function TopBar({
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            className={`rounded-lg p-2 ${
+            className={`p-2 ${
               canUndo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700" : "text-slate-300 cursor-not-allowed"
             }`}
             title="Undo"
@@ -74,7 +101,7 @@ export function TopBar({
           <button
             onClick={onRedo}
             disabled={!canRedo}
-            className={`rounded-lg p-2 ${
+            className={`p-2 ${
               canRedo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700" : "text-slate-300 cursor-not-allowed"
             }`}
             title="Redo"

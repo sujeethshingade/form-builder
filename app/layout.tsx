@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Form Builder Studio",
+  title: "Form Builder",
   description: "Modern drag-and-drop form builder with real-time preview and JSON export",
 };
 

@@ -34,7 +34,7 @@ export function FormCanvas({
         {/* Canvas Paper */}
         <div
           ref={setNodeRef}
-          className={`min-h-[600px] rounded-lg shadow-lg transition-all ${
+          className={`min-h-150 rounded-lg shadow-lg transition-all ${
             isOver ? "ring-2 ring-sky-400 ring-offset-2" : ""
           }`}
           style={{

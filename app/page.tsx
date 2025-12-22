@@ -14,10 +14,11 @@ import { Survey, SurveyModel } from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 
 import { FormCanvas } from "./components/canvas/FormCanvas";
+import { JsonPreview } from "./components/canvas/JsonPreview";
 import { InspectorPanel } from "./components/inspector/InspectorPanel";
 import { LibraryPanel } from "./components/library/LibraryPanel";
 import { TemplatesSidebar } from "./components/sidebar/TemplatesSidebar";
-import { TopBar } from "./components/navbar/TopBar";
+import { TopBar} from "./components/navbar/TopBar";
 import { fieldToSurveyJSON, library, makeField, makeFieldFromTemplate, templates, defaultStyles } from "./lib/form";
 import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/form";
 
@@ -29,14 +30,14 @@ export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [jsonOpen, setJsonOpen] = useState(false);
   const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(null);
   const [styles, setStyles] = useState<FormStyles>(defaultStyles);
   const [rightTab, setRightTab] = useState<"components" | "styles">("components");
   const [undoStack, setUndoStack] = useState<FormField[][]>([]);
   const [redoStack, setRedoStack] = useState<FormField[][]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
+  const [workspaceView, setWorkspaceView] = useState<"edit" | "preview">("edit");
   const viewMode: ViewMode = "desktop";
   const workspaceHeight = `calc(100vh - ${NAVBAR_HEIGHT}px)`;
 
@@ -163,13 +164,13 @@ export default function Home() {
     <div className="flex h-screen flex-col bg-slate-100">
       <TopBar
         onPreview={() => setPreviewOpen(true)}
-        onExport={() => setJsonOpen(true)}
+        onExport={() => navigator.clipboard.writeText(exportString)}
         canUndo={undoStack.length > 0}
         canRedo={redoStack.length > 0}
         onUndo={handleUndo}
         onRedo={handleRedo}
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        isSidebarOpen={isLeftSidebarOpen}
+        onToggleSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
       />
 
       <DndContext
@@ -180,158 +181,176 @@ export default function Home() {
       >
         <div className="flex flex-1 overflow-hidden" style={{ height: workspaceHeight }}>
           {/* Left Sidebar - Templates */}
-          {isSidebarOpen && (
-            <TemplatesSidebar
-              templates={templates}
-              onSelect={handleTemplateSelect}
-            />
-          )}
+          <TemplatesSidebar
+            templates={templates}
+            onSelect={handleTemplateSelect}
+            collapsed={!isLeftSidebarOpen}
+          />
 
           {/* Center - Canvas */}
           <main className="flex h-full flex-1 flex-col overflow-hidden">
-            <FormCanvas
-              fields={fields}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              viewMode={viewMode}
-              styles={styles}
-            />
+            {workspaceView === "edit" ? (
+              <FormCanvas
+                fields={fields}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                viewMode={viewMode}
+                styles={styles}
+              />
+            ) : (
+              <div className="flex-1 overflow-auto bg-slate-100 p-8">
+                <JsonPreview
+                  json={exportString}
+                  onCopy={() => navigator.clipboard.writeText(exportString)}
+                />
+              </div>
+            )}
           </main>
 
           {/* Right Sidebar - Components & Styles */}
-          <aside className="flex h-full w-72 flex-col border-l border-slate-200 bg-white">
-            {/* Tabs */}
-            <div className="flex border-b border-slate-200">
-              <button
-                onClick={() => setRightTab("components")}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition ${
-                  rightTab === "components"
-                    ? "border-b-2 border-sky-500 text-sky-600"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                Components
-              </button>
-              <button
-                onClick={() => setRightTab("styles")}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition ${
-                  rightTab === "styles"
-                    ? "border-b-2 border-sky-500 text-sky-600"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                Styles
-              </button>
-            </div>
+          <aside
+            className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
+              isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
+            }`}
+          >
+            <div
+              className={`flex h-full flex-col ${
+                isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
+            >
+              {/* Tabs */}
+              <div className="flex border-b border-slate-200">
+                <button
+                  onClick={() => setRightTab("components")}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                    rightTab === "components"
+                      ? "border-b-2 border-sky-500 text-sky-600"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Components
+                </button>
+                <button
+                  onClick={() => setRightTab("styles")}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                    rightTab === "styles"
+                      ? "border-b-2 border-sky-500 text-sky-600"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Styles
+                </button>
+              </div>
 
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto">
-              {rightTab === "components" ? (
-                selectedField ? (
-                  <InspectorPanel
-                    selectedField={selectedField}
-                    onUpdate={handleFieldUpdate}
-                    onDelete={handleDelete}
-                  />
+              {/* Tab Content */}
+              <div className="flex-1 overflow-y-auto">
+                {rightTab === "components" ? (
+                  selectedField ? (
+                    <InspectorPanel
+                      selectedField={selectedField}
+                      onUpdate={handleFieldUpdate}
+                      onDelete={handleDelete}
+                    />
+                  ) : (
+                    <LibraryPanel items={library} />
+                  )
                 ) : (
-                  <LibraryPanel items={library} />
-                )
-              ) : (
-                <div className="p-4 space-y-5">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                      Background Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={styles.backgroundColor}
-                        onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
-                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                      />
-                      <input
-                        type="text"
-                        value={styles.backgroundColor}
-                        onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
-                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      />
+                  <div className="p-4 space-y-5">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                        Background Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={styles.backgroundColor}
+                          onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                        />
+                        <input
+                          type="text"
+                          value={styles.backgroundColor}
+                          onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
+                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                        Text Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={styles.textColor}
+                          onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                        />
+                        <input
+                          type="text"
+                          value={styles.textColor}
+                          onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
+                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                        Primary Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={styles.primaryColor}
+                          onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
+                        />
+                        <input
+                          type="text"
+                          value={styles.primaryColor}
+                          onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
+                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                        Border Radius
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="24"
+                          value={styles.borderRadius}
+                          onChange={(e) => handleStyleUpdate({ borderRadius: parseInt(e.target.value) })}
+                          className="flex-1"
+                        />
+                        <span className="w-12 text-right text-sm text-slate-600">{styles.borderRadius}px</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                        Font Family
+                      </label>
+                      <select
+                        value={styles.fontFamily}
+                        onChange={(e) => handleStyleUpdate({ fontFamily: e.target.value })}
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      >
+                        <option value="Inter, sans-serif">Inter (Modern Sans)</option>
+                        <option value="Georgia, serif">Georgia (Classic Serif)</option>
+                        <option value="system-ui, sans-serif">System Default</option>
+                        <option value="Monaco, monospace">Monaco (Monospace)</option>
+                      </select>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                      Text Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={styles.textColor}
-                        onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
-                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                      />
-                      <input
-                        type="text"
-                        value={styles.textColor}
-                        onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
-                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                      Primary Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={styles.primaryColor}
-                        onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
-                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                      />
-                      <input
-                        type="text"
-                        value={styles.primaryColor}
-                        onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
-                        className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                      Border Radius
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="24"
-                        value={styles.borderRadius}
-                        onChange={(e) => handleStyleUpdate({ borderRadius: parseInt(e.target.value) })}
-                        className="flex-1"
-                      />
-                      <span className="w-12 text-right text-sm text-slate-600">{styles.borderRadius}px</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                      Font Family
-                    </label>
-                    <select
-                      value={styles.fontFamily}
-                      onChange={(e) => handleStyleUpdate({ fontFamily: e.target.value })}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                    >
-                      <option value="Inter, sans-serif">Inter (Modern Sans)</option>
-                      <option value="Georgia, serif">Georgia (Classic Serif)</option>
-                      <option value="system-ui, sans-serif">System Default</option>
-                      <option value="Monaco, monospace">Monaco (Monospace)</option>
-                    </select>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </aside>
         </div>
@@ -370,39 +389,6 @@ export default function Home() {
             </div>
             <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-6">
               <Survey model={surveyModel} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* JSON Export Modal */}
-      {jsonOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Export JSON</h3>
-                <p className="text-sm text-slate-500">Copy the form configuration</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600"
-                  onClick={() => navigator.clipboard.writeText(exportString)}
-                >
-                  Copy to Clipboard
-                </button>
-                <button
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  onClick={() => setJsonOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <pre className="max-h-[60vh] overflow-y-auto rounded-xl bg-slate-900 p-4 text-sm text-emerald-400">
-                {exportString}
-              </pre>
             </div>
           </div>
         </div>

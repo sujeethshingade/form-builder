@@ -153,7 +153,7 @@ export function InspectorPanel({
               checked={!!selectedField.required}
               onChange={(e) => onUpdate({ required: e.target.checked })}
             />
-            <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-all peer-checked:bg-sky-500 peer-checked:after:translate-x-full" />
+            <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-all peer-checked:bg-sky-500 peer-checked:after:translate-x-full" />
           </label>
         </div>
       )}

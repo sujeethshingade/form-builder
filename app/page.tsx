@@ -214,10 +214,10 @@ export default function Home() {
             } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
           >
             {/* Tabs */}
-            <div className="flex border-b border-slate-200 mt-14">
+            <div className="flex border-b border-slate-200">
                 <button
                   onClick={() => setRightTab("components")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                  className={`flex-1 px-4 py-4 text-sm font-medium transition ${
                     rightTab === "components"
                       ? "border-b-2 border-sky-500 text-sky-600"
                       : "text-slate-500 hover:text-slate-700"
@@ -227,10 +227,10 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => setRightTab("styles")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                  className={`flex-1 px-4 py-4 text-sm font-medium transition ${
                     rightTab === "styles"
                       ? "border-b-2 border-sky-500 text-sky-600"
-                      : "text-slate-500 hover:text-slate-700"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   Styles
@@ -248,7 +248,7 @@ export default function Home() {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-8 text-center">
-                      <div className="mb-4 bg-slate-100 p-4">
+                      <div className="mb-4 p-4">
                         <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                         </svg>
@@ -296,43 +296,6 @@ export default function Home() {
                           onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
                           className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                         />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                        Primary Color
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={styles.primaryColor}
-                          onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
-                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                        />
-                        <input
-                          type="text"
-                          value={styles.primaryColor}
-                          onChange={(e) => handleStyleUpdate({ primaryColor: e.target.value })}
-                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                        Border Radius
-                      </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="range"
-                          min="0"
-                          max="24"
-                          value={styles.borderRadius}
-                          onChange={(e) => handleStyleUpdate({ borderRadius: parseInt(e.target.value) })}
-                          className="flex-1"
-                        />
-                        <span className="w-12 text-right text-sm text-slate-600">{styles.borderRadius}px</span>
                       </div>
                     </div>
 

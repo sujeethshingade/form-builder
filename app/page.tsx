@@ -10,18 +10,17 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { Survey, SurveyModel } from "survey-react-ui";
+import { SurveyModel } from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { JsonPreview } from "./components/canvas/JsonPreview";
+import { FormPreview } from "./components/canvas/FormPreview";
 import { InspectorPanel } from "./components/inspector/InspectorPanel";
 import { ElementSidebar } from "./components/element/ElementSidebar";
 import { TopBar, type WorkspaceView } from "./components/navbar/TopBar";
 import { fieldToSurveyJSON, library, makeField, makeFieldFromTemplate, templates, defaultStyles } from "./lib/form";
 import type { FormField, LibraryItem, FormStyles, FormTemplate, ComponentType } from "./lib/form";
-
-type ViewMode = "desktop" | "tablet" | "mobile";
 
 // Icon mapping for drag overlay
 const getIconForType = (type: ComponentType): React.ReactNode => {
@@ -162,7 +161,6 @@ export default function Home() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("edit");
-  const viewMode: ViewMode = "desktop";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -268,6 +266,26 @@ export default function Home() {
     setSelectedId(null);
   };
 
+  const handleDeleteById = (id: string) => {
+    pushUndo(fields);
+    setFields((prev) => prev.filter((f) => f.id !== id));
+    if (selectedId === id) setSelectedId(null);
+  };
+
+  const handleMoveUp = (id: string) => {
+    const index = fields.findIndex((f) => f.id === id);
+    if (index <= 0) return;
+    pushUndo(fields);
+    setFields((prev) => arrayMove(prev, index, index - 1));
+  };
+
+  const handleMoveDown = (id: string) => {
+    const index = fields.findIndex((f) => f.id === id);
+    if (index === -1 || index >= fields.length - 1) return;
+    pushUndo(fields);
+    setFields((prev) => arrayMove(prev, index, index + 1));
+  };
+
   const handleTemplateSelect = (template: FormTemplate) => {
     pushUndo(fields);
     setFields(template.fields.map(makeFieldFromTemplate));
@@ -317,9 +335,13 @@ export default function Home() {
               fields={fields}
               selectedId={selectedId}
               onSelect={setSelectedId}
-              viewMode={viewMode}
+              onDelete={handleDeleteById}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
               styles={styles}
             />
+          ) : workspaceView === "preview" ? (
+            <FormPreview surveyJson={surveyJson} />
           ) : (
             <div className="flex-1 overflow-auto bg-slate-100 p-8">
               <JsonPreview

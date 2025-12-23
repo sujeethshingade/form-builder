@@ -5,25 +5,21 @@ import { useDroppable } from "@dnd-kit/core";
 import type { FormField, FormStyles } from "../../lib/form";
 import { CanvasCard } from "./CanvasCard";
 
-type ViewMode = "desktop" | "tablet" | "mobile";
-
-const viewModeWidths: Record<ViewMode, string> = {
-  desktop: "max-w-3xl",
-  tablet: "max-w-md",
-  mobile: "max-w-xs",
-};
-
 export function FormCanvas({
   fields,
   selectedId,
   onSelect,
-  viewMode,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
   styles,
 }: {
   fields: FormField[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  viewMode: ViewMode;
+  onDelete?: (id: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
   styles: FormStyles;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
@@ -36,12 +32,12 @@ export function FormCanvas({
 
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8" onClick={handleBackgroundClick}>
-      <div className={`mx-auto transition-all duration-300 ${viewModeWidths[viewMode]}`}>
+      <div className={`mx-auto transition-all duration-300`}>
         {/* Canvas Paper */}
         <div
           ref={setNodeRef}
           onClick={handleBackgroundClick}
-          className={`min-h-[600px] shadow-lg transition-all ${
+          className={`min-h-150 shadow-lg transition-all ${
             isOver ? "ring-2 ring-sky-400 ring-offset-2" : ""
           }`}
           style={{
@@ -57,12 +53,17 @@ export function FormCanvas({
             ) : (
               <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-3">
-                {fields.map((field) => (
+                {fields.map((field, index) => (
                 <CanvasCard
                   key={field.id}
                   field={field}
                   selected={selectedId === field.id}
                   onSelect={onSelect}
+                  onDelete={onDelete}
+                  onMoveUp={onMoveUp}
+                  onMoveDown={onMoveDown}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < fields.length - 1}
                   styles={styles}
                 />
                 ))}

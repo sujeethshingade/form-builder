@@ -28,11 +28,21 @@ export function CanvasCard({
   field,
   selected,
   onSelect,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
   styles,
 }: {
   field: FormField;
   selected: boolean;
   onSelect: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
   styles: FormStyles;
 }) {
   const {
@@ -52,20 +62,62 @@ export function CanvasCard({
     transition,
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(field.id);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) onDelete(field.id);
+  };
+
+  const handleMoveUp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onMoveUp) onMoveUp(field.id);
+  };
+
+  const handleMoveDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onMoveDown) onMoveDown(field.id);
+  };
+
   // Render layout elements differently
   if (field.type === "divider") {
     return (
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => onSelect(field.id)}
-        className={`group relative cursor-pointer py-4 ${isDragging ? "opacity-50" : ""}`}
+        onClick={handleClick}
+        className={`group relative cursor-pointer py-4 rounded-lg ${isDragging ? "opacity-50" : ""}`}
       >
-        <div className={`border-t border-slate-300 ${selected ? "border-sky-500" : ""}`} />
+        {/* Hover Controls */}
+        <div className="absolute -top-10 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-slate-200 rounded-lg shadow-lg p-1">
+          {/* Move Handle */}
+          <div
+            {...attributes}
+            {...listeners}
+            className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded cursor-grab active:cursor-grabbing"
+            title="Drag to reorder"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+            </svg>
+          </div>
+          <button onClick={handleMoveUp} disabled={!canMoveUp} className={`p-1.5 rounded ${canMoveUp ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move up">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+          </button>
+          <button onClick={handleMoveDown} disabled={!canMoveDown} className={`p-1.5 rounded ${canMoveDown ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move down">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <button onClick={handleDelete} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded" title="Delete">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
+
+        <div className={`border-t ${selected ? "border-sky-500" : "border-slate-300"}`} />
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500" />
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500 rounded-full" />
         )}
       </div>
     );
@@ -76,14 +128,28 @@ export function CanvasCard({
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => onSelect(field.id)}
+        onClick={handleClick}
         className={`group relative cursor-pointer ${isDragging ? "opacity-50" : ""}`}
       >
-        <div className={`h-12 border-2 border-dashed ${selected ? "border-sky-400 bg-sky-50" : "border-slate-200"}`} />
+        {/* Hover Controls */}
+        <div className="absolute -top-10 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-slate-200 rounded-lg shadow-lg p-1">
+          <div {...attributes} {...listeners} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded cursor-grab active:cursor-grabbing" title="Drag to reorder">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" /></svg>
+          </div>
+          <button onClick={handleMoveUp} disabled={!canMoveUp} className={`p-1.5 rounded ${canMoveUp ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move up">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+          </button>
+          <button onClick={handleMoveDown} disabled={!canMoveDown} className={`p-1.5 rounded ${canMoveDown ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move down">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <button onClick={handleDelete} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded" title="Delete">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
+
+        <div className={`h-12 border-2 border-dashed rounded-lg ${selected ? "border-sky-400 bg-sky-50" : "border-slate-200"}`} />
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500" />
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-4 w-1 bg-sky-500 rounded-full" />
         )}
       </div>
     );
@@ -94,18 +160,32 @@ export function CanvasCard({
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => onSelect(field.id)}
-        className={`group relative cursor-pointer p-3 transition ${
-          selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
+        onClick={handleClick}
+        className={`group relative cursor-pointer rounded-lg bg-white p-4 transition ${
+          selected ? "ring-2 ring-sky-400" : "hover:ring-2 hover:ring-slate-200"
         } ${isDragging ? "opacity-50" : ""}`}
       >
-        <h2 className="text-xl font-bold" style={{ color: styles.textColor }}>
+        {/* Hover Controls */}
+        <div className="absolute -top-10 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-slate-200 rounded-lg shadow-lg p-1">
+          <div {...attributes} {...listeners} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded cursor-grab active:cursor-grabbing" title="Drag to reorder">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" /></svg>
+          </div>
+          <button onClick={handleMoveUp} disabled={!canMoveUp} className={`p-1.5 rounded ${canMoveUp ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move up">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+          </button>
+          <button onClick={handleMoveDown} disabled={!canMoveDown} className={`p-1.5 rounded ${canMoveDown ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move down">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <button onClick={handleDelete} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded" title="Delete">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
+
+        <h2 className="text-2xl font-bold text-slate-900">
           {field.label}
         </h2>
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500 rounded-full" />
         )}
       </div>
     );
@@ -116,18 +196,32 @@ export function CanvasCard({
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => onSelect(field.id)}
-        className={`group relative cursor-pointer p-3 transition ${
-          selected ? "ring-2 ring-sky-500 ring-offset-2" : "hover:bg-slate-50"
+        onClick={handleClick}
+        className={`group relative cursor-pointer rounded-lg bg-white p-4 transition ${
+          selected ? "ring-2 ring-sky-400" : "hover:ring-2 hover:ring-slate-200"
         } ${isDragging ? "opacity-50" : ""}`}
       >
-        <p className="text-sm" style={{ color: styles.textColor }}>
+        {/* Hover Controls */}
+        <div className="absolute -top-10 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-slate-200 rounded-lg shadow-lg p-1">
+          <div {...attributes} {...listeners} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded cursor-grab active:cursor-grabbing" title="Drag to reorder">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" /></svg>
+          </div>
+          <button onClick={handleMoveUp} disabled={!canMoveUp} className={`p-1.5 rounded ${canMoveUp ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move up">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+          </button>
+          <button onClick={handleMoveDown} disabled={!canMoveDown} className={`p-1.5 rounded ${canMoveDown ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50" : "text-slate-300 cursor-not-allowed"}`} title="Move down">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <button onClick={handleDelete} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded" title="Delete">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
+
+        <p className="text-sm text-slate-700">
           {field.placeholder || field.label}
         </p>
         {selected && (
-          <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500 rounded-full" />
         )}
       </div>
     );
@@ -137,23 +231,79 @@ export function CanvasCard({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      onClick={() => onSelect(field.id)}
-      className={`group relative cursor-pointer border bg-white p-4 transition ${
+      onClick={handleClick}
+      className={`group relative cursor-pointer rounded-lg bg-white transition ${
         selected
-          ? "border-sky-500 ring-2 ring-sky-100"
-          : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
+          ? "ring-2 ring-sky-400"
+          : "hover:ring-2 hover:ring-slate-200"
       } ${isDragging ? "opacity-50 shadow-lg" : ""}`}
     >
+      {/* Hover Controls */}
+      <div className="absolute -top-10 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-slate-200 rounded-lg shadow-lg p-1">
+        {/* Move Handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded cursor-grab active:cursor-grabbing"
+          title="Drag to reorder"
+        >
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+          </svg>
+        </div>
+
+        {/* Move Up */}
+        <button
+          onClick={handleMoveUp}
+          disabled={!canMoveUp}
+          className={`p-1.5 rounded ${
+            canMoveUp
+              ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              : "text-slate-300 cursor-not-allowed"
+          }`}
+          title="Move up"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+
+        {/* Move Down */}
+        <button
+          onClick={handleMoveDown}
+          disabled={!canMoveDown}
+          className={`p-1.5 rounded ${
+            canMoveDown
+              ? "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              : "text-slate-300 cursor-not-allowed"
+          }`}
+          title="Move down"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Delete */}
+        <button
+          onClick={handleDelete}
+          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+          title="Delete"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+
       {/* Selection indicator */}
       {selected && (
-        <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500" />
+        <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1 bg-sky-500 rounded-full" />
       )}
 
       {/* Field Label */}
-      <div className="flex items-center gap-2 mb-2">
-        <label className="text-sm font-medium" style={{ color: styles.textColor }}>
+      <div className="px-4 pt-4 pb-2">
+        <label className="block text-sm font-medium text-slate-900">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
@@ -161,26 +311,25 @@ export function CanvasCard({
 
       {/* Field Helper */}
       {field.helper && (
-        <p className="mb-2 text-xs text-slate-500">{field.helper}</p>
+        <p className="px-4 pb-2 text-xs text-slate-500">{field.helper}</p>
       )}
 
       {/* Field Preview */}
-      <div className="mt-2">
-        {(field.type === "text" || field.type === "email" || field.type === "number" || field.type === "phone") && (
+      <div className="px-4 pb-4">{(field.type === "text" || field.type === "email" || field.type === "number" || field.type === "phone" || field.type === "password" || field.type === "url") && (
           <input
             type="text"
-            placeholder={field.placeholder}
+            placeholder={field.placeholder || "Enter your response..."}
             disabled
-            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
           />
         )}
 
         {field.type === "textarea" && (
           <textarea
-            placeholder={field.placeholder}
+            placeholder={field.placeholder || "Enter your response..."}
             disabled
             rows={3}
-            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 resize-none"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white resize-none focus:outline-none"
           />
         )}
 
@@ -189,7 +338,7 @@ export function CanvasCard({
             type="text"
             placeholder="mm/dd/yyyy"
             disabled
-            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
           />
         )}
 
@@ -198,14 +347,14 @@ export function CanvasCard({
             type="text"
             placeholder="--:-- --"
             disabled
-            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
           />
         )}
 
         {field.type === "select" && (
           <select
             disabled
-            className="w-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
           >
             <option>Select an option...</option>
             {(field.options || []).map((opt) => (
@@ -217,8 +366,8 @@ export function CanvasCard({
         {field.type === "checkbox" && (
           <div className="space-y-2">
             {(field.options || []).map((opt) => (
-              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" disabled className="border-slate-300" />
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" disabled className="rounded border-slate-300" />
                 {opt}
               </label>
             ))}
@@ -228,7 +377,7 @@ export function CanvasCard({
         {field.type === "radio" && (
           <div className="space-y-2">
             {(field.options || []).map((opt) => (
-              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-700">
                 <input type="radio" disabled name={field.id} className="border-slate-300" />
                 {opt}
               </label>
@@ -238,10 +387,10 @@ export function CanvasCard({
 
         {field.type === "file" && (
           <div
-            className="flex items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-400"
+            className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500"
           >
             <div className="text-center">
-              <svg className="mx-auto h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="mx-auto h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               <p className="mt-1">Click to upload or drag and drop</p>
@@ -266,18 +415,11 @@ export function CanvasCard({
 
         {field.type === "signature" && (
           <div
-            className="flex items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-400"
+            className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500"
           >
             <p>Click to sign</p>
           </div>
         )}
-      </div>
-
-      {/* Drag handle indicator */}
-      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition">
-        <svg className="h-4 w-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM18 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
-        </svg>
       </div>
     </div>
   );

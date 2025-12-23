@@ -12,12 +12,19 @@ export type ComponentType =
   | "date"
   | "time"
   | "file"
+  | "password"
+  | "url"
+  | "location"
   | "rating"
   | "signature"
   | "heading"
+  | "h1"
+  | "h2"
+  | "h3"
   | "paragraph"
   | "divider"
-  | "spacer";
+  | "spacer"
+  | "table";
 
 export type LibraryItem = {
   type: ComponentType;

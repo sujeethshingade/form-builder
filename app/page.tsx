@@ -16,8 +16,7 @@ import "survey-core/defaultV2.min.css";
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { JsonPreview } from "./components/canvas/JsonPreview";
 import { InspectorPanel } from "./components/inspector/InspectorPanel";
-import { LibraryPanel } from "./components/library/LibraryPanel";
-import { TemplatesSidebar } from "./components/sidebar/TemplatesSidebar";
+import { ElementSidebar } from "./components/element/ElementSidebar";
 import { TopBar, type WorkspaceView } from "./components/navbar/TopBar";
 import { fieldToSurveyJSON, library, makeField, makeFieldFromTemplate, templates, defaultStyles } from "./lib/form";
 import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/form";
@@ -165,9 +164,7 @@ export default function Home() {
         onDragEnd={handleDragEnd}
       >
         {/* Left Sidebar - Templates */}
-        <TemplatesSidebar
-          templates={templates}
-          onSelect={handleTemplateSelect}
+        <ElementSidebar
           collapsed={!isLeftSidebarOpen}
         />
 
@@ -250,7 +247,15 @@ export default function Home() {
                       onDelete={handleDelete}
                     />
                   ) : (
-                    <LibraryPanel items={library} />
+                    <div className="flex flex-col items-center justify-center p-8 text-center">
+                      <div className="mb-4 bg-slate-100 p-4">
+                        <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-slate-700">No field selected</p>
+                      <p className="mt-1 text-xs text-slate-500">Select a field from the canvas to edit its properties</p>
+                    </div>
                   )
                 ) : (
                   <div className="p-4 space-y-5">

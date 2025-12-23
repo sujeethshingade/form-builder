@@ -16,9 +16,11 @@ const viewTabs: { key: WorkspaceView; icon: JSX.Element }[] = [
   { 
     key: "json", 
     icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-      </svg>
+<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 4c-2 0-3 1-3 3v2c0 1-1 2-2 2 1 0 2 1 2 2v2c0 2 1 3 3 3 M15 4c2 0 3 1 3 3v2c0 1 1 2 2 2-1 0-2 1-2 2v2c0 2-1 3-3 3"
+/>
+</svg>
+
     )
   },
 ];
@@ -47,14 +49,14 @@ export function TopBar({
   onWorkspaceViewChange: (view: WorkspaceView) => void;
 }) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
+    <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4">
       {/* Left Section */}
       <div className="flex items-center gap-2">
         <button
           onClick={onToggleLeftSidebar}
           aria-pressed={isLeftSidebarOpen}
           title={isLeftSidebarOpen ? "Hide templates" : "Show templates"}
-          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 rounded"
+          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 rounded cursor-pointer"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isLeftSidebarOpen ? (
@@ -69,20 +71,21 @@ export function TopBar({
 
 
         {/* View Toggle */}
-        <div className="flex items-center gap-1 border border-slate-200 rounded-lg overflow-hidden">
+        <div className="flex">
           {viewTabs.map(({ key, icon }) => (
             <button
               key={key}
               onClick={() => onWorkspaceViewChange(key)}
               aria-pressed={workspaceView === key}
               title={key === "edit" ? "Edit View" : "JSON View"}
-              className={`p-2.5 transition ${
+              className={`flex items-center gap-2 px-4 py-4 text-sm font-medium transition border-b-2 cursor-pointer ${
                 workspaceView === key
-                  ? "bg-sky-50 text-sky-600"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                  ? "border-sky-500 text-sky-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
               }`}
             >
               {icon}
+              <span className="capitalize">{key === "edit" ? "Editor" : "JSON"}</span>
             </button>
           ))}
         </div>
@@ -97,7 +100,7 @@ export function TopBar({
             onClick={onUndo}
             disabled={!canUndo}
             className={`p-2 rounded ${
-              canUndo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700" : "text-slate-300 cursor-not-allowed"
+              canUndo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 cursor-pointer" : "text-slate-300 cursor-not-allowed"
             }`}
             title="Undo"
           >
@@ -109,7 +112,7 @@ export function TopBar({
             onClick={onRedo}
             disabled={!canRedo}
             className={`p-2 rounded ${
-              canRedo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700" : "text-slate-300 cursor-not-allowed"
+              canRedo ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 cursor-pointer" : "text-slate-300 cursor-not-allowed"
             }`}
             title="Redo"
           >
@@ -126,7 +129,7 @@ export function TopBar({
           onClick={onToggleRightSidebar}
           aria-pressed={isRightSidebarOpen}
           title={isRightSidebarOpen ? "Hide inspector" : "Show inspector"}
-          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 rounded"
+          className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 rounded cursor-pointer"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isRightSidebarOpen ? (

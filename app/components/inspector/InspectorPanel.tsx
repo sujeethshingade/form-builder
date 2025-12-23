@@ -57,10 +57,10 @@ export function InspectorPanel({
       </div>
 
       {/* Placeholder */}
-      {["text", "email", "number", "phone", "textarea", "heading", "paragraph"].includes(selectedField.type) && (
+      {["text", "email", "number", "phone", "textarea", "password", "url", "location", "heading", "h1", "h2", "h3", "paragraph"].includes(selectedField.type) && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-            {selectedField.type === "heading" || selectedField.type === "paragraph" ? "Content" : "Placeholder"}
+            {["heading", "h1", "h2", "h3", "paragraph"].includes(selectedField.type) ? "Content" : "Placeholder"}
           </label>
           <input
             type="text"
@@ -95,7 +95,7 @@ export function InspectorPanel({
       )}
 
       {/* Helper Text */}
-      {!["heading", "paragraph", "divider", "spacer"].includes(selectedField.type) && (
+      {!["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer"].includes(selectedField.type) && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
             Helper Text
@@ -140,7 +140,7 @@ export function InspectorPanel({
       </div>
 
       {/* Required Toggle */}
-      {!["heading", "paragraph", "divider", "spacer"].includes(selectedField.type) && (
+      {!["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer", "table"].includes(selectedField.type) && (
         <div className="flex items-center justify-between border border-slate-200 bg-slate-50 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-slate-700">Required</p>

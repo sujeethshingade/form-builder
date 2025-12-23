@@ -153,9 +153,6 @@ export function CanvasCard({
 
       {/* Field Label */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex h-6 w-6 items-center justify-center bg-slate-100 text-xs">
-          {fieldIcons[field.type] || "?"}
-        </span>
         <label className="text-sm font-medium" style={{ color: styles.textColor }}>
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}

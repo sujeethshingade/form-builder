@@ -24,8 +24,6 @@ import type { FormField, LibraryItem, FormStyles, FormTemplate } from "./lib/for
 
 type ViewMode = "desktop" | "tablet" | "mobile";
 
-const NAVBAR_HEIGHT = 56;
-
 export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -38,7 +36,6 @@ export default function Home() {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("edit");
   const viewMode: ViewMode = "desktop";
-  const workspaceHeight = `calc(100vh - ${NAVBAR_HEIGHT}px)`;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -160,67 +157,67 @@ export default function Home() {
   );
 
   return (
-    <div className="flex h-screen flex-col bg-slate-100">
-      <TopBar
-        canUndo={undoStack.length > 0}
-        canRedo={redoStack.length > 0}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        isLeftSidebarOpen={isLeftSidebarOpen}
-        onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
-        isRightSidebarOpen={isRightSidebarOpen}
-        onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
-        workspaceView={workspaceView}
-        onWorkspaceViewChange={setWorkspaceView}
-      />
-
+    <div className="flex h-screen bg-slate-100">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-1 overflow-hidden" style={{ height: workspaceHeight }}>
-          {/* Left Sidebar - Templates */}
-          <TemplatesSidebar
-            templates={templates}
-            onSelect={handleTemplateSelect}
-            collapsed={!isLeftSidebarOpen}
+        {/* Left Sidebar - Templates */}
+        <TemplatesSidebar
+          templates={templates}
+          onSelect={handleTemplateSelect}
+          collapsed={!isLeftSidebarOpen}
+        />
+
+        {/* Center - Canvas */}
+        <main className="flex h-full flex-1 flex-col overflow-hidden">
+          {/* Top Bar */}
+          <TopBar
+            canUndo={undoStack.length > 0}
+            canRedo={redoStack.length > 0}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            isLeftSidebarOpen={isLeftSidebarOpen}
+            onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+            isRightSidebarOpen={isRightSidebarOpen}
+            onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
+            workspaceView={workspaceView}
+            onWorkspaceViewChange={setWorkspaceView}
           />
 
-          {/* Center - Canvas */}
-          <main className="flex h-full flex-1 flex-col overflow-hidden">
-            {workspaceView === "edit" ? (
-              <FormCanvas
-                fields={fields}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                viewMode={viewMode}
-                styles={styles}
+          {workspaceView === "edit" ? (
+            <FormCanvas
+              fields={fields}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              viewMode={viewMode}
+              styles={styles}
+            />
+          ) : (
+            <div className="flex-1 overflow-auto bg-slate-100 p-8">
+              <JsonPreview
+                json={exportString}
+                onCopy={() => navigator.clipboard.writeText(exportString)}
               />
-            ) : (
-              <div className="flex-1 overflow-auto bg-slate-100 p-8">
-                <JsonPreview
-                  json={exportString}
-                  onCopy={() => navigator.clipboard.writeText(exportString)}
-                />
-              </div>
-            )}
-          </main>
+            </div>
+          )}
+        </main>
 
-          {/* Right Sidebar - Components & Styles */}
-          <aside
-            className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
-              isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
-            }`}
+        {/* Right Sidebar - Components & Styles */}
+        <aside
+          className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
+            isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
+          }`}
+        >
+          <div
+            className={`flex h-full flex-col ${
+              isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+            } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
           >
-            <div
-              className={`flex h-full flex-col ${
-                isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
-              } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
-            >
-              {/* Tabs */}
-              <div className="flex border-b border-slate-200">
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200 mt-14">
                 <button
                   onClick={() => setRightTab("components")}
                   className={`flex-1 px-4 py-3 text-sm font-medium transition ${
@@ -351,10 +348,9 @@ export default function Home() {
                     </div>
                   </div>
                 )}
-              </div>
             </div>
-          </aside>
-        </div>
+          </div>
+        </aside>
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (

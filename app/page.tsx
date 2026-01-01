@@ -10,8 +10,6 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { SurveyModel } from "survey-react-ui";
-import "survey-core/defaultV2.min.css";
 
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { JsonPreview } from "./components/canvas/JsonPreview";
@@ -170,7 +168,6 @@ export default function Home() {
   const selectedField = fields.find((f) => f.id === selectedId) ?? null;
 
   const surveyJson = useMemo(() => fieldToSurveyJSON(fields), [fields]);
-  const surveyModel = useMemo(() => new SurveyModel(surveyJson), [surveyJson]);
 
   const pushUndo = (prev: FormField[]) => {
     setUndoStack((stack) => [...stack.slice(-19), prev]);
@@ -358,7 +355,7 @@ export default function Home() {
               styles={styles}
             />
           ) : workspaceView === "preview" ? (
-            <FormPreview surveyJson={surveyJson} />
+            <FormPreview fields={fields} styles={styles} />
           ) : (
             <div className="flex-1 overflow-auto bg-slate-100 p-8">
               <JsonPreview

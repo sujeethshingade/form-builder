@@ -1,121 +1,221 @@
 "use client";
 
-import { useMemo } from "react";
-import { Survey, Model } from "survey-react-ui";
+import type { FormField, FormStyles } from "../../lib/form";
 
-export function FormPreview({ surveyJson }: { surveyJson: any }) {
-  const hasElements = useMemo(() => {
-    return surveyJson?.pages?.some((page: any) => page?.elements && page.elements.length > 0) || false;
-  }, [surveyJson]);
+function PreviewCard({ field }: { field: FormField }) {
+  // Render layout elements
+  if (field.type === "divider") {
+    return (
+      <div className="p-3">
+        <div className="border-t border-slate-300" />
+      </div>
+    );
+  }
 
-  const surveyModel = useMemo(() => {
-    const model = new Model(surveyJson);
-    
-    // Apply custom theme to match the editor style
-    model.applyTheme({
-      cssVariables: {
-        "--sjs-general-backcolor": "rgba(255, 255, 255, 1)",
-        "--sjs-general-backcolor-dark": "rgba(248, 248, 248, 1)",
-        "--sjs-general-backcolor-dim": "#ffffff",
-        "--sjs-general-backcolor-dim-light": "#ffffff",
-        "--sjs-general-backcolor-dim-dark": "#f8f8f8",
-        "--sjs-general-forecolor": "rgba(0, 0, 0, 0.91)",
-        "--sjs-general-forecolor-light": "rgba(0, 0, 0, 0.45)",
-        "--sjs-general-dim-forecolor": "rgba(0, 0, 0, 0.91)",
-        "--sjs-general-dim-forecolor-light": "rgba(0, 0, 0, 0.45)",
-        "--sjs-primary-backcolor": "rgba(14, 165, 233, 1)",
-        "--sjs-primary-backcolor-light": "rgba(14, 165, 233, 0.1)",
-        "--sjs-primary-backcolor-dark": "rgba(12, 148, 209, 1)",
-        "--sjs-primary-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-primary-forecolor-light": "rgba(255, 255, 255, 0.25)",
-        "--sjs-base-unit": "8px",
-        "--sjs-corner-radius": "8px",
-        "--sjs-secondary-backcolor": "rgba(255, 152, 20, 1)",
-        "--sjs-secondary-backcolor-light": "rgba(255, 152, 20, 0.1)",
-        "--sjs-secondary-backcolor-semi-light": "rgba(255, 152, 20, 0.25)",
-        "--sjs-secondary-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-secondary-forecolor-light": "rgba(255, 255, 255, 0.25)",
-        "--sjs-shadow-small": "0px 1px 2px 0px rgba(0, 0, 0, 0.15)",
-        "--sjs-shadow-medium": "0px 2px 6px 0px rgba(0, 0, 0, 0.1)",
-        "--sjs-shadow-large": "0px 8px 16px 0px rgba(0, 0, 0, 0.1)",
-        "--sjs-shadow-inner": "inset 0px 1px 2px 0px rgba(0, 0, 0, 0.15)",
-        "--sjs-border-light": "rgba(0, 0, 0, 0.09)",
-        "--sjs-border-default": "rgba(0, 0, 0, 0.16)",
-        "--sjs-border-inside": "rgba(0, 0, 0, 0.16)",
-        "--sjs-special-red": "rgba(229, 10, 62, 1)",
-        "--sjs-special-red-light": "rgba(229, 10, 62, 0.1)",
-        "--sjs-special-red-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-special-green": "rgba(25, 179, 148, 1)",
-        "--sjs-special-green-light": "rgba(25, 179, 148, 0.1)",
-        "--sjs-special-green-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-special-blue": "rgba(67, 127, 217, 1)",
-        "--sjs-special-blue-light": "rgba(67, 127, 217, 0.1)",
-        "--sjs-special-blue-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-special-yellow": "rgba(255, 152, 20, 1)",
-        "--sjs-special-yellow-light": "rgba(255, 152, 20, 0.1)",
-        "--sjs-special-yellow-forecolor": "rgba(255, 255, 255, 1)",
-        "--sjs-article-font-xx-large-textDecoration": "none",
-        "--sjs-article-font-xx-large-fontWeight": "700",
-        "--sjs-article-font-xx-large-fontStyle": "normal",
-        "--sjs-article-font-xx-large-fontStretch": "normal",
-        "--sjs-article-font-xx-large-letterSpacing": "0",
-        "--sjs-article-font-xx-large-lineHeight": "64px",
-        "--sjs-article-font-xx-large-paragraphIndent": "0px",
-        "--sjs-article-font-xx-large-textCase": "none",
-        "--sjs-article-font-x-large-textDecoration": "none",
-        "--sjs-article-font-x-large-fontWeight": "700",
-        "--sjs-article-font-x-large-fontStyle": "normal",
-        "--sjs-article-font-x-large-fontStretch": "normal",
-        "--sjs-article-font-x-large-letterSpacing": "0",
-        "--sjs-article-font-x-large-lineHeight": "56px",
-        "--sjs-article-font-x-large-paragraphIndent": "0px",
-        "--sjs-article-font-x-large-textCase": "none",
-        "--sjs-article-font-large-textDecoration": "none",
-        "--sjs-article-font-large-fontWeight": "700",
-        "--sjs-article-font-large-fontStyle": "normal",
-        "--sjs-article-font-large-fontStretch": "normal",
-        "--sjs-article-font-large-letterSpacing": "0",
-        "--sjs-article-font-large-lineHeight": "40px",
-        "--sjs-article-font-large-paragraphIndent": "0px",
-        "--sjs-article-font-large-textCase": "none",
-        "--sjs-article-font-medium-textDecoration": "none",
-        "--sjs-article-font-medium-fontWeight": "700",
-        "--sjs-article-font-medium-fontStyle": "normal",
-        "--sjs-article-font-medium-fontStretch": "normal",
-        "--sjs-article-font-medium-letterSpacing": "0",
-        "--sjs-article-font-medium-lineHeight": "32px",
-        "--sjs-article-font-medium-paragraphIndent": "0px",
-        "--sjs-article-font-medium-textCase": "none",
-        "--sjs-article-font-default-textDecoration": "none",
-        "--sjs-article-font-default-fontWeight": "400",
-        "--sjs-article-font-default-fontStyle": "normal",
-        "--sjs-article-font-default-fontStretch": "normal",
-        "--sjs-article-font-default-letterSpacing": "0",
-        "--sjs-article-font-default-lineHeight": "28px",
-        "--sjs-article-font-default-paragraphIndent": "0px",
-        "--sjs-article-font-default-textCase": "none",
-        "--sjs-font-family": "Inter, sans-serif",
-      },
-      themeName: "plain",
-      colorPalette: "light",
-      isPanelless: false,
-    });
-    
-    model.showTitle = false;
-    model.showDescription = false;
-    model.showCompleteButton = false;
-    model.onComplete.add((sender) => {
-      console.log("Survey results:", sender.data);
-    });
-    
-    return model;
-  }, [surveyJson]);
+  if (field.type === "spacer") {
+    return <div className="h-12" />;
+  }
 
+  if (field.type === "heading") {
+    return (
+      <div className="p-2">
+        <h2 className="text-2xl font-bold text-slate-900">{field.label}</h2>
+      </div>
+    );
+  }
+
+  if (field.type === "paragraph") {
+    return (
+      <div className="p-2">
+        <p className="text-sm text-slate-700">
+          {field.placeholder || field.label}
+        </p>
+      </div>
+    );
+  }
+
+  // Render form fields
+  return (
+    <div className="p-2">
+      {/* Field Label */}
+      <div className="pb-2">
+        <label className="block text-sm font-medium text-slate-900">
+          {field.label}
+          {field.required && <span className="ml-1 text-red-500">*</span>}
+        </label>
+      </div>
+
+      {/* Field Helper */}
+      {field.helper && (
+        <p className="pb-2 text-xs text-slate-500">{field.helper}</p>
+      )}
+
+      {/* Field Preview */}
+      <div>
+        {(field.type === "text" ||
+          field.type === "email" ||
+          field.type === "number" ||
+          field.type === "phone" ||
+          field.type === "password" ||
+          field.type === "url") && (
+          <input
+            type="text"
+            placeholder={field.placeholder || "Enter your response..."}
+            disabled
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
+          />
+        )}
+
+        {field.type === "textarea" && (
+          <textarea
+            placeholder={field.placeholder || "Enter your response..."}
+            disabled
+            rows={3}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white resize-none focus:outline-none"
+          />
+        )}
+
+        {field.type === "date" && (
+          <input
+            type="text"
+            placeholder="mm/dd/yyyy"
+            disabled
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
+          />
+        )}
+
+        {field.type === "time" && (
+          <input
+            type="text"
+            placeholder="--:-- --"
+            disabled
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
+          />
+        )}
+
+        {field.type === "select" && (
+          <select
+            disabled
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
+          >
+            <option>Select an option...</option>
+            {(field.options || []).map((opt) => (
+              <option key={opt}>{opt}</option>
+            ))}
+          </select>
+        )}
+
+        {field.type === "checkbox" && (
+          <div className="space-y-2">
+            {(field.options || []).map((opt) => (
+              <label
+                key={opt}
+                className="flex items-center gap-2 text-sm text-slate-700"
+              >
+                <input
+                  type="checkbox"
+                  disabled
+                  className="rounded border-slate-300"
+                />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {field.type === "radio" && (
+          <div className="space-y-2">
+            {(field.options || []).map((opt) => (
+              <label
+                key={opt}
+                className="flex items-center gap-2 text-sm text-slate-700"
+              >
+                <input
+                  type="radio"
+                  disabled
+                  name={field.id}
+                  className="border-slate-300"
+                />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {field.type === "file" && (
+          <div className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-8 w-8 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              <p className="mt-1">Click to upload or drag and drop</p>
+            </div>
+          </div>
+        )}
+
+        {field.type === "rating" && (
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <svg
+                key={star}
+                className="h-6 w-6 text-slate-300"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            ))}
+          </div>
+        )}
+
+        {field.type === "signature" && (
+          <div className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500">
+            <p>Click to sign</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function FormPreview({
+  fields,
+  styles,
+}: {
+  fields: FormField[];
+  styles: FormStyles;
+}) {
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8">
       <div className="mx-auto max-w-3xl">
-        <div className="min-h-150 bg-white shadow-lg p-8">
-          {hasElements ? <Survey model={surveyModel} /> : null}
+        <div
+          className="min-h-150 bg-white shadow-lg p-8"
+          style={{
+            backgroundColor: styles.backgroundColor,
+            color: styles.textColor,
+            fontFamily: styles.fontFamily,
+          }}
+        >
+          {fields.length === 0 ? (
+            <div>
+            </div>
+          ) : (
+            <div className="space-y-6 pointer-events-none select-none">
+              {fields.map((field) => (
+                <PreviewCard key={field.id} field={field} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

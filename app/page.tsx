@@ -155,7 +155,6 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeDrag, setActiveDrag] = useState<LibraryItem | FormField | null>(null);
   const [styles, setStyles] = useState<FormStyles>(defaultStyles);
-  const [rightTab, setRightTab] = useState<"components" | "styles">("components");
   const [undoStack, setUndoStack] = useState<FormField[][]>([]);
   const [redoStack, setRedoStack] = useState<FormField[][]>([]);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
@@ -272,6 +271,23 @@ export default function Home() {
     if (selectedId === id) setSelectedId(null);
   };
 
+  const handleDuplicate = (id: string) => {
+    const index = fields.findIndex((f) => f.id === id);
+    if (index === -1) return;
+    pushUndo(fields);
+    const fieldToDuplicate = fields[index];
+    const duplicatedField = {
+      ...fieldToDuplicate,
+      id: Math.random().toString(36).substring(2, 11),
+      label: `${fieldToDuplicate.label} (Copy)`,
+    };
+    setFields((prev) => [
+      ...prev.slice(0, index + 1),
+      duplicatedField,
+      ...prev.slice(index + 1),
+    ]);
+  };
+
   const handleMoveUp = (id: string) => {
     const index = fields.findIndex((f) => f.id === id);
     if (index <= 0) return;
@@ -336,6 +352,7 @@ export default function Home() {
               selectedId={selectedId}
               onSelect={setSelectedId}
               onDelete={handleDeleteById}
+              onDuplicate={handleDuplicate}
               onMoveUp={handleMoveUp}
               onMoveDown={handleMoveDown}
               styles={styles}
@@ -352,7 +369,7 @@ export default function Home() {
           )}
         </main>
 
-        {/* Right Sidebar - Components & Styles */}
+        {/* Right Sidebar - Properties */}
         <aside
           className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
             isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
@@ -363,34 +380,14 @@ export default function Home() {
               isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
             } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
           >
-            {/* Tabs */}
-            <div className="flex border-b border-slate-200">
-                <button
-                  onClick={() => setRightTab("components")}
-                  className={`flex-1 px-4 py-4 text-sm font-medium transition ${
-                    rightTab === "components"
-                      ? "border-b-2 border-sky-500 text-sky-600"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  Components
-                </button>
-                <button
-                  onClick={() => setRightTab("styles")}
-                  className={`flex-1 px-4 py-4 text-sm font-medium transition ${
-                    rightTab === "styles"
-                      ? "border-b-2 border-sky-500 text-sky-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  Styles
-                </button>
-              </div>
+            {/* Header */}
+            <div className="border-b border-slate-200 px-4 py-4">
+              <h2 className="text-sm font-medium text-slate-500 mt-0.5">Properties</h2>
+            </div>
 
-              {/* Tab Content */}
+              {/* Content */}
               <div className="flex-1 overflow-y-auto">
-                {rightTab === "components" ? (
-                  selectedField ? (
+                  {selectedField ? (
                     <InspectorPanel
                       selectedField={selectedField}
                       onUpdate={handleFieldUpdate}
@@ -407,65 +404,7 @@ export default function Home() {
                       <p className="mt-1 text-xs text-slate-500">Select a field from the canvas to edit its properties</p>
                     </div>
                   )
-                ) : (
-                  <div className="p-4 space-y-5">
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                        Background Color
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={styles.backgroundColor}
-                          onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
-                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                        />
-                        <input
-                          type="text"
-                          value={styles.backgroundColor}
-                          onChange={(e) => handleStyleUpdate({ backgroundColor: e.target.value })}
-                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                        Text Color
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={styles.textColor}
-                          onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
-                          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200"
-                        />
-                        <input
-                          type="text"
-                          value={styles.textColor}
-                          onChange={(e) => handleStyleUpdate({ textColor: e.target.value })}
-                          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                        Font Family
-                      </label>
-                      <select
-                        value={styles.fontFamily}
-                        onChange={(e) => handleStyleUpdate({ fontFamily: e.target.value })}
-                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      >
-                        <option value="Inter, sans-serif">Inter (Modern Sans)</option>
-                        <option value="Georgia, serif">Georgia (Classic Serif)</option>
-                        <option value="system-ui, sans-serif">System Default</option>
-                        <option value="Monaco, monospace">Monaco (Monospace)</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
+              }
             </div>
           </div>
         </aside>

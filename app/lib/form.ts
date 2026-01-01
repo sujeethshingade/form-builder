@@ -208,8 +208,7 @@ function hasOptions(type: ComponentType): boolean {
 
 export function fieldToSurveyJSON(fields: FormField[]) {
   return {
-    title: "Form Preview",
-    showQuestionNumbers: "off",
+    title: "Form Title",
     pages: [
       {
         name: "page1",

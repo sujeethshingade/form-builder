@@ -101,10 +101,9 @@ export function FormPreview({ surveyJson }: { surveyJson: any }) {
       isPanelless: false,
     });
     
-    // Hide survey title and description
     model.showTitle = false;
     model.showDescription = false;
-    
+    model.showCompleteButton = false;
     model.onComplete.add((sender) => {
       console.log("Survey results:", sender.data);
     });
@@ -115,7 +114,7 @@ export function FormPreview({ surveyJson }: { surveyJson: any }) {
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8">
       <div className="mx-auto max-w-3xl">
-        <div className="min-h-[600px] bg-white shadow-lg p-8">
+        <div className="min-h-150 bg-white shadow-lg p-8">
           {hasElements ? <Survey model={surveyModel} /> : null}
         </div>
       </div>

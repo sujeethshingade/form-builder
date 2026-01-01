@@ -1,9 +1,6 @@
 "use client";
 
-export function JsonPreview({
-  json,
-  onCopy,
-}: {
+export function JsonPreview({ json, onCopy }: {
   json: string;
   onCopy: () => void;
 }) {

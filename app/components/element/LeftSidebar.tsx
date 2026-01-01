@@ -1,33 +1,45 @@
 "use client";
 
-import type { FormField } from "../../lib/form";
+import type { FormField } from "../../lib/types";
+import { TrashIcon, CursorIcon } from "../../lib/icons";
+
+type InspectorPanelProps = {
+  selectedField: FormField | null;
+  onUpdate: (patch: Partial<FormField>) => void;
+  onDelete: () => void;
+};
+
+const placeholderTypes = ["text", "email", "number", "phone", "textarea", "password", "url", "location", "heading", "h1", "h2", "h3", "paragraph"];
+const optionTypes = ["select", "checkbox", "radio"];
+const layoutTypes = ["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer"];
+const noRequiredTypes = ["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer", "table"];
+const headingTypes = ["heading", "h1", "h2", "h3", "paragraph"];
 
 export function InspectorPanel({
   selectedField,
   onUpdate,
   onDelete,
-}: {
-  selectedField: FormField | null;
-  onUpdate: (patch: Partial<FormField>) => void;
-  onDelete: () => void;
-}) {
+}: InspectorPanelProps) {
   if (!selectedField) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <div className="mb-4 bg-slate-100 p-4">
-          <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-          </svg>
+        <div className="mb-4 p-4">
+          <CursorIcon className="h-8 w-8 text-slate-400" />
         </div>
         <p className="text-sm font-medium text-slate-700">No field selected</p>
-        <p className="mt-1 text-xs text-slate-500">Click on a field in the canvas to edit it</p>
+        <p className="mt-2 text-xs text-slate-500">Click on a field in the canvas to edit it</p>
       </div>
     );
   }
 
+  const showPlaceholder = placeholderTypes.includes(selectedField.type);
+  const showOptions = optionTypes.includes(selectedField.type);
+  const showHelper = !layoutTypes.includes(selectedField.type);
+  const showRequired = !noRequiredTypes.includes(selectedField.type);
+  const placeholderLabel = headingTypes.includes(selectedField.type) ? "Content" : "Placeholder";
+
   return (
     <div className="p-4 space-y-5">
-      {/* Field Type Badge */}
       <div className="flex items-center justify-between">
         <div className="inline-flex items-center gap-2 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700">
           <span className="capitalize">{selectedField.type}</span>
@@ -37,13 +49,10 @@ export function InspectorPanel({
           className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
           title="Delete field"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
+          <TrashIcon className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Label */}
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
           Label
@@ -56,11 +65,10 @@ export function InspectorPanel({
         />
       </div>
 
-      {/* Placeholder */}
-      {["text", "email", "number", "phone", "textarea", "password", "url", "location", "heading", "h1", "h2", "h3", "paragraph"].includes(selectedField.type) && (
+      {showPlaceholder && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-            {["heading", "h1", "h2", "h3", "paragraph"].includes(selectedField.type) ? "Content" : "Placeholder"}
+            {placeholderLabel}
           </label>
           <input
             type="text"
@@ -71,8 +79,7 @@ export function InspectorPanel({
         </div>
       )}
 
-      {/* Options */}
-      {["select", "checkbox", "radio"].includes(selectedField.type) && (
+      {showOptions && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
             Options
@@ -94,8 +101,7 @@ export function InspectorPanel({
         </div>
       )}
 
-      {/* Helper Text */}
-      {!["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer"].includes(selectedField.type) && (
+      {showHelper && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
             Helper Text
@@ -110,7 +116,6 @@ export function InspectorPanel({
         </div>
       )}
 
-      {/* Width */}
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
           Width
@@ -139,8 +144,7 @@ export function InspectorPanel({
         </div>
       </div>
 
-      {/* Required Toggle */}
-      {!["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer", "table"].includes(selectedField.type) && (
+      {showRequired && (
         <div className="flex items-center justify-between border border-slate-200 bg-slate-50 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-slate-700">Required</p>

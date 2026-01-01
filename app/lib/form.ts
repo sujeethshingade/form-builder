@@ -1,63 +1,7 @@
 import { nanoid } from "nanoid";
+import type { ComponentType, FormField, LibraryItem, FormStyles } from "./types";
 
-export type ComponentType =
-  | "text"
-  | "email"
-  | "number"
-  | "phone"
-  | "textarea"
-  | "select"
-  | "checkbox"
-  | "radio"
-  | "date"
-  | "time"
-  | "file"
-  | "password"
-  | "url"
-  | "location"
-  | "rating"
-  | "signature"
-  | "heading"
-  | "h1"
-  | "h2"
-  | "h3"
-  | "paragraph"
-  | "divider"
-  | "spacer"
-  | "table";
-
-export type LibraryItem = {
-  type: ComponentType;
-  label: string;
-  icon: string;
-  category: "input" | "choice" | "layout" | "advanced";
-};
-
-export type FormField = {
-  id: string;
-  type: ComponentType;
-  label: string;
-  placeholder?: string;
-  helper?: string;
-  required?: boolean;
-  options?: string[];
-  width?: "full" | "half";
-};
-
-export type FormTemplate = {
-  id: string;
-  name: string;
-  description: string;
-  fields: Omit<FormField, "id">[];
-};
-
-export type FormStyles = {
-  backgroundColor: string;
-  textColor: string;
-  primaryColor: string;
-  borderRadius: number;
-  fontFamily: string;
-};
+export type { ComponentType, FormField, LibraryItem, FormStyles } from "./types";
 
 export const defaultStyles: FormStyles = {
   backgroundColor: "#ffffff",
@@ -68,7 +12,6 @@ export const defaultStyles: FormStyles = {
 };
 
 export const library: LibraryItem[] = [
-  // Input fields
   { type: "text", label: "Text Input", icon: "T", category: "input" },
   { type: "email", label: "Email", icon: "@", category: "input" },
   { type: "number", label: "Number", icon: "#", category: "input" },
@@ -76,96 +19,49 @@ export const library: LibraryItem[] = [
   { type: "textarea", label: "Long Text", icon: "¶", category: "input" },
   { type: "date", label: "Date", icon: "📅", category: "input" },
   { type: "time", label: "Time", icon: "⏰", category: "input" },
-  
-  // Choice fields
+  { type: "password", label: "Password", icon: "🔒", category: "input" },
+  { type: "url", label: "URL", icon: "🔗", category: "input" },
+  { type: "location", label: "Location", icon: "📍", category: "input" },
   { type: "select", label: "Dropdown", icon: "▼", category: "choice" },
   { type: "checkbox", label: "Checkbox", icon: "☑", category: "choice" },
   { type: "radio", label: "Radio", icon: "◉", category: "choice" },
   { type: "rating", label: "Rating", icon: "★", category: "choice" },
-  
-  // Layout elements
   { type: "heading", label: "Heading", icon: "H", category: "layout" },
+  { type: "h1", label: "H1", icon: "H1", category: "layout" },
+  { type: "h2", label: "H2", icon: "H2", category: "layout" },
+  { type: "h3", label: "H3", icon: "H3", category: "layout" },
   { type: "paragraph", label: "Paragraph", icon: "≡", category: "layout" },
   { type: "divider", label: "Divider", icon: "—", category: "layout" },
   { type: "spacer", label: "Spacer", icon: "⬚", category: "layout" },
-  
-  // Advanced
+  { type: "table", label: "Table", icon: "⊞", category: "layout" },
   { type: "file", label: "File Upload", icon: "📎", category: "advanced" },
   { type: "signature", label: "Signature", icon: "✍", category: "advanced" },
 ];
 
-export const templates: FormTemplate[] = [
-  {
-    id: "blank",
-    name: "Blank Form",
-    description: "Start from scratch",
-    fields: [],
-  },
-  {
-    id: "contact",
-    name: "Contact Form",
-    description: "Simple contact form",
-    fields: [
-      { type: "heading", label: "Contact Us" },
-      { type: "text", label: "Full Name", placeholder: "John Doe", required: true },
-      { type: "email", label: "Email Address", placeholder: "john@example.com", required: true },
-      { type: "phone", label: "Phone Number", placeholder: "+1 (555) 000-0000" },
-      { type: "textarea", label: "Message", placeholder: "How can we help?", required: true },
-    ],
-  },
-  {
-    id: "feedback",
-    name: "Feedback Form",
-    description: "Collect user feedback",
-    fields: [
-      { type: "heading", label: "We value your feedback" },
-      { type: "rating", label: "How would you rate your experience?" },
-      { type: "radio", label: "Would you recommend us?", options: ["Yes", "No", "Maybe"] },
-      { type: "textarea", label: "Additional comments", placeholder: "Share your thoughts..." },
-    ],
-  },
-  {
-    id: "registration",
-    name: "Registration",
-    description: "User registration form",
-    fields: [
-      { type: "heading", label: "Create Account" },
-      { type: "text", label: "First Name", required: true },
-      { type: "text", label: "Last Name", required: true },
-      { type: "email", label: "Email", required: true },
-      { type: "phone", label: "Phone" },
-      { type: "date", label: "Date of Birth" },
-      { type: "checkbox", label: "Interests", options: ["Technology", "Sports", "Music", "Travel"] },
-    ],
-  },
-  {
-    id: "survey",
-    name: "Survey",
-    description: "Multi-question survey",
-    fields: [
-      { type: "heading", label: "Quick Survey" },
-      { type: "paragraph", label: "Please take a moment to answer these questions." },
-      { type: "radio", label: "How did you hear about us?", options: ["Search Engine", "Social Media", "Friend", "Other"] },
-      { type: "select", label: "How often do you use our product?", options: ["Daily", "Weekly", "Monthly", "Rarely"] },
-      { type: "rating", label: "Overall satisfaction" },
-      { type: "textarea", label: "Suggestions for improvement" },
-    ],
-  },
-  {
-    id: "application",
-    name: "Job Application",
-    description: "Employment application",
-    fields: [
-      { type: "heading", label: "Job Application" },
-      { type: "text", label: "Full Name", required: true },
-      { type: "email", label: "Email", required: true },
-      { type: "phone", label: "Phone Number", required: true },
-      { type: "file", label: "Resume" },
-      { type: "textarea", label: "Cover Letter" },
-      { type: "date", label: "Available Start Date" },
-    ],
-  },
-];
+function hasOptions(type: ComponentType): boolean {
+  return ["select", "checkbox", "radio"].includes(type);
+}
+
+function getDefaultPlaceholder(type: ComponentType): string | undefined {
+  const placeholders: Partial<Record<ComponentType, string>> = {
+    text: "Enter text...",
+    email: "email@example.com",
+    number: "0",
+    phone: "+1 (555) 000-0000",
+    textarea: "Enter your response...",
+    date: "Select date",
+    time: "Select time",
+    heading: "Form Title",
+    h1: "Form Title",
+    h2: "Section Title",
+    h3: "Subsection Title",
+    paragraph: "Add description text here...",
+    password: "Enter password...",
+    url: "https://example.com",
+    location: "Enter location...",
+  };
+  return placeholders[type];
+}
 
 export function makeField(item: LibraryItem): FormField {
   return {
@@ -187,25 +83,6 @@ export function makeFieldFromTemplate(field: Omit<FormField, "id">): FormField {
   };
 }
 
-function getDefaultPlaceholder(type: ComponentType): string | undefined {
-  switch (type) {
-    case "text": return "Enter text...";
-    case "email": return "email@example.com";
-    case "number": return "0";
-    case "phone": return "+1 (555) 000-0000";
-    case "textarea": return "Enter your response...";
-    case "date": return "Select date";
-    case "time": return "Select time";
-    case "heading": return "Form Title";
-    case "paragraph": return "Add description text here...";
-    default: return undefined;
-  }
-}
-
-function hasOptions(type: ComponentType): boolean {
-  return ["select", "checkbox", "radio"].includes(type);
-}
-
 export function fieldToSurveyJSON(fields: FormField[]) {
   return {
     title: "Form Title",
@@ -223,11 +100,16 @@ export function fieldToSurveyJSON(fields: FormField[]) {
           switch (field.type) {
             case "text":
             case "phone":
+            case "location":
               return { ...base, type: "text", placeholder: field.placeholder };
             case "email":
               return { ...base, type: "text", inputType: "email", placeholder: field.placeholder };
             case "number":
               return { ...base, type: "text", inputType: "number", placeholder: field.placeholder };
+            case "password":
+              return { ...base, type: "text", inputType: "password", placeholder: field.placeholder };
+            case "url":
+              return { ...base, type: "text", inputType: "url", placeholder: field.placeholder };
             case "textarea":
               return { ...base, type: "comment", placeholder: field.placeholder };
             case "select":
@@ -247,6 +129,9 @@ export function fieldToSurveyJSON(fields: FormField[]) {
             case "signature":
               return { ...base, type: "signaturepad" };
             case "heading":
+            case "h1":
+            case "h2":
+            case "h3":
               return { ...base, type: "html", html: `<h2>${field.label}</h2>` };
             case "paragraph":
               return { ...base, type: "html", html: `<p>${field.placeholder || field.label}</p>` };
@@ -254,6 +139,8 @@ export function fieldToSurveyJSON(fields: FormField[]) {
               return { ...base, type: "html", html: "<hr style='border-top: 1px solid #e2e8f0; margin: 16px 0;'/>" };
             case "spacer":
               return { ...base, type: "html", html: "<div style='height: 24px;'></div>" };
+            case "table":
+              return { ...base, type: "html", html: "<div>Table placeholder</div>" };
             default:
               return { ...base, type: "text" };
           }

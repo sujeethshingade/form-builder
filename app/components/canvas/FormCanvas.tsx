@@ -2,8 +2,19 @@
 
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import type { FormField, FormStyles } from "../../lib/form";
+import type { FormField, FormStyles } from "../../lib/types";
 import { CanvasCard } from "./CanvasCard";
+
+type FormCanvasProps = {
+  fields: FormField[];
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  styles: FormStyles;
+};
 
 export function FormCanvas({
   fields,
@@ -14,16 +25,7 @@ export function FormCanvas({
   onMoveUp,
   onMoveDown,
   styles,
-}: {
-  fields: FormField[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
-  onDelete?: (id: string) => void;
-  onDuplicate?: (id: string) => void;
-  onMoveUp?: (id: string) => void;
-  onMoveDown?: (id: string) => void;
-  styles: FormStyles;
-}) {
+}: FormCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
@@ -35,7 +37,7 @@ export function FormCanvas({
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8" onClick={handleBackgroundClick}>
       <div className="mx-auto max-w-3xl">
-        {/* Canvas Paper */}
+        {/* Canvas */}
         <div
           ref={setNodeRef}
           onClick={handleBackgroundClick}
@@ -48,29 +50,29 @@ export function FormCanvas({
             fontFamily: styles.fontFamily,
           }}
         >
-            {fields.length === 0 ? (
-              <div className="flex items-center justify-center py-16" />
-            ) : (
-              <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+          {fields.length === 0 ? (
+            <div className="flex items-center justify-center py-16" />
+          ) : (
+            <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-6">
                 {fields.map((field, index) => (
-                <CanvasCard
-                  key={field.id}
-                  field={field}
-                  selected={selectedId === field.id}
-                  onSelect={onSelect}
-                  onDelete={onDelete}
-                  onDuplicate={onDuplicate}
-                  onMoveUp={onMoveUp}
-                  onMoveDown={onMoveDown}
-                  canMoveUp={index > 0}
-                  canMoveDown={index < fields.length - 1}
-                  styles={styles}
-                />
+                  <CanvasCard
+                    key={field.id}
+                    field={field}
+                    selected={selectedId === field.id}
+                    onSelect={onSelect}
+                    onDelete={onDelete}
+                    onDuplicate={onDuplicate}
+                    onMoveUp={onMoveUp}
+                    onMoveDown={onMoveDown}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < fields.length - 1}
+                    styles={styles}
+                  />
                 ))}
               </div>
-              </SortableContext>
-            )}
+            </SortableContext>
+          )}
         </div>
       </div>
     </div>

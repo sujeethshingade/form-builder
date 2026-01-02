@@ -21,18 +21,10 @@ function PreviewCard({ field }: { field: FormField }) {
     return <div className="h-12" />;
   }
 
-  if (field.type === "heading" || field.type === "h1" || field.type === "h2" || field.type === "h3") {
+  if (field.type === "heading") {
     return (
       <div className="p-2">
         <HeadingRenderer field={field} />
-      </div>
-    );
-  }
-
-  if (field.type === "paragraph") {
-    return (
-      <div className="p-2">
-        <ParagraphRenderer field={field} />
       </div>
     );
   }

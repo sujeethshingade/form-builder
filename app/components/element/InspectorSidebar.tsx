@@ -9,11 +9,11 @@ type InspectorPanelProps = {
   onDelete: () => void;
 };
 
-const placeholderTypes = ["text", "email", "number", "phone", "textarea", "password", "url", "location", "heading", "h1", "h2", "h3", "paragraph"];
+const placeholderTypes = ["text", "email", "number", "url", "location", "heading"];
 const optionTypes = ["select", "checkbox", "radio"];
-const layoutTypes = ["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer"];
-const noRequiredTypes = ["heading", "h1", "h2", "h3", "paragraph", "divider", "spacer", "table"];
-const headingTypes = ["heading", "h1", "h2", "h3", "paragraph"];
+const layoutTypes = ["heading", "divider", "spacer"];
+const noRequiredTypes = ["heading", "divider", "spacer", "table"];
+const headingTypes = ["heading"];
 
 export function InspectorPanel({
   selectedField,

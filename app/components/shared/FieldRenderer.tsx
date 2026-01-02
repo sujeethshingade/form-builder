@@ -1,7 +1,6 @@
 "use client";
 
 import type { FormField } from "../../lib/types";
-import { FileIcon, StarFilledIcon } from "../../lib/icons";
 
 type FieldRendererProps = {
   field: FormField;
@@ -92,27 +91,6 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
   );
 }
 
-export function FileUploadRenderer() {
-  return (
-    <div className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500">
-      <div className="text-center">
-        <FileIcon className="mx-auto h-8 w-8 text-slate-400" />
-        <p className="mt-1">Click to upload or drag and drop</p>
-      </div>
-    </div>
-  );
-}
-
-export function RatingRenderer() {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <StarFilledIcon key={star} className="h-6 w-6 text-slate-300" />
-      ))}
-    </div>
-  );
-}
-
 export function SignatureRenderer() {
   return (
     <div className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500">
@@ -173,20 +151,10 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
       return <TextareaRenderer field={field} disabled={disabled} />;
     case "date":
       return <DateInputRenderer disabled={disabled} />;
-    case "time":
-      return <TimeInputRenderer disabled={disabled} />;
-    case "select":
-      return <SelectRenderer field={field} disabled={disabled} />;
     case "checkbox":
       return <CheckboxRenderer field={field} disabled={disabled} />;
     case "radio":
       return <RadioRenderer field={field} disabled={disabled} />;
-    case "file":
-      return <FileUploadRenderer />;
-    case "rating":
-      return <RatingRenderer />;
-    case "signature":
-      return <SignatureRenderer />;
     default:
       return null;
   }
@@ -215,12 +183,6 @@ export function LayoutElementRenderer({ field, selected = false }: FieldRenderer
     case "spacer":
       return <SpacerRenderer selected={selected} />;
     case "heading":
-    case "h1":
-    case "h2":
-    case "h3":
-      return <HeadingRenderer field={field} />;
-    case "paragraph":
-      return <ParagraphRenderer field={field} />;
     default:
       return null;
   }

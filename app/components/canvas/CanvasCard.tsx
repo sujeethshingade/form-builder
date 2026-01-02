@@ -113,20 +113,11 @@ export function CanvasCard({
     );
   }
 
-  if (field.type === "heading" || field.type === "h1" || field.type === "h2" || field.type === "h3") {
+  if (field.type === "heading") {
     return (
       <div ref={setNodeRef} style={style} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
         <HeadingRenderer field={field} />
-      </div>
-    );
-  }
-
-  if (field.type === "paragraph") {
-    return (
-      <div ref={setNodeRef} style={style} onClick={handleClick} className={`${wrapperClasses} p-2`}>
-        {controls}
-        <ParagraphRenderer field={field} />
       </div>
     );
   }

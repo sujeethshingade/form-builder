@@ -7,8 +7,6 @@ export {
   SelectRenderer,
   CheckboxRenderer,
   RadioRenderer,
-  FileUploadRenderer,
-  RatingRenderer,
   SignatureRenderer,
   DividerRenderer,
   SpacerRenderer,

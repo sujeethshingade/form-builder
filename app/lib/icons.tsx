@@ -29,20 +29,6 @@ export const EmailIcon = ({ className = "h-5 w-5" }: { className?: string }) => 
   </svg>
 );
 
-// Phone Icon
-export const PhoneIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-  </svg>
-);
-
-// Password Icon
-export const PasswordIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-);
-
 // URL Icon
 export const UrlIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,13 +64,6 @@ export const DateIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   </svg>
 );
 
-// Time Icon
-export const TimeIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
 // Location Icon
 export const LocationIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,59 +72,10 @@ export const LocationIcon = ({ className = "h-5 w-5" }: { className?: string }) 
   </svg>
 );
 
-// File Icon
-export const FileIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-  </svg>
-);
-
-// Rating Icon
-export const RatingIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-  </svg>
-);
-
-// Signature Icon
-export const SignatureIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-);
-
 // Heading Icon
 export const HeadingIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
-  </svg>
-);
-
-// H1 Icon
-export const H1Icon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 18h16" />
-  </svg>
-);
-
-// H2 Icon
-export const H2Icon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 8h16M4 16h12" />
-  </svg>
-);
-
-// H3 Icon
-export const H3Icon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 10h16M4 14h10" />
-  </svg>
-);
-
-// Paragraph Icon
-export const ParagraphIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
   </svg>
 );
 
@@ -205,20 +135,6 @@ export const TrashIcon = ({ className = "h-4 w-4" }: { className?: string }) => 
   </svg>
 );
 
-// Star Icon (for rating)
-export const StarIcon = ({ className = "h-6 w-6", filled = false }: { className?: string; filled?: boolean }) => (
-  <svg className={className} fill={filled ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
-
-// Star Icon Filled (for rating display)
-export const StarFilledIcon = ({ className = "h-6 w-6" }: { className?: string }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
-
 // Chevron Left Icon
 export const ChevronLeftIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -240,7 +156,7 @@ export const EditIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   </svg>
 );
 
-// Preview/Eye Icon
+// Preview Icon
 export const PreviewIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -282,23 +198,12 @@ export function getIconForType(type: ComponentType): ReactNode {
     textarea: <TextareaIcon />,
     number: <NumberIcon />,
     email: <EmailIcon />,
-    phone: <PhoneIcon />,
-    password: <PasswordIcon />,
     url: <UrlIcon />,
     checkbox: <CheckboxIcon />,
     radio: <RadioIcon />,
-    select: <SelectIcon />,
     date: <DateIcon />,
-    time: <TimeIcon />,
     location: <LocationIcon />,
-    file: <FileIcon />,
-    rating: <RatingIcon />,
-    signature: <SignatureIcon />,
     heading: <HeadingIcon />,
-    h1: <H1Icon />,
-    h2: <H2Icon />,
-    h3: <H3Icon />,
-    paragraph: <ParagraphIcon />,
     divider: <DividerIcon />,
     spacer: <SpacerIcon />,
     table: <TableIcon />,

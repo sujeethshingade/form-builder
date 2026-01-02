@@ -13,8 +13,8 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { JsonPreview } from "./components/canvas/JsonPreview";
 import { FormPreview } from "./components/canvas/FormPreview";
-import { InspectorPanel } from "./components/element/LeftSidebar";
-import { ElementSidebar } from "./components/element/RightSidebar";
+import { InspectorPanel } from "./components/element/InspectorSidebar";
+import { ElementSidebar } from "./components/element/ElementSidebar";
 import { TopBar } from "./components/element/Navbar";
 import { fieldToSurveyJSON, library, makeField, defaultStyles } from "./lib/form";
 import { getIconForType } from "./lib/icons";
@@ -236,7 +236,7 @@ export default function Home() {
               isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
             } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
           >
-            <div className="border-b border-slate-200 px-4 py-4">
+            <div className="flex justify-center border-b border-slate-200 px-4 py-4">
               <h2 className="text-sm font-medium text-slate-500 mt-0.5">Properties</h2>
             </div>
 

@@ -11,7 +11,7 @@ export function TextInputRenderer({ field, disabled = true }: FieldRendererProps
   return (
     <input
       type="text"
-      placeholder={field.placeholder || "Enter your response..."}
+      placeholder={field.placeholder}
       disabled={disabled}
       className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
     />
@@ -21,7 +21,7 @@ export function TextInputRenderer({ field, disabled = true }: FieldRendererProps
 export function TextareaRenderer({ field, disabled = true }: FieldRendererProps) {
   return (
     <textarea
-      placeholder={field.placeholder || "Enter your response..."}
+      placeholder={field.placeholder}
       disabled={disabled}
       rows={3}
       className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white resize-none focus:outline-none"
@@ -29,22 +29,11 @@ export function TextareaRenderer({ field, disabled = true }: FieldRendererProps)
   );
 }
 
-export function DateInputRenderer({ disabled = true }: { disabled?: boolean }) {
+export function DateInputRenderer({ field, disabled = true }: FieldRendererProps) {
   return (
     <input
       type="text"
-      placeholder="mm/dd/yyyy"
-      disabled={disabled}
-      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
-    />
-  );
-}
-
-export function TimeInputRenderer({ disabled = true }: { disabled?: boolean }) {
-  return (
-    <input
-      type="text"
-      placeholder="--:-- --"
+      placeholder={field.placeholder}
       disabled={disabled}
       className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-500 bg-white focus:outline-none"
     />
@@ -91,14 +80,6 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
   );
 }
 
-export function SignatureRenderer() {
-  return (
-    <div className="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-lg bg-white px-4 py-8 text-sm text-slate-500">
-      <p>Click to sign</p>
-    </div>
-  );
-}
-
 export function DividerRenderer({ selected = false }: { selected?: boolean }) {
   return (
     <div className={`border-t ${selected ? "border-sky-500" : "border-slate-300"}`} />
@@ -114,12 +95,6 @@ export function SpacerRenderer({ selected = false }: { selected?: boolean }) {
 export function HeadingRenderer({ field }: FieldRendererProps) {
   return (
     <h2 className="text-2xl font-bold text-slate-900">{field.label}</h2>
-  );
-}
-
-export function ParagraphRenderer({ field }: FieldRendererProps) {
-  return (
-    <p className="text-sm text-slate-700">{field.placeholder || field.label}</p>
   );
 }
 
@@ -140,7 +115,7 @@ export function FieldHelper({ helper }: { helper?: string }) {
 }
 
 export function FieldInputRenderer({ field, disabled = true }: FieldRendererProps) {
-  const textTypes = ["text", "email", "number", "phone", "password", "url"];
+  const textTypes = ["text", "email", "number", "url"];
   
   if (textTypes.includes(field.type)) {
     return <TextInputRenderer field={field} disabled={disabled} />;
@@ -150,7 +125,7 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
     case "textarea":
       return <TextareaRenderer field={field} disabled={disabled} />;
     case "date":
-      return <DateInputRenderer disabled={disabled} />;
+      return <DateInputRenderer field={field} disabled={disabled} />;
     case "checkbox":
       return <CheckboxRenderer field={field} disabled={disabled} />;
     case "radio":
@@ -173,7 +148,7 @@ export function FormFieldRenderer({ field, disabled = true }: FieldRendererProps
 }
 
 export function isLayoutElement(type: string): boolean {
-  return ["divider", "spacer", "heading", "h1", "h2", "h3", "paragraph"].includes(type);
+  return ["divider", "spacer", "heading", "paragraph"].includes(type);
 }
 
 export function LayoutElementRenderer({ field, selected = false }: FieldRendererProps & { selected?: boolean }) {

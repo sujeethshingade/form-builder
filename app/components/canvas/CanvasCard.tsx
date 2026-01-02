@@ -9,7 +9,6 @@ import {
   DividerRenderer,
   SpacerRenderer,
   HeadingRenderer,
-  ParagraphRenderer,
 } from "../shared/FieldRenderer";
 
 type CanvasCardProps = {

@@ -9,8 +9,8 @@ type InspectorPanelProps = {
   onDelete: () => void;
 };
 
-const placeholderTypes = ["text", "email", "number", "url", "location", "heading"];
-const optionTypes = ["select", "checkbox", "radio"];
+const placeholderTypes = ["text", "email", "number", "url", "location", "date"];
+const optionTypes = ["checkbox", "radio"];
 const layoutTypes = ["heading", "divider", "spacer"];
 const noRequiredTypes = ["heading", "divider", "spacer", "table"];
 const headingTypes = ["heading"];
@@ -97,7 +97,6 @@ export function InspectorPanel({
               })
             }
           />
-          <p className="mt-1.5 text-xs text-slate-500">One option per line</p>
         </div>
       )}
 
@@ -148,7 +147,6 @@ export function InspectorPanel({
         <div className="flex items-center justify-between border border-slate-200 bg-slate-50 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-slate-700">Required</p>
-            <p className="text-xs text-slate-500">Field must be filled</p>
           </div>
           <label className="relative inline-flex cursor-pointer items-center">
             <input

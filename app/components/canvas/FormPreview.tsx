@@ -5,7 +5,6 @@ import {
   FormFieldRenderer,
   DividerRenderer,
   HeadingRenderer,
-  ParagraphRenderer,
 } from "../shared/FieldRenderer";
 
 function PreviewCard({ field }: { field: FormField }) {

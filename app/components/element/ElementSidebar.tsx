@@ -29,24 +29,47 @@ function ElementCard({ element }: { element: ElementDefinition }) {
   );
 }
 
+function ElementIconCard({ element }: { element: ElementDefinition }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `palette-${element.type}`,
+    data: { from: "palette", type: element.type },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      title={element.label}
+      className={`flex items-center justify-center border rounded-sm border-slate-200 bg-white py-1.5 cursor-grab transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-sm active:cursor-grabbing ${
+        isDragging ? "opacity-50 border-sky-400 shadow-md" : ""
+      }`}
+    >
+      <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
+        {element.icon}
+      </div>
+    </div>
+  );
+}
+
 export function ElementSidebar({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <aside
       className={`flex h-full flex-col bg-white transition-[width] duration-300 ease-out ${
         collapsed
-          ? "w-0 min-w-0 overflow-hidden border-r border-transparent"
+          ? "w-16 border-r border-slate-200"
           : "w-52 border-r border-slate-200"
       }`}
     >
-      <div
-        className={`flex h-full flex-col ${
-          collapsed ? "pointer-events-none opacity-0" : "opacity-100"
-        } transition-opacity duration-200 ${collapsed ? "" : "delay-100"}`}
-      >
-        <div className="flex justify-center border-b border-slate-200 px-3 py-4">
-          <h2 className="text-sm font-medium mt-0.5 text-slate-500">Components</h2>
+      {collapsed ? (
+        <div className="flex-1 overflow-y-auto p-2">
+          <div className="space-y-2">
+            {elements.map((element) => (
+              <ElementIconCard key={element.type} element={element} />
+            ))}
+          </div>
         </div>
-
+      ) : (
         <div className="flex-1 overflow-y-auto p-2">
           <div className="space-y-2">
             {elements.map((element) => (
@@ -54,7 +77,7 @@ export function ElementSidebar({ collapsed = false }: { collapsed?: boolean }) {
             ))}
           </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }

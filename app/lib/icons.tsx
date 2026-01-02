@@ -3,8 +3,8 @@ import type { ComponentType } from "./types";
 
 // Text Input Icon
 export const TextIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h8" />
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="16" fontWeight="600" dy="0.1em">T</text>
   </svg>
 );
 
@@ -74,8 +74,8 @@ export const LocationIcon = ({ className = "h-5 w-5" }: { className?: string }) 
 
 // Heading Icon
 export const HeadingIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="16" fontWeight="700" dy="0.1em">H</text>
   </svg>
 );
 

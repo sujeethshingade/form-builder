@@ -180,98 +180,104 @@ export default function Home() {
   );
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="flex h-screen bg-slate-100 flex-col">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <ElementSidebar collapsed={!isLeftSidebarOpen} />
+        <TopBar
+          canUndo={undoStack.length > 0}
+          canRedo={redoStack.length > 0}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          isLeftSidebarOpen={isLeftSidebarOpen}
+          onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+          isRightSidebarOpen={isRightSidebarOpen}
+          onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
+          workspaceView={workspaceView}
+          onWorkspaceViewChange={setWorkspaceView}
+        />
 
-        <main className="flex h-full flex-1 flex-col overflow-hidden">
-          <TopBar
-            canUndo={undoStack.length > 0}
-            canRedo={redoStack.length > 0}
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            isLeftSidebarOpen={isLeftSidebarOpen}
-            onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
-            isRightSidebarOpen={isRightSidebarOpen}
-            onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
-            workspaceView={workspaceView}
-            onWorkspaceViewChange={setWorkspaceView}
-          />
+        <div className="flex h-full overflow-hidden">
+          <ElementSidebar collapsed={!isLeftSidebarOpen} />
 
-          {workspaceView === "edit" ? (
-            <FormCanvas
-              fields={fields}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onDelete={handleDeleteById}
-              onDuplicate={handleDuplicate}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
-              styles={styles}
-            />
-          ) : workspaceView === "preview" ? (
-            <FormPreview fields={fields} styles={styles} />
-          ) : (
-            <div className="flex-1 overflow-auto bg-slate-100 p-8">
-              <JsonPreview
-                json={exportString}
-                onCopy={() => navigator.clipboard.writeText(exportString)}
+          <main className="flex h-full flex-1 flex-col overflow-hidden">
+            {workspaceView === "edit" ? (
+              <FormCanvas
+                fields={fields}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onDelete={handleDeleteById}
+                onDuplicate={handleDuplicate}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                styles={styles}
               />
-            </div>
-          )}
-        </main>
-
-        <aside
-          className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
-            isRightSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
-          }`}
-        >
-          <div
-            className={`flex h-full flex-col ${
-              isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
-            } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
-          >
-            <div className="flex justify-center border-b border-slate-200 px-4 py-4">
-              <h2 className="text-sm font-medium text-slate-500 mt-0.5">Properties</h2>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {selectedField ? (
-                <InspectorSidebar
-                  field={selectedField}
-                  onClose={() => setSelectedId(null)}
-                  onUpdate={handleFieldUpdate}
+            ) : workspaceView === "preview" ? (
+              <FormPreview fields={fields} styles={styles} />
+            ) : (
+              <div className="flex-1 overflow-auto bg-slate-100 p-8">
+                <JsonPreview
+                  json={exportString}
+                  onCopy={() => navigator.clipboard.writeText(exportString)}
                 />
-              ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <div className="mb-4 p-4">
-                    <CursorIcon className="h-8 w-8 text-slate-400" />
+              </div>
+            )}
+          </main>
+
+          <aside
+            className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
+              isRightSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+            }`}
+          >
+            <div
+              className={`flex h-full flex-col ${
+                isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
+            >
+              <div className="flex-1 overflow-y-auto">
+                {selectedField ? (
+                  <InspectorSidebar
+                    field={selectedField}
+                    onClose={() => setSelectedId(null)}
+                    onUpdate={handleFieldUpdate}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <div className="mb-4 p-4">
+                      <CursorIcon className="h-8 w-8 text-slate-400" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-700">No field selected</p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Click on a field in the canvas to edit it
+                    </p>
                   </div>
-                  <p className="text-sm font-medium text-slate-700">No field selected</p>
-                  <p className="mt-2 text-xs text-slate-500">
-                    Click on a field in the canvas to edit it
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </div>
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            <div className="flex items-center gap-3 border border-slate-200 bg-white px-3 py-2.5 text-slate-900 shadow-lg rounded">
-              <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-                {getIconForType(activeDrag.type as any)}
+            isLeftSidebarOpen ? (
+              <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 text-slate-900 shadow-lg">
+                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
+                  {getIconForType(activeDrag.type as any)}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <div className="text-sm font-medium text-slate-700">{activeDrag.label}</div>
+            ) : (
+              <div className="flex items-center justify-center border rounded-sm border-slate-200 bg-white py-1.5 shadow-lg">
+                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
+                  {getIconForType(activeDrag.type as any)}
+                </div>
               </div>
-            </div>
+            )
           ) : null}
         </DragOverlay>
       </DndContext>

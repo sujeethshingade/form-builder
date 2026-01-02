@@ -9,20 +9,10 @@ export type ComponentType =
   | "checkbox"
   | "radio"
   | "date"
-  | "location"
   | "heading"
   | "divider"
   | "spacer"
   | "table";
-
-// Vueform-inspired property types
-export type VueformCondition = {
-  field: string;
-  operator: "==" | "!=" | ">" | "<" | ">=" | "<=";
-  value: any;
-};
-
-export type VueformRule = string | { [key: string]: any };
 
 export type VueformItem = {
   value: string | number;
@@ -33,99 +23,78 @@ export type VueformItem = {
 export type VueformColumn = {
   name: string;
   label: string;
-  type: "text" | "number" | "email" | "select";
+  type: "text" | "number" | "email" | "select" | "date";
   width?: string;
+  placeholder?: string;
+  options?: VueformItem[];
 };
 
-// Base properties shared by most components
+export type VueformAddon = {
+  before?: string;
+  after?: string;
+};
+
 export type BaseVueformProps = {
   name: string;
+  id?: string;
   label?: string;
   placeholder?: string;
-  description?: string;
   default?: any;
   required?: boolean;
   disabled?: boolean;
   readonly?: boolean;
   width?: "full" | "half";
-  rules?: VueformRule[];
-  conditions?: VueformCondition[];
-  attrs?: Record<string, any>;
-  addClass?: string;
-  removeClasses?: string[];
-  replaceClasses?: Record<string, string>;
-  overrideClasses?: Record<string, string>;
+  size?: "sm" | "md" | "lg";
 };
 
-// Input field properties (text, email, url, location)
 export type InputVueformProps = BaseVueformProps & {
-  autocomplete?: string;
-  inputType?: string;
+  inputType?: "text" | "email" | "url";
+  addons?: VueformAddon;
 };
 
-// Number field properties
 export type NumberVueformProps = BaseVueformProps & {
+  inputType?: "number";
   min?: number | null;
   max?: number | null;
   step?: number;
+  addons?: VueformAddon;
 };
 
-// Choice field properties (radio, checkbox)
 export type ChoiceVueformProps = Omit<BaseVueformProps, "placeholder"> & {
   items: VueformItem[];
   view?: "tabs" | "blocks" | "default";
+  labelPosition?: "left" | "right";
 };
 
-// Date field properties
 export type DateVueformProps = BaseVueformProps & {
-  displayFormat?: string;
-  valueFormat?: string;
-  loadFormat?: string;
-  hour24?: boolean;
-  min?: string | null;
-  max?: string | null;
-  disables?: string[];
+  format?: string;
+  minDate?: string | null;
+  maxDate?: string | null;
+  addons?: VueformAddon;
 };
 
-// Heading properties
 export type HeadingVueformProps = {
   name: string;
   content: string;
   tag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  align?: "left" | "center" | "right";
   width?: "full" | "half";
-  conditions?: VueformCondition[];
-  attrs?: Record<string, any>;
-  addClass?: string;
-  removeClasses?: string[];
-  replaceClasses?: Record<string, string>;
-  overrideClasses?: Record<string, string>;
 };
 
-// Divider properties
 export type DividerVueformProps = {
   name: string;
   width?: "full" | "half";
-  conditions?: VueformCondition[];
-  attrs?: Record<string, any>;
-  addClass?: string;
-  removeClasses?: string[];
-  replaceClasses?: Record<string, string>;
-  overrideClasses?: Record<string, string>;
 };
 
-// Spacer properties
 export type SpacerVueformProps = DividerVueformProps & {
   height?: string;
 };
 
-// Table field properties
 export type TableVueformProps = BaseVueformProps & {
   columns: VueformColumn[];
-  addLabel?: string;
-  removeLabel?: string;
+  rows?: Record<string, any>[];
 };
 
-// Union type for all Vueform props
 export type VueformProps =
   | InputVueformProps
   | NumberVueformProps
@@ -145,15 +114,29 @@ export type FormField = {
   required?: boolean;
   options?: string[];
   width?: "full" | "half";
-  // Add Vueform properties
+  widthPercent?: number; // 25-100 percentage width
   name?: string;
-  description?: string;
   default?: any;
   disabled?: boolean;
   readonly?: boolean;
-  rules?: VueformRule[];
-  conditions?: VueformCondition[];
-  attrs?: Record<string, any>;
+  size?: "sm" | "md" | "lg";
+  inputType?: string;
+  addons?: VueformAddon;
+  min?: number | string | null;
+  max?: number | string | null;
+  step?: number;
+  format?: string;
+  minDate?: string;
+  maxDate?: string;
+  items?: VueformItem[];
+  view?: "tabs" | "blocks" | "default";
+  labelPosition?: "left" | "right";
+  content?: string;
+  tag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  align?: "left" | "center" | "right";
+  height?: string;
+  columns?: VueformColumn[];
+  rows?: Record<string, any>[];
   [key: string]: any; // Allow additional properties
 };
 

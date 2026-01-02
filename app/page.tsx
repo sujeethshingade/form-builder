@@ -13,7 +13,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { FormCanvas } from "./components/canvas/FormCanvas";
 import { JsonPreview } from "./components/canvas/JsonPreview";
 import { FormPreview } from "./components/canvas/FormPreview";
-import { InspectorPanel } from "./components/element/InspectorSidebar";
+import InspectorSidebar from "./components/element/InspectorSidebar";
 import { ElementSidebar } from "./components/element/ElementSidebar";
 import { TopBar } from "./components/element/Navbar";
 import { fieldToSurveyJSON, library, makeField, defaultStyles } from "./lib/form";
@@ -147,7 +147,7 @@ export default function Home() {
     const duplicatedField = {
       ...fieldToDuplicate,
       id: Math.random().toString(36).substring(2, 11),
-      label: `${fieldToDuplicate.label} (Copy)`,
+      label: `${fieldToDuplicate.label}`,
     };
     setFields((prev) => [
       ...prev.slice(0, index + 1),
@@ -228,7 +228,7 @@ export default function Home() {
 
         <aside
           className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
-            isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
+            isRightSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
           }`}
         >
           <div
@@ -242,10 +242,10 @@ export default function Home() {
 
             <div className="flex-1 overflow-y-auto">
               {selectedField ? (
-                <InspectorPanel
-                  selectedField={selectedField}
+                <InspectorSidebar
+                  field={selectedField}
+                  onClose={() => setSelectedId(null)}
                   onUpdate={handleFieldUpdate}
-                  onDelete={handleDelete}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center">

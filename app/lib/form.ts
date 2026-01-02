@@ -19,7 +19,6 @@ export const library: LibraryItem[] = [
   { type: "radio", label: "Single choice", icon: "◉", category: "choice" },
   { type: "checkbox", label: "Multiple choice", icon: "☑", category: "choice" },
   { type: "date", label: "Date", icon: "📅", category: "input" },
-  { type: "location", label: "Location", icon: "📍", category: "input" },
   { type: "heading", label: "Heading", icon: "H", category: "layout" },
   { type: "divider", label: "Divider", icon: "—", category: "layout" },
   { type: "spacer", label: "Spacer", icon: "⬚", category: "layout" },
@@ -42,7 +41,13 @@ export function makeField(item: LibraryItem): FormField {
     placeholder: getDefaultPlaceholder(item.type),
     helper: "",
     required: false,
-    options: hasOptions(item.type) ? ["Option 1", "Option 2", "Option 3"] : undefined,
+    items: hasOptions(item.type) 
+      ? [
+          { value: "option_1", label: "Option 1", disabled: false },
+          { value: "option_2", label: "Option 2", disabled: false },
+          { value: "option_3", label: "Option 3", disabled: false },
+        ] 
+      : undefined,
     width: "full",
   };
 }
@@ -73,7 +78,6 @@ export function fieldToSurveyJSON(fields: FormField[]) {
 
           switch (field.type) {
             case "text":
-            case "location":
               return { ...base, type: "text", placeholder: field.placeholder };
             case "email":
               return { ...base, type: "text", inputType: "email", placeholder: field.placeholder };

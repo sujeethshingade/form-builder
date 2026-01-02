@@ -36,7 +36,7 @@ export function FormCanvas({
 
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8" onClick={handleBackgroundClick}>
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl">
         {/* Canvas */}
         <div
           ref={setNodeRef}
@@ -54,7 +54,7 @@ export function FormCanvas({
             <div className="flex items-center justify-center py-16" />
           ) : (
             <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-6">
+              <div className="flex flex-wrap gap-4">
                 {fields.map((field, index) => (
                   <CanvasCard
                     key={field.id}

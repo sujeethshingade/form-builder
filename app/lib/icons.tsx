@@ -202,7 +202,6 @@ export function getIconForType(type: ComponentType): ReactNode {
     checkbox: <CheckboxIcon />,
     radio: <RadioIcon />,
     date: <DateIcon />,
-    location: <LocationIcon />,
     heading: <HeadingIcon />,
     divider: <DividerIcon />,
     spacer: <SpacerIcon />,

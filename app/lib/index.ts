@@ -25,7 +25,6 @@ export {
   RadioIcon,
   SelectIcon,
   DateIcon,
-  LocationIcon,
   HeadingIcon,
   DividerIcon,
   SpacerIcon,

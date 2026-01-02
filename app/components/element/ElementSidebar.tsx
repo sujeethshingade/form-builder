@@ -15,7 +15,7 @@ function ElementCard({ element }: { element: ElementDefinition }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-3 border rounded-sm border-slate-200 bg-white px-3 py-2.5 cursor-grab transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-sm active:cursor-grabbing ${
+      className={`flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 cursor-grab transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-sm active:cursor-grabbing ${
         isDragging ? "opacity-50 border-sky-400 shadow-md" : ""
       }`}
     >
@@ -35,7 +35,7 @@ export function ElementSidebar({ collapsed = false }: { collapsed?: boolean }) {
       className={`flex h-full flex-col bg-white transition-[width] duration-300 ease-out ${
         collapsed
           ? "w-0 min-w-0 overflow-hidden border-r border-transparent"
-          : "w-65 border-r border-slate-200"
+          : "w-52 border-r border-slate-200"
       }`}
     >
       <div

@@ -22,7 +22,7 @@ export const elements: ElementDefinition[] = [
     defaultProps: {
       name: "text_field",   
       label: "Text Field",
-      placeholder: "Enter text...",
+      placeholder: "Enter text",
       default: "",
       required: false,
       disabled: false,
@@ -151,7 +151,7 @@ export const elements: ElementDefinition[] = [
     defaultProps: {
       name: "date_field",
       label: "Date",
-      placeholder: "Select date...",
+      placeholder: "Select date",
       default: null,
       required: false,
       disabled: false,

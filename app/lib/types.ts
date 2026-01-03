@@ -163,3 +163,17 @@ export type ElementDefinition = {
 };
 
 export type WorkspaceView = "edit" | "json" | "preview";
+
+export interface FormData {
+  _id: string;
+  collectionName: string;
+  formName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CollectionData {
+  _id: string;
+  name: string;
+  description?: string;
+}

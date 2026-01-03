@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, use } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -17,18 +17,21 @@ import { FormPreview } from "@/app/components/canvas/FormPreview";
 import InspectorSidebar from "@/app/components/element/InspectorSidebar";
 import { ElementSidebar } from "@/app/components/element/ElementSidebar";
 import { TopBar } from "@/app/components/element/Navbar";
-import { fieldToSurveyJSON, library, makeField, defaultStyles } from "@/app/lib/form";
+import { library, makeField, defaultStyles } from "@/app/lib/form";
 import { getIconForType } from "@/app/lib/icons";
 import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
+
+interface FormJson {
+  fields: FormField[];
+  styles: FormStyles;
+}
 
 interface FormData {
   _id: string;
   collectionName: string;
   formName: string;
-  fields: FormField[];
-  styles: FormStyles;
-  surveyJson: any;
+  formJson: FormJson;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,7 +62,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   );
 
   const selectedField = fields.find((f) => f.id === selectedId) ?? null;
-  const surveyJson = useMemo(() => fieldToSurveyJSON(fields), [fields]);
 
   // Fetch form data on mount
   useEffect(() => {
@@ -70,8 +72,9 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         
         if (data.success) {
           setFormData(data.data);
-          setFields(data.data.fields || []);
-          setStyles(data.data.styles || defaultStyles);
+          const formJson = data.data.formJson || { fields: [], styles: defaultStyles };
+          setFields(formJson.fields || []);
+          setStyles(formJson.styles || defaultStyles);
         } else {
           setError(data.error);
         }
@@ -88,8 +91,9 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   // Track unsaved changes
   useEffect(() => {
     if (formData) {
-      const fieldsChanged = JSON.stringify(fields) !== JSON.stringify(formData.fields || []);
-      const stylesChanged = JSON.stringify(styles) !== JSON.stringify(formData.styles || defaultStyles);
+      const formJson = formData.formJson || { fields: [], styles: defaultStyles };
+      const fieldsChanged = JSON.stringify(fields) !== JSON.stringify(formJson.fields || []);
+      const stylesChanged = JSON.stringify(styles) !== JSON.stringify(formJson.styles || defaultStyles);
       setHasUnsavedChanges(fieldsChanged || stylesChanged);
     }
   }, [fields, styles, formData]);
@@ -104,9 +108,10 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fields,
-          styles,
-          surveyJson,
+          formJson: {
+            fields,
+            styles,
+          },
         }),
       });
       
@@ -247,10 +252,26 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     setFields((prev) => arrayMove(prev, index, index + 1));
   };
 
-  const exportString = useMemo(
-    () => JSON.stringify(surveyJson, null, 2),
-    [surveyJson]
-  );
+  // Handle form submission from preview mode
+  const handleFormSubmission = async (data: Record<string, unknown>) => {
+    if (!formData) throw new Error("Form data not available");
+    
+    const response = await fetch("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        formId: formData._id,
+        collectionName: formData.collectionName,
+        formName: formData.formName,
+        data,
+      }),
+    });
+    
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
 
   if (loading) {
     return (
@@ -319,14 +340,21 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                 styles={styles}
               />
             ) : workspaceView === "preview" ? (
-              <FormPreview fields={fields} styles={styles} />
+              <FormPreview 
+                fields={fields} 
+                styles={styles}
+                formId={formData?._id}
+                formName={formData?.formName}
+                collectionName={formData?.collectionName}
+                onSubmit={handleFormSubmission}
+              />
             ) : (
-              <div className="flex-1 overflow-auto bg-slate-100 p-8">
-                <JsonPreview
-                  json={exportString}
-                  onCopy={() => navigator.clipboard.writeText(exportString)}
-                />
-              </div>
+              <JsonPreview
+                fields={fields}
+                styles={styles}
+                formName={formData?.formName}
+                collectionName={formData?.collectionName}
+              />
             )}
           </main>
 

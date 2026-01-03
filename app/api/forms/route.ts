@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { collectionName, formName, fields, styles, surveyJson } = body;
+    const { collectionName, formName, formJson } = body;
     
     if (!collectionName || !formName) {
       return NextResponse.json(
@@ -51,12 +51,21 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    const defaultFormJson = {
+      fields: [],
+      styles: {
+        backgroundColor: '#ffffff',
+        textColor: '#1e293b',
+        primaryColor: '#0ea5e9',
+        borderRadius: 8,
+        fontFamily: 'Inter, sans-serif',
+      },
+    };
+    
     const form = await Form.create({
       collectionName,
       formName: formName,
-      fields: fields || [],
-      styles: styles || {},
-      surveyJson: surveyJson || null,
+      formJson: formJson || defaultFormJson,
     });
     
     return NextResponse.json({ success: true, data: form }, { status: 201 });

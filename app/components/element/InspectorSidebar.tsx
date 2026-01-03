@@ -285,7 +285,7 @@ export default function InspectorSidebar({
                           })
                         }
                         placeholder="Column label"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
                       />
                       <button
                         onClick={() => removeColumn(index)}
@@ -301,7 +301,7 @@ export default function InspectorSidebar({
                           type: e.target.value as "text" | "number" | "select",
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
                     >
                       <option value="text">Text</option>
                       <option value="number">Number</option>
@@ -362,7 +362,7 @@ export default function InspectorSidebar({
               onChange={(e) =>
                 handleSpacerHeightChange(e.target.value || "32")
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
             />
           </div>
         )}

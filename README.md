@@ -34,6 +34,7 @@ A modern drag-and-drop form builder with MongoDB integration for storing and man
 ### Collections
 
 Collections help organize forms by category. Create collections before creating forms:
+
 1. Click "+ Add Collection" on the Forms page
 2. Enter a name and display name
 3. Click "Save"

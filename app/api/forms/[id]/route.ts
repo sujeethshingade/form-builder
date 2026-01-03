@@ -41,13 +41,19 @@ export async function PUT(
     
     const { id } = await params;
     const body = await request.json();
+    const { formJson } = body;
+    
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+    
+    if (formJson) {
+      updateData.formJson = formJson;
+    }
     
     const form = await Form.findByIdAndUpdate(
       id,
-      { 
-        ...body,
-        updatedAt: new Date(),
-      },
+      updateData,
       { new: true, runValidators: true }
     ).lean();
     

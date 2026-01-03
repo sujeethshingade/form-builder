@@ -42,64 +42,18 @@ export interface IFormStyles {
   fontFamily: string;
 }
 
+export interface IFormJson {
+  fields: IFormField[];
+  styles: IFormStyles;
+}
+
 export interface IForm extends Document {
   collectionName: string;
   formName: string;
-  fields: IFormField[];
-  styles: IFormStyles;
-  surveyJson: any;
+  formJson: IFormJson;
   createdAt: Date;
   updatedAt: Date;
 }
-
-const FormFieldSchema = new Schema({
-  id: { type: String, required: true },
-  type: { type: String, required: true },
-  label: { type: String, required: true },
-  placeholder: String,
-  helper: String,
-  required: Boolean,
-  options: [String],
-  width: { type: String, enum: ['full', 'half'] },
-  widthPercent: Number,
-  name: String,
-  default: Schema.Types.Mixed,
-  disabled: Boolean,
-  readonly: Boolean,
-  size: { type: String, enum: ['sm', 'md', 'lg'] },
-  inputType: String,
-  addons: {
-    before: String,
-    after: String,
-  },
-  min: Schema.Types.Mixed,
-  max: Schema.Types.Mixed,
-  step: Number,
-  format: String,
-  minDate: String,
-  maxDate: String,
-  items: [{
-    value: Schema.Types.Mixed,
-    label: String,
-    disabled: Boolean,
-  }],
-  view: { type: String, enum: ['tabs', 'blocks', 'default'] },
-  labelPosition: { type: String, enum: ['left', 'right'] },
-  content: String,
-  tag: { type: String, enum: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] },
-  align: { type: String, enum: ['left', 'center', 'right'] },
-  height: String,
-  columns: [Schema.Types.Mixed],
-  rows: [Schema.Types.Mixed],
-}, { _id: false });
-
-const FormStylesSchema = new Schema({
-  backgroundColor: { type: String, default: '#ffffff' },
-  textColor: { type: String, default: '#1e293b' },
-  primaryColor: { type: String, default: '#0ea5e9' },
-  borderRadius: { type: Number, default: 8 },
-  fontFamily: { type: String, default: 'Inter, sans-serif' },
-}, { _id: false });
 
 const FormSchema = new Schema<IForm>({
   collectionName: { 
@@ -114,14 +68,18 @@ const FormSchema = new Schema<IForm>({
     trim: true,
     uppercase: true,
   },
-  fields: [FormFieldSchema],
-  styles: {
-    type: FormStylesSchema,
-    default: () => ({}),
-  },
-  surveyJson: {
+  formJson: {
     type: Schema.Types.Mixed,
-    default: null,
+    default: {
+      fields: [],
+      styles: {
+        backgroundColor: '#ffffff',
+        textColor: '#1e293b',
+        primaryColor: '#0ea5e9',
+        borderRadius: 8,
+        fontFamily: 'Inter, sans-serif',
+      },
+    },
   },
 }, {
   timestamps: true,

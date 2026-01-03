@@ -13,7 +13,9 @@ export default function FormsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showNewFormModal, setShowNewFormModal] = useState(false);
   const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [filterCollection, setFilterCollection] = useState<string>("");
+  const [importJson, setImportJson] = useState("");
 
   const [newForm, setNewForm] = useState({
     collectionName: "",
@@ -148,6 +150,61 @@ export default function FormsPage() {
     }
   };
 
+  const handleImportForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const jsonData = JSON.parse(importJson);
+      
+      if (!jsonData.collectionName || !jsonData.formName) {
+        alert("Invalid JSON: Missing collectionName or formName");
+        return;
+      }
+      
+      let formJson = jsonData.formJson;
+      if (!formJson && jsonData.fields) {
+        formJson = {
+          fields: jsonData.fields || [],
+          styles: jsonData.styles || {
+            backgroundColor: '#ffffff',
+            textColor: '#1e293b',
+            primaryColor: '#0ea5e9',
+            borderRadius: 8,
+            fontFamily: 'Inter, sans-serif',
+          },
+        };
+      }
+      
+      if (!formJson) {
+        alert("Invalid JSON: Missing formJson data");
+        return;
+      }
+
+      const response = await fetch("/api/forms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          collectionName: jsonData.collectionName,
+          formName: jsonData.formName,
+          formJson,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setShowImportModal(false);
+        setImportJson("");
+        // Navigate to form builder with the imported form
+        router.push(`/builder/${data.data._id}`);
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Invalid JSON format. Please check your input.");
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toISOString().replace("T", " ").slice(0, -5) + "Z";
   };
@@ -169,7 +226,7 @@ export default function FormsPage() {
       <header className="bg-white border-b border-slate-200 px-6 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-slate-800">Form Builder</h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center text-sm gap-3">
             <button
               onClick={() => setShowNewFormModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 transition-colors"
@@ -178,6 +235,15 @@ export default function FormsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               New
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Import JSON
             </button>
           </div>
         </div>
@@ -313,7 +379,7 @@ export default function FormsPage() {
                   type="text"
                   value={newForm.formName}
                   onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
                   required
                 />
               </div>
@@ -360,7 +426,7 @@ export default function FormsPage() {
                   type="text"
                   value={newCollection.name}
                   onChange={(e) => setNewCollection({ ...newCollection, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
                   required
                 />
               </div>
@@ -371,7 +437,7 @@ export default function FormsPage() {
                 <textarea
                   value={newCollection.description}
                   onChange={(e) => setNewCollection({ ...newCollection, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
                   rows={3}
                 />
               </div>
@@ -388,6 +454,53 @@ export default function FormsPage() {
                   className="px-4 py-2 bg-sky-400 text-white rounded-md hover:bg-sky-600 transition-colors"
                 >
                   Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800">Import Form JSON</h2>
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleImportForm} className="p-4 space-y-4">
+              <div>
+                <textarea
+                  value={importJson}
+                  onChange={(e) => setImportJson(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none font-mono text-xs"
+                  rows={15}
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowImportModal(false);
+                    setImportJson("");
+                  }}
+                  className="px-4 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
+                >
+                  Import & Open Builder
                 </button>
               </div>
             </form>

@@ -20,8 +20,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: forms });
   } catch (error) {
     console.error('Error fetching forms:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch forms';
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch forms' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
@@ -71,8 +72,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: form }, { status: 201 });
   } catch (error) {
     console.error('Error creating form:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create form';
     return NextResponse.json(
-      { success: false, error: 'Failed to create form' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

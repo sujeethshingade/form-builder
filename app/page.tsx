@@ -12,8 +12,7 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="text-lg text-slate-600">Redirecting to Forms</div>
-    </div>
+    <>
+    </>
   );
 }

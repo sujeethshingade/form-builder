@@ -362,7 +362,19 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         />
 
         <div className="flex h-full overflow-hidden">
-          <ElementSidebar collapsed={!isLeftSidebarOpen} />
+          <aside
+            className={`flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-300 ease-out ${
+              isLeftSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+            }`}
+          >
+            <div
+              className={`flex h-full w-84 flex-col ${
+                isLeftSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              } transition-opacity duration-200 ${isLeftSidebarOpen ? "delay-100" : ""}`}
+            >
+              <ElementSidebar />
+            </div>
+          </aside>
 
           <main className="flex h-full flex-1 flex-col overflow-hidden">
             {workspaceView === "edit" ? (

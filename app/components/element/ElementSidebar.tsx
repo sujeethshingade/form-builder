@@ -117,71 +117,40 @@ export function ElementSidebar({
   }, [formCategory, categories]);
 
   return (
-    <aside
-      className={`flex h-full flex-col bg-white transition-[width] duration-300 ease-out ${
-        collapsed
-          ? "w-16 border-r border-slate-200"
-          : "w-52 border-r border-slate-200"
-      }`}
-    >
-      {/* Header */}
-      {!collapsed && (
-        <div className="px-3 py-2 border-b border-slate-200">
-          <h3 className="text-sm font-medium text-slate-700">Templates</h3>
-        </div>
-      )}
-
+    <aside className="flex h-full flex-col bg-white border-r border-slate-200">
       {/* Category Filter for Templates */}
-      {!collapsed && (
-        <div className="p-2 border-b border-slate-200">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
-          >
-            <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="p-2 border-b border-slate-200">
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {collapsed ? (
-        <div className="flex-1 overflow-y-auto p-2">
-          <div className="space-y-2">
-            {loading ? (
-              <div className="text-center py-4 text-slate-400 text-xs">Loading...</div>
-            ) : templates.length === 0 ? (
-              <div className="text-center py-4 text-slate-400 text-xs">No templates</div>
-            ) : (
-              templates.map((template) => (
-                <TemplateIconCard key={template._id} template={template} />
-              ))
-            )}
-          </div>
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="space-y-2">
+          {loading ? (
+            <div className="text-center py-8 text-slate-400 text-sm">Loading templates...</div>
+          ) : templates.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-sm">
+              No templates found.
+              <br />
+              <span className="text-xs">Create templates from the Forms page.</span>
+            </div>
+          ) : (
+            templates.map((template) => (
+              <TemplateCard key={template._id} template={template} />
+            ))
+          )}
         </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto p-2">
-          <div className="space-y-2">
-            {loading ? (
-              <div className="text-center py-8 text-slate-400 text-sm">Loading templates...</div>
-            ) : templates.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">
-                No templates found.
-                <br />
-                <span className="text-xs">Create templates from the Forms page.</span>
-              </div>
-            ) : (
-              templates.map((template) => (
-                <TemplateCard key={template._id} template={template} />
-              ))
-            )}
-          </div>
-        </div>
-      )}
+      </div>
     </aside>
   );
 }

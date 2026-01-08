@@ -57,22 +57,6 @@ export function TopBar({
   return (
     <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4">
       <div className="flex items-center gap-2">
-        {onBack && (
-          <>
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors"
-              title="Back to Forms"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="text-sm">Forms</span>
-            </button>
-            <div className="h-6 w-px bg-slate-200 mx-1" />
-          </>
-        )}
-
         <button
           onClick={onToggleLeftSidebar}
           aria-pressed={isLeftSidebarOpen}
@@ -105,6 +89,21 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
+        {onBack && (
+          <>
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors"
+              title="Back to Forms"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm">Forms</span>
+            </button>
+            <div className="h-6 w-px bg-slate-200 mx-1" />
+          </>
+        )}
         {onSave && (
           <>
             <button

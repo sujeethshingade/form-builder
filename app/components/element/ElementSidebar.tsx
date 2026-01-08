@@ -2,58 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import type { ElementDefinition, TemplateData, FormField } from "../../lib/types";
-import { elements } from "../../lib/elements";
+import type { TemplateData } from "../../lib/types";
 
-function ElementCard({ element }: { element: ElementDefinition }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `palette-${element.type}`,
-    data: { from: "palette", type: element.type },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      className={`flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 cursor-grab transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-sm active:cursor-grabbing ${
-        isDragging ? "opacity-50 border-sky-400 shadow-md" : ""
-      }`}
-    >
-      <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-        {element.icon}
-      </div>
-      <div className="min-w-0">
-        <div className="text-sm font-medium text-slate-700 truncate">{element.label}</div>
-      </div>
-    </div>
-  );
-}
-
-function ElementIconCard({ element }: { element: ElementDefinition }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `palette-${element.type}`,
-    data: { from: "palette", type: element.type },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      title={element.label}
-      className={`flex items-center justify-center border rounded-sm border-slate-200 bg-white py-1.5 cursor-grab transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-sm active:cursor-grabbing ${
-        isDragging ? "opacity-50 border-sky-400 shadow-md" : ""
-      }`}
-    >
-      <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-        {element.icon}
-      </div>
-    </div>
-  );
-}
-
-function TemplateCard({ template, onDragStart }: { template: TemplateData; onDragStart?: () => void }) {
+function TemplateCard({ template }: { template: TemplateData }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `template-${template._id}`,
     data: { from: "template", templateId: template._id, fields: template.fields },
@@ -108,8 +59,6 @@ function TemplateIconCard({ template }: { template: TemplateData }) {
   );
 }
 
-type SidebarMode = "elements" | "templates";
-
 export function ElementSidebar({ 
   collapsed = false,
   formCategory 
@@ -117,7 +66,6 @@ export function ElementSidebar({
   collapsed?: boolean;
   formCategory?: string;
 }) {
-  const [mode, setMode] = useState<SidebarMode>("elements");
   const [templates, setTemplates] = useState<TemplateData[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -141,10 +89,8 @@ export function ElementSidebar({
       }
     };
 
-    if (mode === "templates") {
-      fetchTemplates();
-    }
-  }, [mode, selectedCategory]);
+    fetchTemplates();
+  }, [selectedCategory]);
 
   // Fetch categories
   useEffect(() => {
@@ -178,34 +124,15 @@ export function ElementSidebar({
           : "w-52 border-r border-slate-200"
       }`}
     >
-      {/* Mode Toggle Tabs */}
+      {/* Header */}
       {!collapsed && (
-        <div className="flex border-b border-slate-200">
-          <button
-            onClick={() => setMode("elements")}
-            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-              mode === "elements"
-                ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Elements
-          </button>
-          <button
-            onClick={() => setMode("templates")}
-            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-              mode === "templates"
-                ? "text-sky-600 border-b-2 border-sky-500 bg-sky-50"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Templates
-          </button>
+        <div className="px-3 py-2 border-b border-slate-200">
+          <h3 className="text-sm font-medium text-slate-700">Templates</h3>
         </div>
       )}
 
       {/* Category Filter for Templates */}
-      {!collapsed && mode === "templates" && (
+      {!collapsed && (
         <div className="p-2 border-b border-slate-200">
           <select
             value={selectedCategory}
@@ -225,11 +152,7 @@ export function ElementSidebar({
       {collapsed ? (
         <div className="flex-1 overflow-y-auto p-2">
           <div className="space-y-2">
-            {mode === "elements" ? (
-              elements.map((element) => (
-                <ElementIconCard key={element.type} element={element} />
-              ))
-            ) : loading ? (
+            {loading ? (
               <div className="text-center py-4 text-slate-400 text-xs">Loading...</div>
             ) : templates.length === 0 ? (
               <div className="text-center py-4 text-slate-400 text-xs">No templates</div>
@@ -243,11 +166,7 @@ export function ElementSidebar({
       ) : (
         <div className="flex-1 overflow-y-auto p-2">
           <div className="space-y-2">
-            {mode === "elements" ? (
-              elements.map((element) => (
-                <ElementCard key={element.type} element={element} />
-              ))
-            ) : loading ? (
+            {loading ? (
               <div className="text-center py-8 text-slate-400 text-sm">Loading templates...</div>
             ) : templates.length === 0 ? (
               <div className="text-center py-8 text-slate-400 text-sm">

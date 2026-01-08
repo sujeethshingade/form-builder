@@ -105,19 +105,6 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
-        {formName && (
-          <>
-            <div className="flex items-center gap-3 pr-2">
-              <span className="text-sm font-medium text-slate-800">{formName}</span>
-              {formCollection && (
-                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                  {formCollection}
-                </span>
-              )}
-            </div>
-          </>
-        )}
-
         {onSave && (
           <>
             <button

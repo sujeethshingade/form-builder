@@ -17,9 +17,19 @@ export function JsonPreview({ fields, styles, formName, collectionName }: JsonPr
       fields: fields.map(field => {
         const cleanField: Record<string, unknown> = {};
         Object.entries(field).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            cleanField[key] = value;
+          // Skip undefined, null, empty strings
+          if (value === undefined || value === null || value === "") {
+            return;
           }
+          // Skip empty arrays
+          if (Array.isArray(value) && value.length === 0) {
+            return;
+          }
+          // Skip empty objects
+          if (typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0) {
+            return;
+          }
+          cleanField[key] = value;
         });
         return cleanField;
       }),

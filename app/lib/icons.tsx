@@ -100,6 +100,20 @@ export const TableIcon = ({ className = "h-5 w-5" }: { className?: string }) => 
   </svg>
 );
 
+// File Upload Icon
+export const FileIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+  </svg>
+);
+
+// Slider Icon
+export const SliderIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+  </svg>
+);
+
 // Drag Handle Icon
 export const DragHandleIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +215,10 @@ export function getIconForType(type: ComponentType): ReactNode {
     url: <UrlIcon />,
     checkbox: <CheckboxIcon />,
     radio: <RadioIcon />,
+    select: <SelectIcon />,
     date: <DateIcon />,
+    file: <FileIcon />,
+    slider: <SliderIcon />,
     heading: <HeadingIcon />,
     divider: <DividerIcon />,
     spacer: <SpacerIcon />,

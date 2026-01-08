@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef } from "react";
 import type { FormField, VueformItem, VueformColumn } from "../../lib/types";
 
 type FieldRendererProps = {
@@ -33,18 +34,34 @@ export function TextInputRenderer({ field, disabled = true }: FieldRendererProps
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
   const input = (
-    <input
-      key={`${field.id}-${field.placeholder}-${field.min}-${field.max}`}
-      type={field.inputType || "text"}
-      placeholder={field.placeholder}
-      defaultValue={field.default}
-      disabled={disabled || field.disabled}
-      readOnly={field.readonly}
-      min={field.min as number}
-      max={field.max as number}
-      step={field.step}
-      className={hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`}
-    />
+    <div className="relative flex-1">
+      {field.prefix && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+          {field.prefix}
+        </span>
+      )}
+      <input
+        key={`${field.id}-${field.placeholder}-${field.min}-${field.max}`}
+        type={field.inputType || "text"}
+        placeholder={field.placeholder}
+        defaultValue={field.default}
+        disabled={disabled || field.disabled}
+        readOnly={field.readonly}
+        min={field.min as number}
+        max={field.max as number}
+        step={field.step}
+        minLength={field.minLength}
+        maxLength={field.maxLength}
+        pattern={field.pattern}
+        autoComplete={field.autocomplete}
+        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`} ${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""}`}
+      />
+      {field.suffix && (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+          {field.suffix}
+        </span>
+      )}
+    </div>
   );
 
   if (hasAddonBefore || hasAddonAfter) {
@@ -70,18 +87,30 @@ export function NumberInputRenderer({ field, disabled = true }: FieldRendererPro
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
   const input = (
-    <input
-      key={`${field.id}-${field.placeholder}-${field.min}-${field.max}-${field.step}`}
-      type="number"
-      placeholder={field.placeholder}
-      defaultValue={field.default}
-      disabled={disabled || field.disabled}
-      readOnly={field.readonly}
-      min={field.min as number}
-      max={field.max as number}
-      step={field.step || 1}
-      className={hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`}
-    />
+    <div className="relative flex-1">
+      {field.prefix && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+          {field.prefix}
+        </span>
+      )}
+      <input
+        key={`${field.id}-${field.placeholder}-${field.min}-${field.max}-${field.step}`}
+        type="number"
+        placeholder={field.placeholder}
+        defaultValue={field.default}
+        disabled={disabled || field.disabled}
+        readOnly={field.readonly}
+        min={field.min as number}
+        max={field.max as number}
+        step={field.step || 1}
+        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`} ${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""}`}
+      />
+      {field.suffix && (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+          {field.suffix}
+        </span>
+      )}
+    </div>
   );
 
   if (hasAddonBefore || hasAddonAfter) {
@@ -100,15 +129,24 @@ export function NumberInputRenderer({ field, disabled = true }: FieldRendererPro
 export function TextareaRenderer({ field, disabled = true }: FieldRendererProps) {
   const size = field.size || "md";
   return (
-    <textarea
-      key={`${field.id}-${field.placeholder}`}
-      placeholder={field.placeholder}
-      defaultValue={field.default}
-      disabled={disabled || field.disabled}
-      readOnly={field.readonly}
-      rows={3}
-      className={`w-full border border-slate-300 rounded-lg ${sizeClasses[size]} text-slate-500 bg-white resize-none focus:outline-none`}
-    />
+    <div className="relative">
+      <textarea
+        key={`${field.id}-${field.placeholder}`}
+        placeholder={field.placeholder}
+        defaultValue={field.default}
+        disabled={disabled || field.disabled}
+        readOnly={field.readonly}
+        rows={field.rows || 3}
+        maxLength={field.maxLength}
+        spellCheck={field.spellcheck}
+        className={`w-full border border-slate-300 rounded-lg ${sizeClasses[size]} text-slate-500 bg-white resize-none focus:outline-none`}
+      />
+      {field.counter && field.maxLength && (
+        <span className="absolute bottom-2 right-2 text-xs text-slate-400">
+          0 / {field.maxLength}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -121,10 +159,14 @@ export function DateInputRenderer({ field, disabled = true }: FieldRendererProps
     !hasAddonBefore && !hasAddonAfter ? "rounded-lg" : ""
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
+  const inputType = field.mode === "datetime" ? "datetime-local" : 
+                    field.mode === "time" ? "time" : 
+                    field.mode === "month" ? "month" : "date";
+
   const input = (
     <input
       key={`${field.id}-${field.format}-${field.minDate}-${field.maxDate}`}
-      type="date"
+      type={inputType}
       placeholder={field.placeholder || field.format}
       defaultValue={field.default}
       disabled={disabled || field.disabled}
@@ -325,11 +367,9 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
 }
 
 export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
-  const columns: VueformColumn[] = field.columns || [];
-  const rows: Record<string, any>[] = (field.rows as Record<string, any>[]) || [];
+  const columns: VueformColumn[] = Array.isArray(field.columns) ? field.columns : [];
+  const rows: Record<string, unknown>[] = field.tableRows || [];
   const size = field.size || "md";
-  const addable = field.addable !== false;
-  const removable = field.removable !== false;
   const renderKey = `${field.id}-${columns.length}-${rows.length}`;
 
   return (
@@ -364,7 +404,7 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
                       <select
                         disabled={disabled || field.disabled}
                         className={`w-full border-0 bg-transparent ${sizeClasses[size]} text-slate-500 focus:outline-none`}
-                        defaultValue={row[col.name] || ""}
+                        defaultValue={String(row[col.name] ?? "")}
                       >
                         <option value="">Select...</option>
                         {(col.options || []).map((opt) => (
@@ -379,7 +419,7 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
                         placeholder={col.placeholder || ""}
                         disabled={disabled || field.disabled}
                         className={`w-full border-0 bg-transparent ${sizeClasses[size]} text-slate-500 focus:outline-none`}
-                        defaultValue={row[col.name] || ""}
+                        defaultValue={String(row[col.name] ?? "")}
                       />
                     )}
                   </td>
@@ -389,6 +429,123 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
           )}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+export function FileRenderer({ field, disabled = true }: FieldRendererProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const acceptValue = Array.isArray(field.accept) ? field.accept.join(",") : (field.accept || "");
+  const maxSize = field.maxFileSize;
+  const multiple = field.multiple || false;
+  
+  const formatSize = (bytes?: number) => {
+    if (!bytes) return "";
+    const mb = bytes / (1024 * 1024);
+    return mb >= 1 ? `${mb.toFixed(1)}MB` : `${(bytes / 1024).toFixed(0)}KB`;
+  };
+
+  if (field.dragDrop) {
+    return (
+      <div
+        className={`w-full border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+          transition-colors hover:border-sky-400 hover:bg-sky-50
+          ${disabled || field.disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "border-slate-300 bg-white"}`}
+        onClick={() => !disabled && !field.disabled && fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={acceptValue}
+          multiple={multiple}
+          disabled={disabled || field.disabled}
+          className="hidden"
+        />
+        <div className="flex flex-col items-center gap-2">
+          <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <div className="text-sm text-slate-600">
+            <span className="font-medium text-sky-600">Click to upload</span> or drag and drop
+          </div>
+          <div className="text-xs text-slate-400">
+            {Array.isArray(field.accept) && field.accept.length ? field.accept.join(", ") : "Any file"}
+            {maxSize && ` (max ${formatSize(maxSize)})`}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={acceptValue}
+        multiple={multiple}
+        disabled={disabled || field.disabled}
+        className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 disabled:opacity-50"
+      />
+    </div>
+  );
+}
+
+export function SliderRenderer({ field, disabled = true }: FieldRendererProps) {
+  const [value, setValue] = useState(field.default as number || field.min as number || 0);
+  const min = field.min as number || 0;
+  const max = field.max as number || 100;
+  const step = field.step || 1;
+  const showTooltip = field.showTooltip !== false;
+  const showValue = field.showValue !== false;
+  const unit = field.unit || "";
+  const marks = field.sliderMarks || [];
+
+  const percentage = ((value - min) / (max - min)) * 100;
+
+  return (
+    <div className="w-full">
+      <div className="relative pt-1">
+        {showTooltip && (
+          <div
+            className="absolute -top-7 transform -translate-x-1/2 bg-slate-700 text-white text-xs px-2 py-1 rounded"
+            style={{ left: `${percentage}%` }}
+          >
+            {value}{unit}
+          </div>
+        )}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+          disabled={disabled || field.disabled}
+          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        {marks.length > 0 && (
+          <div className="relative w-full h-4">
+            {marks.map((mark) => {
+              const markPos = ((mark.value - min) / (max - min)) * 100;
+              return (
+                <div
+                  key={mark.value}
+                  className="absolute text-xs text-slate-500 transform -translate-x-1/2"
+                  style={{ left: `${markPos}%` }}
+                >
+                  {mark.label || mark.value}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <div className="flex justify-between mt-1 text-xs text-slate-400">
+        <span>{min}{unit}</span>
+        {showValue && <span className="font-medium text-slate-600">{value}{unit}</span>}
+        <span>{max}{unit}</span>
+      </div>
     </div>
   );
 }
@@ -512,6 +669,12 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
       return <CheckboxRenderer field={field} disabled={disabled} />;
     case "radio":
       return <RadioRenderer field={field} disabled={disabled} />;
+    case "select":
+      return <SelectRenderer field={field} disabled={disabled} />;
+    case "file":
+      return <FileRenderer field={field} disabled={disabled} />;
+    case "slider":
+      return <SliderRenderer field={field} disabled={disabled} />;
     case "table":
       return <TableRenderer field={field} disabled={disabled} />;
     default:

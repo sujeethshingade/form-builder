@@ -20,7 +20,8 @@ import { TopBar } from "@/app/components/element/Navbar";
 import { library, makeField, defaultStyles } from "@/app/lib/form";
 import { getIconForType } from "@/app/lib/icons";
 import { CursorIcon } from "@/app/lib/icons";
-import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
+import type { FormField, FormStyles, WorkspaceView, TemplateData } from "@/app/lib/types";
+import { nanoid } from "nanoid";
 
 interface FormJson {
   fields: FormField[];
@@ -157,10 +158,16 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const handleDragStart = (event: any) => {
     const activeType = event?.active?.data?.current?.type;
     const fromCanvas = event?.active?.data?.current?.from === "canvas";
+    const fromTemplate = event?.active?.data?.current?.from === "template";
 
     if (fromCanvas) {
       const field = fields.find((f) => f.id === event.active.id);
       if (field) setActiveDrag({ type: field.type, label: field.label });
+    } else if (fromTemplate) {
+      const templateFields = event?.active?.data?.current?.fields;
+      if (templateFields) {
+        setActiveDrag({ type: "template", label: `Template (${templateFields.length} fields)` });
+      }
     } else if (activeType) {
       const libItem = library.find((l) => l.type === activeType);
       if (libItem) setActiveDrag({ type: libItem.type, label: libItem.label });
@@ -172,6 +179,36 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     const activeData = active?.data?.current;
     const overId = over?.id as string | undefined;
 
+    // Handle template drop
+    if (activeData?.from === "template") {
+      const templateFields = activeData?.fields;
+      if (!templateFields || templateFields.length === 0) return;
+
+      pushUndo(fields);
+      // Clone template fields with new IDs
+      const newFields = templateFields.map((field: FormField) => ({
+        ...field,
+        id: nanoid(),
+      }));
+
+      if (!overId || overId === "canvas") {
+        setFields((prev) => [...prev, ...newFields]);
+      } else {
+        const targetIndex = fields.findIndex((f) => f.id === overId);
+        if (targetIndex >= 0) {
+          setFields((prev) => {
+            const next = [...prev];
+            next.splice(targetIndex, 0, ...newFields);
+            return next;
+          });
+        }
+      }
+      if (newFields.length > 0) {
+        setSelectedId(newFields[0].id);
+      }
+    }
+
+    // Handle palette element drop
     if (activeData?.from === "palette") {
       const libItem = library.find((l) => l.type === activeData.type);
       if (!libItem) return;
@@ -393,7 +430,18 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            isLeftSidebarOpen ? (
+            activeDrag.type === "template" ? (
+              <div className="flex items-center gap-2 border rounded-sm border-sky-300 bg-sky-50 px-2 py-1.5 text-slate-900 shadow-lg">
+                <div className="flex h-9 w-9 items-center justify-center text-sky-500 shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
+                </div>
+              </div>
+            ) : isLeftSidebarOpen ? (
               <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 text-slate-900 shadow-lg">
                 <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
                   {getIconForType(activeDrag.type as any)}

@@ -698,3 +698,13 @@ export interface CollectionData {
   name: string;
   description?: string;
 }
+
+export interface TemplateData {
+  _id: string;
+  name: string;
+  description?: string;
+  category: string;
+  fields: FormField[];
+  createdAt: string;
+  updatedAt: string;
+}

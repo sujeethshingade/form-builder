@@ -140,16 +140,15 @@ export default function NewFormBuilderPage() {
   const handleDragStart = (event: any) => {
     const activeType = event?.active?.data?.current?.type;
     const fromCanvas = event?.active?.data?.current?.from === "canvas";
-    const fromTemplate = event?.active?.data?.current?.from === "template";
+    const fromCustomField = event?.active?.data?.current?.from === "custom-field";
 
     if (fromCanvas) {
       const field = fields.find((f) => f.id === event.active.id);
       if (field) setActiveDrag({ type: field.type, label: field.label });
-    } else if (fromTemplate) {
-      const templateFields = event?.active?.data?.current?.fields;
-      if (templateFields) {
-        setActiveDrag({ type: "template", label: `Template (${templateFields.length} fields)` });
-      }
+    } else if (fromCustomField) {
+      const fieldLabel = event?.active?.data?.current?.fieldLabel;
+      const fieldType = event?.active?.data?.current?.type;
+      setActiveDrag({ type: fieldType, label: fieldLabel || "Custom Field" });
     } else if (activeType) {
       const libItem = library.find((l) => l.type === activeType);
       if (libItem) setActiveDrag({ type: libItem.type, label: libItem.label });
@@ -161,32 +160,53 @@ export default function NewFormBuilderPage() {
     const activeData = active?.data?.current;
     const overId = over?.id as string | undefined;
 
-    // Handle template drop
-    if (activeData?.from === "template") {
-      const templateFields = activeData?.fields;
-      if (!templateFields || templateFields.length === 0) return;
+    // Handle custom field drop
+    if (activeData?.from === "custom-field") {
+      const fieldType = activeData?.type;
+      const fieldLabel = activeData?.fieldLabel;
+      const fieldName = activeData?.fieldName;
+      const lovEnabled = activeData?.lovEnabled;
+      const lovItems = activeData?.lovItems;
+
+      if (!fieldType) return;
 
       pushUndo(fields);
-      const newFields = templateFields.map((field: FormField) => ({
-        ...field,
+      
+      // Create the new field based on custom field data
+      const newField: FormField = {
         id: nanoid(),
-      }));
+        type: fieldType as any,
+        label: fieldLabel || fieldName,
+        name: fieldName,
+        placeholder: "",
+        helper: "",
+        required: false,
+        width: "full" as const,
+      };
+
+      // If it's a select/radio with LOV items, add the options
+      if (lovEnabled && lovItems && lovItems.length > 0 && (fieldType === "select" || fieldType === "radio")) {
+        newField.items = lovItems
+          .filter((item: any) => item.status === "Active")
+          .map((item: any) => ({
+            value: item.code,
+            label: item.shortName,
+          }));
+      }
 
       if (!overId || overId === "canvas") {
-        setFields((prev) => [...prev, ...newFields]);
+        setFields((prev) => [...prev, newField]);
       } else {
         const targetIndex = fields.findIndex((f) => f.id === overId);
         if (targetIndex >= 0) {
           setFields((prev) => {
             const next = [...prev];
-            next.splice(targetIndex, 0, ...newFields);
+            next.splice(targetIndex, 0, newField);
             return next;
           });
         }
       }
-      if (newFields.length > 0) {
-        setSelectedId(newFields[0].id);
-      }
+      setSelectedId(newField.id);
     }
 
     // Handle palette element drop

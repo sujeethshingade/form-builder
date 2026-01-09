@@ -161,6 +161,15 @@ export default function FormsPage() {
               ))}
             </select>
           </div>
+          <button
+            onClick={() => setShowNewCollectionModal(true)}
+            className="flex items-center gap-2 px-4 py-1.5 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Collection
+          </button>
         </div>
 
         {error && (

@@ -14,10 +14,7 @@ export interface ICustomField extends Document {
   dataType: 'text' | 'textarea' | 'number' | 'email' | 'date' | 'select' | 'radio' | 'checkbox' | 'file' | 'url';
   className?: string;
   category: string;
-  // LOV (List of Values) configuration
-  lovEnabled: boolean;
   lovType?: 'user-defined' | 'api';
-  disableSorting?: boolean;
   lovItems?: ILOVItem[];
   createdAt: Date;
   updatedAt: Date;
@@ -57,17 +54,9 @@ const CustomFieldSchema = new Schema<ICustomField>({
     required: true,
     trim: true,
   },
-  lovEnabled: {
-    type: Boolean,
-    default: false,
-  },
   lovType: {
     type: String,
     enum: ['user-defined', 'api'],
-  },
-  disableSorting: {
-    type: Boolean,
-    default: false,
   },
   lovItems: [LOVItemSchema],
 }, {

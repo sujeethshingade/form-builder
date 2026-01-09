@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { fieldName, fieldLabel, dataType, className, category, lovEnabled, lovType, disableSorting, lovItems } = body;
+    const { fieldName, fieldLabel, dataType, className, category, lovType, lovItems } = body;
     
     if (!fieldName || !fieldLabel || !dataType || !category) {
       return NextResponse.json(
@@ -56,9 +56,7 @@ export async function POST(request: NextRequest) {
       dataType,
       className,
       category,
-      lovEnabled: lovEnabled || false,
       lovType,
-      disableSorting,
       lovItems: lovItems || [],
     });
     

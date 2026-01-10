@@ -36,7 +36,6 @@ interface CustomFieldForm {
 
 const dataTypes = [
   { value: "text", label: "Text" },
-  { value: "textarea", label: "Text Area" },
   { value: "number", label: "Number" },
   { value: "email", label: "Email" },
   { value: "date", label: "Date" },
@@ -45,6 +44,10 @@ const dataTypes = [
   { value: "checkbox", label: "Checkbox" },
   { value: "file", label: "File Upload" },
   { value: "url", label: "URL" },
+  { value: "heading", label: "Heading" },
+  { value: "divider", label: "Divider" },
+  { value: "spacer", label: "Spacer" },
+  { value: "table", label: "Table" },
 ];
 
 export default function CustomFieldsPage() {
@@ -435,6 +438,8 @@ export default function CustomFieldsPage() {
                 )}
               </div>
 
+              {/* LOV section - only show for data input types, not layout types */}
+              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && (
               <div className="pt-4 mt-4">
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">List of Values (LOV)</h3>
                 
@@ -466,8 +471,9 @@ export default function CustomFieldsPage() {
                   </div>
                 </div>
               </div>
+              )}
 
-              {form.lovType === "dynamic-api" && (
+              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && form.lovType === "dynamic-api" && (
                 <div className="mt-4 space-y-4">
                   <h4 className="text-sm font-medium text-slate-700">API Configuration</h4>
                   
@@ -613,11 +619,11 @@ export default function CustomFieldsPage() {
                         </table>
                       </div>
                     </div>
-                  )}
+                )}
                 </div>
               )}
 
-              {form.lovType === "user-defined" && (
+              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && form.lovType === "user-defined" && (
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-medium text-slate-700">User Defined LOVs</h4>

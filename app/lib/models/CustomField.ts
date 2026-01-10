@@ -11,7 +11,7 @@ export interface ILOVItem {
 export interface ICustomField extends Document {
   fieldName: string;
   fieldLabel: string;
-  dataType: 'text' | 'textarea' | 'number' | 'email' | 'date' | 'select' | 'radio' | 'checkbox' | 'file' | 'url';
+  dataType: 'text' | 'number' | 'email' | 'date' | 'select' | 'radio' | 'checkbox' | 'file' | 'url' | 'heading' | 'divider' | 'spacer' | 'table';
   className?: string;
   category: string;
   lovType?: 'user-defined' | 'api';
@@ -43,7 +43,7 @@ const CustomFieldSchema = new Schema<ICustomField>({
   dataType: { 
     type: String, 
     required: true,
-    enum: ['text', 'textarea', 'number', 'email', 'date', 'select', 'radio', 'checkbox', 'file', 'url'],
+    enum: ['text', 'number', 'email', 'date', 'select', 'radio', 'checkbox', 'file', 'url', 'heading', 'divider', 'spacer', 'table'],
   },
   className: { 
     type: String,

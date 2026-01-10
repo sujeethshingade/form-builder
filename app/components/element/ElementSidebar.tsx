@@ -23,6 +23,14 @@ interface CustomFieldData {
   lovItems?: LOVItem[];
 }
 
+interface FormLayoutData {
+  _id: string;
+  layoutName: string;
+  layoutType: 'form-group' | 'box-layout';
+  category?: string;
+  fields: any[];
+}
+
 function CustomFieldCard({ field }: { field: CustomFieldData }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `custom-field-${field._id}`,
@@ -129,19 +137,74 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
   );
 }
 
+function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `form-layout-${layout._id}`,
+    data: { 
+      from: "form-layout", 
+      layoutId: layout._id,
+      layoutType: layout.layoutType,
+      layoutName: layout.layoutName,
+      fields: layout.fields,
+    },
+  });
+
+  const isGroup = layout.layoutType === 'form-group';
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={`flex items-center gap-2 border rounded-sm px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing ${
+        isDragging 
+          ? "opacity-50 shadow-md" 
+          : ""
+      } ${
+        isGroup 
+          ? "border-purple-200 bg-purple-50 hover:border-purple-300 hover:bg-purple-100" 
+          : "border-emerald-200 bg-emerald-50 hover:border-emerald-300 hover:bg-emerald-100"
+      }`}
+    >
+      <div className={`flex h-7 w-7 items-center justify-center shrink-0 ${isGroup ? "text-purple-500" : "text-emerald-500"}`}>
+        {isGroup ? (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+          </svg>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium text-slate-700 truncate">{layout.layoutName}</div>
+        <div className="text-xs text-slate-400 truncate">
+          {isGroup ? "Form Group" : "Box Layout"} • {layout.fields?.length || 0} fields
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ElementSidebar({ 
   formCategory 
 }: { 
   formCategory?: string;
 }) {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"fields" | "layouts">("fields");
   const [customFields, setCustomFields] = useState<CustomFieldData[]>([]);
+  const [formLayouts, setFormLayouts] = useState<FormLayoutData[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [layoutFilter, setLayoutFilter] = useState<string>("all");
   const [loading, setLoading] = useState(false);
 
   // Fetch custom fields
   useEffect(() => {
+    if (activeTab !== "fields") return;
+    
     const fetchCustomFields = async () => {
       setLoading(true);
       try {
@@ -159,7 +222,30 @@ export function ElementSidebar({
     };
 
     fetchCustomFields();
-  }, [selectedCategory]);
+  }, [selectedCategory, activeTab]);
+
+  // Fetch form layouts
+  useEffect(() => {
+    if (activeTab !== "layouts") return;
+    
+    const fetchFormLayouts = async () => {
+      setLoading(true);
+      try {
+        const typeParam = layoutFilter !== "all" ? `?type=${layoutFilter}` : "";
+        const response = await fetch(`/api/form-layouts${typeParam}`);
+        const data = await response.json();
+        if (data.success) {
+          setFormLayouts(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch form layouts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFormLayouts();
+  }, [layoutFilter, activeTab]);
 
   // Fetch categories
   useEffect(() => {
@@ -187,53 +273,115 @@ export function ElementSidebar({
 
   return (
     <aside className="flex h-full flex-col bg-white border-r border-slate-200">
-      {/* Add Custom Field Button */}
-      <div className="p-2 border-b border-slate-200">
+      {/* Tab Header - matching right sidebar style */}
+      <div className="border-b border-gray-200 px-2 py-2 flex gap-1">
         <button
-          onClick={() => router.push("/custom-fields")}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
+          onClick={() => setActiveTab("fields")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === "fields"
+              ? "bg-sky-100 text-sky-700"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Custom Field
+          Fields
+        </button>
+        <button
+          onClick={() => setActiveTab("layouts")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === "layouts"
+              ? "bg-sky-100 text-sky-700"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          Layouts
         </button>
       </div>
 
-      {/* Category Filter */}
-      <div className="p-2 border-b border-slate-200">
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
-        >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </div>
+      {activeTab === "fields" ? (
+        <>
+          {/* Add Custom Field Button */}
+          <div className="p-2 border-b border-slate-200">
+            <button
+              onClick={() => router.push("/custom-fields")}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Custom Field
+            </button>
+          </div>
 
-      {/* Custom Fields List */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-2">
-          {loading ? (
-            <div className="text-center py-8 text-slate-400 text-sm">Loading fields...</div>
-          ) : customFields.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-sm">
-              No custom fields found.
-              <br />
-              <span className="text-xs">Click "Add Custom Field" to create one.</span>
+          {/* Category Filter */}
+          <div className="p-2 border-b border-slate-200">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Custom Fields List */}
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-2">
+              {loading ? (
+                <div className="text-center py-8 text-slate-400 text-sm">Loading fields...</div>
+              ) : customFields.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  No custom fields found.
+                  <br />
+                  <span className="text-xs">Click "Add Custom Field" to create one.</span>
+                </div>
+              ) : (
+                customFields.map((field) => (
+                  <CustomFieldCard key={field._id} field={field} />
+                ))
+              )}
             </div>
-          ) : (
-            customFields.map((field) => (
-              <CustomFieldCard key={field._id} field={field} />
-            ))
-          )}
-        </div>
-      </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Layout Type Filter */}
+          <div className="p-2 border-b border-slate-200">
+            <select
+              value={layoutFilter}
+              onChange={(e) => setLayoutFilter(e.target.value)}
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+            >
+              <option value="all">All Layouts</option>
+              <option value="form-group">Form Groups</option>
+              <option value="box-layout">Box Layouts</option>
+            </select>
+          </div>
+
+          {/* Form Layouts List */}
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-2">
+              {loading ? (
+                <div className="text-center py-8 text-slate-400 text-sm">Loading layouts...</div>
+              ) : formLayouts.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  No form layouts found.
+                  <br />
+                  <span className="text-xs">Save a form as "Form Group" or "Box Layout" to view.</span>
+                </div>
+              ) : (
+                formLayouts.map((layout) => (
+                  <FormLayoutCard key={layout._id} layout={layout} />
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </aside>
   );
 }

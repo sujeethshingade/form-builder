@@ -24,6 +24,8 @@ import type { FormField, FormStyles, WorkspaceView, CollectionData } from "@/app
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
+type SaveAsType = "form" | "form-group" | "box-layout";
+
 export default function NewFormBuilderPage() {
   const router = useRouter();
   const [fields, setFields] = useState<FormField[]>([]);
@@ -44,6 +46,8 @@ export default function NewFormBuilderPage() {
     collectionName: "",
     formName: "",
   });
+  const [saveType, setSaveType] = useState<SaveAsType>("form");
+  const [layoutName, setLayoutName] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -72,6 +76,8 @@ export default function NewFormBuilderPage() {
 
   const handleSave = () => {
     setShowSaveModal(true);
+    setSaveType("form");
+    setLayoutName("");
   };
 
   const handleSaveConfirm = async (e: React.FormEvent) => {
@@ -82,8 +88,14 @@ export default function NewFormBuilderPage() {
       return;
     }
 
+    if (saveType !== "form" && !layoutName.trim()) {
+      alert(`Please enter a ${saveType === "form-group" ? "Form Group" : "Box Layout"} name`);
+      return;
+    }
+
     setSaving(true);
     try {
+      // Always create the form first
       const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,13 +111,40 @@ export default function NewFormBuilderPage() {
       
       const data = await response.json();
       
-      if (data.success) {
+      if (!data.success) {
+        alert(data.error);
+        return;
+      }
+
+      // If saving as layout, also create the layout
+      if (saveType !== "form" && layoutName.trim()) {
+        const layoutResponse = await fetch("/api/form-layouts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            layoutName: layoutName.trim(),
+            layoutType: saveType,
+            category: saveForm.collectionName,
+            fields,
+          }),
+        });
+
+        const layoutResult = await layoutResponse.json();
+
+        if (!layoutResult.success) {
+          alert(`Form saved, but layout creation failed: ${layoutResult.error}`);
+          setShowSaveModal(false);
+          router.push(`/builder/${data.data._id}`);
+          return;
+        }
+
         setShowSaveModal(false);
-        alert("Form saved successfully!");
-        // Navigate to the saved form's builder page
+        alert(`Form saved and ${saveType === "form-group" ? "Form Group" : "Box Layout"} "${layoutName}" created successfully!`);
         router.push(`/builder/${data.data._id}`);
       } else {
-        alert(data.error);
+        setShowSaveModal(false);
+        alert("Form saved successfully!");
+        router.push(`/builder/${data.data._id}`);
       }
     } catch (err) {
       alert("Failed to save form");
@@ -141,6 +180,7 @@ export default function NewFormBuilderPage() {
     const activeType = event?.active?.data?.current?.type;
     const fromCanvas = event?.active?.data?.current?.from === "canvas";
     const fromCustomField = event?.active?.data?.current?.from === "custom-field";
+    const fromFormLayout = event?.active?.data?.current?.from === "form-layout";
 
     if (fromCanvas) {
       const field = fields.find((f) => f.id === event.active.id);
@@ -149,6 +189,10 @@ export default function NewFormBuilderPage() {
       const fieldLabel = event?.active?.data?.current?.fieldLabel;
       const fieldType = event?.active?.data?.current?.type;
       setActiveDrag({ type: fieldType, label: fieldLabel || "Custom Field" });
+    } else if (fromFormLayout) {
+      const layoutName = event?.active?.data?.current?.layoutName;
+      const layoutType = event?.active?.data?.current?.layoutType;
+      setActiveDrag({ type: "layout", label: layoutName || (layoutType === "form-group" ? "Form Group" : "Box Layout") });
     } else if (activeType) {
       const libItem = library.find((l) => l.type === activeType);
       if (libItem) setActiveDrag({ type: libItem.type, label: libItem.label });
@@ -159,6 +203,47 @@ export default function NewFormBuilderPage() {
     const { active, over } = event;
     const activeData = active?.data?.current;
     const overId = over?.id as string | undefined;
+
+    // Handle form layout drop - add all fields from the layout
+    if (activeData?.from === "form-layout") {
+      const layoutFields = activeData?.fields;
+      
+      if (!layoutFields || !Array.isArray(layoutFields) || layoutFields.length === 0) {
+        setActiveDrag(null);
+        return;
+      }
+
+      pushUndo(fields);
+      
+      // Create new fields with new IDs from the layout
+      const newFields: FormField[] = layoutFields.map((field: any) => ({
+        ...field,
+        id: nanoid(), // Generate new unique ID
+      }));
+
+      if (!overId || overId === "canvas") {
+        setFields((prev) => [...prev, ...newFields]);
+      } else {
+        const targetIndex = fields.findIndex((f) => f.id === overId);
+        if (targetIndex >= 0) {
+          setFields((prev) => {
+            const next = [...prev];
+            next.splice(targetIndex, 0, ...newFields);
+            return next;
+          });
+        } else {
+          setFields((prev) => [...prev, ...newFields]);
+        }
+      }
+      
+      // Select the first field of the added layout
+      if (newFields.length > 0) {
+        setSelectedId(newFields[0].id);
+      }
+      
+      setActiveDrag(null);
+      return;
+    }
 
     // Handle custom field drop
     if (activeData?.from === "custom-field") {
@@ -413,6 +498,17 @@ export default function NewFormBuilderPage() {
                   <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
                 </div>
               </div>
+            ) : activeDrag.type === "layout" ? (
+              <div className="flex items-center gap-2 border rounded-sm border-purple-300 bg-purple-50 px-2 py-1.5 text-slate-900 shadow-lg">
+                <div className="flex h-9 w-9 items-center justify-center text-purple-500 shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
+                </div>
+              </div>
             ) : isLeftSidebarOpen ? (
               <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 text-slate-900 shadow-lg">
                 <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
@@ -481,6 +577,71 @@ export default function NewFormBuilderPage() {
                   required
                 />
               </div>
+
+              {/* Save Type Options */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Save As
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="saveType"
+                      checked={saveType === "form"}
+                      onChange={() => setSaveType("form")}
+                      className="w-4 h-4 text-sky-600"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-700 text-sm">Form</div>
+                      <div className="text-xs text-slate-500">Save as a regular form</div>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="saveType"
+                      checked={saveType === "form-group"}
+                      onChange={() => setSaveType("form-group")}
+                      className="w-4 h-4 text-purple-600"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-700 text-sm">Form Group</div>
+                      <div className="text-xs text-slate-500">Save as a reusable group of fields</div>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-emerald-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="saveType"
+                      checked={saveType === "box-layout"}
+                      onChange={() => setSaveType("box-layout")}
+                      className="w-4 h-4 text-emerald-600"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-700 text-sm">Box Layout</div>
+                      <div className="text-xs text-slate-500">Save as a box layout template</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {saveType !== "form" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {saveType === "form-group" ? "Form Group Name" : "Box Layout Name"} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={layoutName}
+                    onChange={(e) => setLayoutName(e.target.value)}
+                    placeholder={`Enter ${saveType === "form-group" ? "form group" : "box layout"} name`}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
+                  />
+                </div>
+              )}
               
               <div className="flex justify-end gap-3 pt-4">
                 <button

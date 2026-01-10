@@ -20,7 +20,7 @@ import { TopBar } from "@/app/components/element/Navbar";
 import { library, makeField, defaultStyles } from "@/app/lib/form";
 import { getIconForType } from "@/app/lib/icons";
 import { CursorIcon } from "@/app/lib/icons";
-import type { FormField, FormStyles, WorkspaceView, TemplateData } from "@/app/lib/types";
+import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
 
 type SaveAsType = "form" | "form-group" | "box-layout";
@@ -671,18 +671,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            activeDrag.type === "template" ? (
-              <div className="flex items-center gap-2 border rounded-sm border-sky-300 bg-sky-50 px-2 py-1.5 text-slate-900 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-sky-500 shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-                </div>
-              </div>
-            ) : activeDrag.type === "layout" ? (
+            activeDrag.type === "layout" ? (
               <div className="flex items-center gap-2 border rounded-sm border-purple-300 bg-purple-50 px-2 py-1.5 text-slate-900 shadow-lg">
                 <div className="flex h-9 w-9 items-center justify-center text-purple-500 shrink-0">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

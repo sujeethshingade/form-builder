@@ -11,7 +11,6 @@ export {
   defaultStyles,
   library,
   makeField,
-  makeFieldFromTemplate,
   fieldToSurveyJSON,
 } from "./form";
 

@@ -52,16 +52,6 @@ export function makeField(item: LibraryItem): FormField {
   };
 }
 
-export function makeFieldFromTemplate(field: Omit<FormField, "id">): FormField {
-  const result: FormField = {
-    id: nanoid(),
-    type: field.type,
-    label: field.label,
-    ...field,
-  };
-  return result;
-}
-
 export function fieldToSurveyJSON(fields: FormField[]) {
   return {
     title: "Form Title",

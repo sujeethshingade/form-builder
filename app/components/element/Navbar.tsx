@@ -60,7 +60,7 @@ export function TopBar({
         <button
           onClick={onToggleLeftSidebar}
           aria-pressed={isLeftSidebarOpen}
-          title={isLeftSidebarOpen ? "Hide templates" : "Show templates"}
+          title={isLeftSidebarOpen ? "Hide sidebar" : "Show sidebar"}
           className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 rounded cursor-pointer"
         >
           {isLeftSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}

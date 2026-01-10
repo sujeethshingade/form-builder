@@ -11,15 +11,27 @@ interface LOVItem {
   status: "Active" | "Inactive";
 }
 
+interface APIConfig {
+  url: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  headers: string;
+  body: string;
+  responseKeyPath: string;
+  valueKey: string;
+  labelKey: string;
+}
+
 interface CustomFieldForm {
   fieldName: string;
   fieldLabel: string;
   dataType: string;
   className: string;
   category: string;
+  enableLOV: boolean;
   lovFieldName: string;
-  lovType: "user-defined" | "api";
+  lovType: "user-defined" | "dynamic-api";
   lovItems: LOVItem[];
+  apiConfig: APIConfig;
 }
 
 const dataTypes = [
@@ -50,10 +62,24 @@ export default function CustomFieldsPage() {
     dataType: "",
     className: "",
     category: "",
+    enableLOV: false,
     lovFieldName: "",
     lovType: "user-defined",
     lovItems: [],
+    apiConfig: {
+      url: "",
+      method: "GET",
+      headers: "",
+      body: "",
+      responseKeyPath: "",
+      valueKey: "",
+      labelKey: "",
+    },
   });
+
+  const [apiTestResult, setApiTestResult] = useState<any[] | null>(null);
+  const [apiTestLoading, setApiTestLoading] = useState(false);
+  const [apiTestError, setApiTestError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCustomFields();
@@ -157,10 +183,22 @@ export default function CustomFieldsPage() {
       dataType: field.dataType,
       className: field.className || "",
       category: field.category,
+      enableLOV: field.enableLOV || false,
       lovFieldName: field.lovFieldName || "",
       lovType: field.lovType || "user-defined",
       lovItems: field.lovItems || [],
+      apiConfig: field.apiConfig || {
+        url: "",
+        method: "GET",
+        headers: "",
+        body: "",
+        responseKeyPath: "",
+        valueKey: "",
+        labelKey: "",
+      },
     });
+    setApiTestResult(null);
+    setApiTestError(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -192,22 +230,90 @@ export default function CustomFieldsPage() {
       dataType: "",
       className: "",
       category: "",
+      enableLOV: false,
       lovFieldName: "",
       lovType: "user-defined",
       lovItems: [],
+      apiConfig: {
+        url: "",
+        method: "GET",
+        headers: "",
+        body: "",
+        responseKeyPath: "",
+        valueKey: "",
+        labelKey: "",
+      },
     });
     setNewCategory("");
     setShowNewCategory(false);
+    setApiTestResult(null);
+    setApiTestError(null);
+  };
+
+  const handleTestApi = async () => {
+    if (!form.apiConfig.url) {
+      setApiTestError("Please enter an API URL");
+      return;
+    }
+
+    setApiTestLoading(true);
+    setApiTestError(null);
+    setApiTestResult(null);
+
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (form.apiConfig.headers) {
+        try {
+          const customHeaders = JSON.parse(form.apiConfig.headers);
+          Object.assign(headers, customHeaders);
+        } catch {
+          setApiTestError("Invalid headers JSON format");
+          setApiTestLoading(false);
+          return;
+        }
+      }
+
+      const fetchOptions: RequestInit = {
+        method: form.apiConfig.method,
+        headers,
+      };
+
+      if (["POST", "PUT", "PATCH"].includes(form.apiConfig.method) && form.apiConfig.body) {
+        fetchOptions.body = form.apiConfig.body;
+      }
+
+      const response = await fetch(form.apiConfig.url, fetchOptions);
+      const data = await response.json();
+
+      // Extract data using response key path
+      let extractedData = data;
+      if (form.apiConfig.responseKeyPath) {
+        const keys = form.apiConfig.responseKeyPath.split(".");
+        for (const key of keys) {
+          extractedData = extractedData?.[key];
+        }
+      }
+
+      if (Array.isArray(extractedData)) {
+        setApiTestResult(extractedData.slice(0, 5)); // Show first 5 items
+      } else {
+        setApiTestError("Response is not an array. Check the Response Key Path.");
+      }
+    } catch (err: any) {
+      setApiTestError(err.message || "Failed to fetch API");
+    } finally {
+      setApiTestLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       <header className="bg-white border-b border-slate-200 px-6 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-slate-800">Custom Fields</h1>
           <button
             onClick={() => router.push("/forms")}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -217,10 +323,7 @@ export default function CustomFieldsPage() {
         </div>
       </header>
 
-      <main className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Add/Edit Field Form */}
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
+          <div className="bg-white p-6">
             <h2 className="text-lg font-semibold text-slate-800 mb-4">
               {editingId ? "Edit Field" : "Add Field"}
             </h2>
@@ -331,75 +434,188 @@ export default function CustomFieldsPage() {
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {saving ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={() => {
-                  if (editingId) {
-                    resetForm();
-                  } else {
-                    router.back();
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                {editingId ? "Cancel Edit" : "Close"}
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-2">List Of Values</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Select Field Name
-                </label>
-                <input
-                  type="text"
-                  value={form.lovFieldName}
-                  onChange={(e) => setForm({ ...form, lovFieldName: e.target.value })}
-                  placeholder="Enter field name"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Type
-                </label>
-                <div className="flex flex-wrap gap-4">
-                  {["user-defined", "api"].map((type) => (
-                    <label key={type} className="flex items-center gap-2">
+              <div className="pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">List of Values (LOV)</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Type
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2">
                       <input
                         type="radio"
                         name="lovType"
-                        checked={form.lovType === type}
-                        onChange={() => setForm({ ...form, lovType: type as any })}
+                        checked={form.lovType === "user-defined"}
+                        onChange={() => setForm({ ...form, lovType: "user-defined" })}
                         className="w-4 h-4 text-sky-600 border-slate-300 focus:ring-sky-500"
                       />
-                      <span className="text-sm text-slate-700 capitalize">
-                        {type.replace("-", " ")}
-                      </span>
+                      <span className="text-sm text-slate-700">User Defined</span>
                     </label>
-                  ))}
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="lovType"
+                        checked={form.lovType === "dynamic-api"}
+                        onChange={() => setForm({ ...form, lovType: "dynamic-api" })}
+                        className="w-4 h-4 text-sky-600 border-slate-300 focus:ring-sky-500"
+                      />
+                      <span className="text-sm text-slate-700">Dynamic API</span>
+                    </label>
+                  </div>
                 </div>
               </div>
+
+              {form.lovType === "dynamic-api" && (
+                <div className="mt-4 space-y-4">
+                  <h4 className="text-sm font-medium text-slate-700">API Configuration</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-3">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        API URL <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={form.apiConfig.url}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, url: e.target.value } })}
+                        placeholder="Enter API URL"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Method
+                      </label>
+                      <select
+                        value={form.apiConfig.method}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, method: e.target.value as any } })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="DELETE">DELETE</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Headers (JSON format)
+                    </label>
+                    <textarea
+                      value={form.apiConfig.headers}
+                      onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, headers: e.target.value } })}
+                      placeholder='{"Authorization": "Bearer token", "Custom-Header": "value"}'
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500 font-mono text-sm"
+                    />
+                  </div>
+
+                  {["POST", "PUT", "PATCH"].includes(form.apiConfig.method) && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Request Body (JSON format)
+                      </label>
+                      <textarea
+                        value={form.apiConfig.body}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, body: e.target.value } })}
+                        placeholder='{"key": "value"}'
+                        rows={3}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500 font-mono text-sm"
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Response Key Path
+                      </label>
+                      <input
+                        type="text"
+                        value={form.apiConfig.responseKeyPath}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, responseKeyPath: e.target.value } })}
+                        placeholder="data.items"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Value Key
+                      </label>
+                      <input
+                        type="text"
+                        value={form.apiConfig.valueKey}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, valueKey: e.target.value } })}
+                        placeholder="id"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Label Key
+                      </label>
+                      <input
+                        type="text"
+                        value={form.apiConfig.labelKey}
+                        onChange={(e) => setForm({ ...form, apiConfig: { ...form.apiConfig, labelKey: e.target.value } })}
+                        placeholder="name"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleTestApi}
+                      disabled={apiTestLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {apiTestLoading ? "Testing..." : "Test API"}
+                    </button>
+                    {apiTestError && (
+                      <span className="text-sm text-red-600">{apiTestError}</span>
+                    )}
+                  </div>
+
+                  {apiTestResult && (
+                    <div className="mt-3">
+                      <h5 className="text-sm font-medium text-slate-700 mb-2">Preview (First 5 items)</h5>
+                      <div className="border border-slate-200 rounded-md overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead className="bg-slate-100">
+                            <tr>
+                              <th className="px-3 py-2 text-left font-medium text-slate-700">Value ({form.apiConfig.valueKey || "id"})</th>
+                              <th className="px-3 py-2 text-left font-medium text-slate-700">Label ({form.apiConfig.labelKey || "name"})</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {apiTestResult.map((item, index) => (
+                              <tr key={index} className="border-t border-slate-200">
+                                <td className="px-3 py-2 text-slate-600">
+                                  {item[form.apiConfig.valueKey] ?? item.id ?? "-"}
+                                </td>
+                                <td className="px-3 py-2 text-slate-600">
+                                  {item[form.apiConfig.labelKey] ?? item.name ?? "-"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {form.lovType === "user-defined" && (
                 <div className="mt-4">
@@ -495,9 +711,35 @@ export default function CustomFieldsPage() {
                 </div>
               )}
             </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {saving ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => {
+                  if (editingId) {
+                    resetForm();
+                  } else {
+                    router.back();
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {editingId ? "Cancel Edit" : "Close"}
+              </button>
+            </div>
           </div>
-        </div>
-      </main>
     </div>
   );
 }

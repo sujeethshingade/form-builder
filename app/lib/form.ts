@@ -49,7 +49,24 @@ export function makeField(item: LibraryItem): FormField {
         ] 
       : undefined,
     width: "full",
+    widthColumns: 12,
   };
+}
+
+export function getFieldColumnSpan(field: { widthColumns?: number; widthPercent?: number }) {
+  // Prefer widthColumns if set (1-12 grid system)
+  if (typeof field.widthColumns === "number" && !Number.isNaN(field.widthColumns)) {
+    return Math.min(12, Math.max(1, Math.round(field.widthColumns)));
+  }
+
+  // Fallback to widthPercent for backward compatibility
+  if (typeof field.widthPercent === "number" && !Number.isNaN(field.widthPercent)) {
+    const span = Math.round((field.widthPercent / 100) * 12);
+    return Math.min(12, Math.max(1, span || 12));
+  }
+
+  // Default to full width (12 columns)
+  return 12;
 }
 
 export function fieldToSurveyJSON(fields: FormField[]) {

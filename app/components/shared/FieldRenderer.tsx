@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { FormField, VueformItem, VueformColumn } from "../../lib/types";
+import { BoxLayoutRenderer, type BoxLayoutSection } from "./BoxLayoutRenderer";
 
 type FieldRendererProps = {
   field: FormField;
@@ -430,6 +431,22 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
         </tbody>
       </table>
     </div>
+  );
+}
+
+export function BoxLayoutSectionRenderer({ 
+  field, 
+  disabled = true,
+  onSectionsChange,
+}: FieldRendererProps & { onSectionsChange?: (sections: BoxLayoutSection[]) => void }) {
+  const sections: BoxLayoutSection[] = field.sections || [];
+
+  return (
+    <BoxLayoutRenderer
+      sections={sections}
+      onSectionsChange={onSectionsChange}
+      disabled={disabled}
+    />
   );
 }
 

@@ -23,135 +23,49 @@ import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
 
-type SaveAsType = "form" | "form-group" | "grid-layout";
-
-interface FormJson {
-  fields: FormField[];
-  styles: FormStyles;
-}
-
-interface FormData {
-  _id: string;
-  collectionName: string;
-  formName: string;
-  formJson: FormJson;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface SaveModalProps {
+interface SaveAsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (saveType: SaveAsType, layoutName?: string) => void;
+  onSave: (layoutName: string) => void;
   saving: boolean;
-  formName?: string;
+  defaultName?: string;
 }
 
-function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps) {
-  const [saveType, setSaveType] = useState<SaveAsType>("form");
-  const [layoutName, setLayoutName] = useState("");
+function SaveAsModal({ isOpen, onClose, onSave, saving, defaultName }: SaveAsModalProps) {
+  const [layoutName, setLayoutName] = useState(defaultName || "");
 
   useEffect(() => {
     if (isOpen) {
-      setSaveType("form");
-      setLayoutName("");
+      setLayoutName(defaultName || "");
     }
-  }, [isOpen]);
+  }, [isOpen, defaultName]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
-    if (saveType !== "form" && !layoutName.trim()) {
+    if (!layoutName.trim()) {
       alert("Please enter a layout name");
       return;
     }
-    onSave(saveType, saveType !== "form" ? layoutName.trim() : undefined);
+    onSave(layoutName.trim());
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Save Options</h2>
-        
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Save Layout As New</h2>
         <div className="mb-4">
-          {saveType === "form" ? (
-            <p className="text-sm text-slate-600 mb-3">
-              Save <span className="font-medium">{formName || "this form"}</span> as:
-            </p>
-          ) : (
-            <p className="text-sm text-slate-600 mb-3">
-              Save current fields as a reusable layout:
-            </p>
-          )}
-          
-          <div className="space-y-2">
-            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
-              <input
-                type="radio"
-                name="saveType"
-                checked={saveType === "form"}
-                onChange={() => setSaveType("form")}
-                className="w-4 h-4 text-sky-600"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-slate-700">Save as Form</div>
-                <div className="text-xs text-slate-500">Save as a regular form</div>
-              </div>
-            </label>
-            
-            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
-              <input
-                type="radio"
-                name="saveType"
-                checked={saveType === "form-group"}
-                onChange={() => setSaveType("form-group")}
-                className="w-4 h-4 text-sky-600"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-slate-700">Save as Form Group</div>
-                <div className="text-xs text-slate-500">Create a reusable group of fields (won&apos;t affect this form)</div>
-              </div>
-            </label>
-            
-            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
-              <input
-                type="radio"
-                name="saveType"
-                checked={saveType === "grid-layout"}
-                onChange={() => setSaveType("grid-layout")}
-                className="w-4 h-4 text-sky-600"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-slate-700">Save as Grid Layout</div>
-                <div className="text-xs text-slate-500">Create a grid layout template (won&apos;t affect this form)</div>
-              </div>
-            </label>
-          </div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Layout Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={layoutName}
+            onChange={(e) => setLayoutName(e.target.value)}
+            placeholder="Enter layout name"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+          />
         </div>
-
-        {saveType !== "form" && (
-          <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                {saveType === "form-group" ? "Form Group Name" : "Grid Layout Name"} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={layoutName}
-                onChange={(e) => setLayoutName(e.target.value)}
-                placeholder={`Enter ${saveType === "form-group" ? "form group" : "grid layout"} name`}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-              />
-            </div>
-            <div className="mb-4 p-3 bg-sky-50 border border-sky-200 rounded-md">
-              <p className="text-xs text-sky-700">
-                <strong>Note:</strong> This will only create a new {saveType === "form-group" ? "form group" : "grid layout"} from the current fields. 
-                The form itself will not be modified. You can manage layouts from the <span className="font-medium">Layouts</span> page.
-              </p>
-            </div>
-          </>
-        )}
-
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
@@ -162,9 +76,9 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 text-white rounded-md transition-colors disabled:opacity-50 bg-sky-500 hover:bg-sky-600"
+            className="px-4 py-2 text-white rounded-md transition-colors disabled:opacity-50 bg-emerald-500 hover:bg-emerald-600"
           >
-            {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : "Grid Layout"}`}
+            {saving ? "Saving..." : "Save As New"}
           </button>
         </div>
       </div>
@@ -172,15 +86,26 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
   );
 }
 
-export default function FormBuilderPage({ params }: { params: Promise<{ id: string }> }) {
+interface LayoutData {
+  _id: string;
+  layoutName: string;
+  layoutType: "form-group" | "grid-layout" | "box-layout";
+  category?: string;
+  fields: FormField[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function LayoutBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [layoutData, setLayoutData] = useState<LayoutData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingAs, setSavingAs] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
 
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -200,105 +125,96 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
   const selectedField = fields.find((f) => f.id === selectedId) ?? null;
 
-  // Fetch form data on mount
+  // Fetch layout data on mount
   useEffect(() => {
-    const fetchForm = async () => {
+    const fetchLayout = async () => {
       try {
-        const response = await fetch(`/api/forms/${resolvedParams.id}`);
+        const response = await fetch(`/api/form-layouts/${resolvedParams.id}`);
         const data = await response.json();
         
         if (data.success) {
-          setFormData(data.data);
-          const formJson = data.data.formJson || { fields: [], styles: defaultStyles };
-          setFields(formJson.fields || []);
-          setStyles(formJson.styles || defaultStyles);
+          setLayoutData(data.data);
+          setFields(data.data.fields || []);
         } else {
           setError(data.error);
         }
       } catch (err) {
-        setError("Failed to fetch form");
+        setError("Failed to fetch layout");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchForm();
+    fetchLayout();
   }, [resolvedParams.id]);
 
   // Track unsaved changes
   useEffect(() => {
-    if (formData) {
-      const formJson = formData.formJson || { fields: [], styles: defaultStyles };
-      const fieldsChanged = JSON.stringify(fields) !== JSON.stringify(formJson.fields || []);
-      const stylesChanged = JSON.stringify(styles) !== JSON.stringify(formJson.styles || defaultStyles);
-      setHasUnsavedChanges(fieldsChanged || stylesChanged);
+    if (layoutData) {
+      const fieldsChanged = JSON.stringify(fields) !== JSON.stringify(layoutData.fields || []);
+      setHasUnsavedChanges(fieldsChanged);
     }
-  }, [fields, styles, formData]);
+  }, [fields, layoutData]);
 
-  // Handle save button click - show modal
-  const handleSaveClick = () => {
-    setShowSaveModal(true);
-  };
-
-  // Save form to database
-  const handleSave = async (saveType: SaveAsType, layoutName?: string) => {
-    if (!formData) return;
+  // Save layout to database
+  const handleSave = async () => {
+    if (!layoutData) return;
     
     setSaving(true);
     try {
-      // If saving as a layout (form-group or grid-layout), only create the layout
-      // Do NOT save to the form - this keeps the form creation separate
-      if (saveType !== "form" && layoutName) {
-        const layoutResponse = await fetch("/api/form-layouts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            layoutName,
-            layoutType: saveType,
-            fields,
-          }),
-        });
-
-        const layoutResult = await layoutResponse.json();
-
-        if (!layoutResult.success) {
-          alert(`Failed to create layout: ${layoutResult.error}`);
-          setShowSaveModal(false);
-          return;
-        }
-
-        alert(`${saveType === "form-group" ? "Form Group" : "Grid Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
-        setShowSaveModal(false);
-        return;
-      }
-
-      // Save as form - update the form normally
-      const formResponse = await fetch(`/api/forms/${resolvedParams.id}`, {
+      const response = await fetch(`/api/form-layouts/${resolvedParams.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          formJson: {
-            fields,
-            styles,
-          },
+          fields,
         }),
       });
       
-      const formResult = await formResponse.json();
+      const result = await response.json();
       
-      if (!formResult.success) {
-        alert(formResult.error);
+      if (!result.success) {
+        alert(result.error);
         return;
       }
 
-      setFormData(formResult.data);
+      setLayoutData(result.data);
       setHasUnsavedChanges(false);
-      alert("Form saved successfully!");
-      setShowSaveModal(false);
+      alert("Layout saved successfully!");
     } catch (err) {
       alert("Failed to save");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveAsNew = async (layoutName: string) => {
+    if (!layoutData) return;
+
+    setSavingAs(true);
+    try {
+      const response = await fetch("/api/form-layouts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          layoutName,
+          layoutType: layoutData.layoutType,
+          fields,
+        }),
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        alert(result.error || "Failed to save layout");
+        return;
+      }
+
+      setShowSaveAsModal(false);
+      alert("Layout saved as new successfully!");
+      router.push(`/layouts/builder/${result.data._id}`);
+    } catch (err) {
+      alert("Failed to save as new");
+    } finally {
+      setSavingAs(false);
     }
   };
 
@@ -367,7 +283,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
       // Create new fields with new IDs from the layout
       const newFields: FormField[] = layoutFields.map((field: any) => ({
         ...field,
-        id: nanoid(), // Generate new unique ID
+        id: nanoid(),
       }));
 
       if (!overId || overId === "canvas") {
@@ -385,7 +301,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         }
       }
       
-      // Select the first field of the added layout
       if (newFields.length > 0) {
         setSelectedId(newFields[0].id);
       }
@@ -406,7 +321,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
       pushUndo(fields);
       
-      // Create the new field based on custom field data
       const newField: FormField = {
         id: nanoid(),
         type: fieldType as any,
@@ -419,7 +333,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         widthColumns: 12,
       };
 
-      // If it's a select/radio with LOV items, add the options
       if (lovEnabled && lovItems && lovItems.length > 0 && (fieldType === "select" || fieldType === "radio")) {
         newField.items = lovItems
           .filter((item: any) => item.status === "Active")
@@ -525,27 +438,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     setFields((prev) => arrayMove(prev, index, index + 1));
   };
 
-  // Handle form submission from preview mode
-  const handleFormSubmission = async (data: Record<string, unknown>) => {
-    if (!formData) throw new Error("Form data not available");
-    
-    const response = await fetch("/api/submissions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        formId: formData._id,
-        collectionName: formData.collectionName,
-        formName: formData.formName,
-        data,
-      }),
-    });
-    
-    const result = await response.json();
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -560,10 +452,10 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         <div className="text-center">
           <div className="text-lg text-red-600 mb-4">{error}</div>
           <button
-            onClick={() => router.push("/forms")}
+            onClick={() => router.push("/layouts")}
             className="px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700"
           >
-            Back to Forms
+            Back to Layouts
           </button>
         </div>
       </div>
@@ -589,20 +481,20 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
           workspaceView={workspaceView}
           onWorkspaceViewChange={setWorkspaceView}
-          formName={formData?.formName}
-          formCollection={formData?.collectionName}
+          formName={layoutData?.layoutName}
+          formCollection={
+            layoutData?.layoutType === "form-group" 
+              ? "Form Group" 
+              : layoutData?.layoutType === "box-layout"
+                ? "Box Layout"
+                : "Grid Layout"
+          }
           hasUnsavedChanges={hasUnsavedChanges}
-          onSave={handleSaveClick}
-          saving={saving}
-          onBack={() => router.push("/forms")}
-        />
-
-        <SaveModal
-          isOpen={showSaveModal}
-          onClose={() => setShowSaveModal(false)}
           onSave={handleSave}
+          onSaveAs={() => setShowSaveAsModal(true)}
+          saveAsLabel="Save As New"
           saving={saving}
-          formName={formData?.formName}
+          onBack={() => router.push("/layouts")}
         />
 
         <div className="flex h-full overflow-hidden">
@@ -636,17 +528,13 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
               <FormPreview 
                 fields={fields} 
                 styles={styles}
-                formId={formData?._id}
-                formName={formData?.formName}
-                collectionName={formData?.collectionName}
-                onSubmit={handleFormSubmission}
               />
             ) : (
               <JsonPreview
                 fields={fields}
                 styles={styles}
-                formName={formData?.formName}
-                collectionName={formData?.collectionName}
+                formName={layoutData?.layoutName}
+                collectionName={layoutData?.category}
               />
             )}
           </main>
@@ -716,6 +604,14 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <SaveAsModal
+        isOpen={showSaveAsModal}
+        onClose={() => setShowSaveAsModal(false)}
+        onSave={handleSaveAsNew}
+        saving={savingAs}
+        defaultName={layoutData ? `${layoutData.layoutName} Copy` : ""}
+      />
     </div>
   );
 }

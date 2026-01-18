@@ -10,6 +10,7 @@ export interface IFormLayoutField {
   options?: string[];
   width?: 'full' | 'half';
   widthPercent?: number;
+  widthColumns?: number;
   name?: string;
   default?: any;
   disabled?: boolean;
@@ -36,7 +37,7 @@ export interface IFormLayoutField {
 
 export interface IFormLayout extends Document {
   layoutName: string;
-  layoutType: 'form-group' | 'box-layout';
+  layoutType: 'form-group' | 'grid-layout' | 'box-layout';
   category?: string;
   fields: IFormLayoutField[];
   createdAt: Date;
@@ -53,7 +54,7 @@ const FormLayoutSchema = new Schema<IFormLayout>({
   layoutType: { 
     type: String, 
     required: true,
-    enum: ['form-group', 'box-layout'],
+    enum: ['form-group', 'grid-layout', 'box-layout'],
   },
   category: {
     type: String,

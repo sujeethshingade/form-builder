@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SaveAsModal } from "@/app/components/shared/SaveAsModal";
 
 interface LOVItem {
   code: string;
@@ -50,14 +51,17 @@ const dataTypes = [
   { value: "table", label: "Table" },
 ];
 
-export default function CustomFieldsPage() {
+function CustomFieldsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [saving, setSaving] = useState(false);
+  const [savingAs, setSavingAs] = useState(false);
   const [existingFields, setExistingFields] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
   
   const [form, setForm] = useState<CustomFieldForm>({
     fieldName: "",
@@ -88,6 +92,17 @@ export default function CustomFieldsPage() {
     fetchCustomFields();
     fetchCategories();
   }, []);
+
+  // Handle edit query parameter
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (editId && existingFields.length > 0) {
+      const fieldToEdit = existingFields.find((f) => f._id === editId);
+      if (fieldToEdit) {
+        handleEdit(fieldToEdit);
+      }
+    }
+  }, [searchParams, existingFields]);
 
   const fetchCustomFields = async () => {
     try {
@@ -222,6 +237,57 @@ export default function CustomFieldsPage() {
       }
     } catch (err) {
       alert("Failed to delete custom field");
+    }
+  };
+
+  const handleSaveAsNew = async (newLabel: string) => {
+    if (!form.dataType) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    const categoryToUse = showNewCategory ? newCategory : form.category;
+    if (!categoryToUse) {
+      alert("Please select or enter a category");
+      return;
+    }
+
+    setSavingAs(true);
+    try {
+      const newFieldName = newLabel.replace(/\s+/g, '_').toLowerCase();
+      const response = await fetch("/api/custom-fields", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fieldName: newFieldName,
+          fieldLabel: newLabel,
+          dataType: form.dataType,
+          className: form.className,
+          category: categoryToUse,
+          enableLOV: form.enableLOV,
+          lovFieldName: form.lovFieldName,
+          lovType: form.lovType,
+          lovItems: form.lovItems,
+          apiConfig: form.apiConfig,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowSaveAsModal(false);
+        alert("Field saved as new successfully!");
+        resetForm();
+        router.replace("/custom-fields");
+        fetchCustomFields();
+        fetchCategories();
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Failed to save field as new");
+    } finally {
+      setSavingAs(false);
     }
   };
 
@@ -719,6 +785,18 @@ export default function CustomFieldsPage() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-3">
+              {editingId && (
+                <button
+                  onClick={() => setShowSaveAsModal(true)}
+                  disabled={savingAs}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Save As New
+                </button>
+              )}
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -733,6 +811,7 @@ export default function CustomFieldsPage() {
                 onClick={() => {
                   if (editingId) {
                     resetForm();
+                    router.replace("/custom-fields");
                   } else {
                     router.back();
                   }
@@ -746,6 +825,26 @@ export default function CustomFieldsPage() {
               </button>
             </div>
           </div>
+
+      <SaveAsModal
+        isOpen={showSaveAsModal}
+        onClose={() => setShowSaveAsModal(false)}
+        onSave={handleSaveAsNew}
+        saving={savingAs}
+        defaultName={form.fieldLabel ? `${form.fieldLabel} Copy` : ""}
+        title="Save Field As New"
+        nameLabel="Field Label"
+        namePlaceholder="Enter field label"
+        saveButtonText="Save As New"
+      />
     </div>
+  );
+}
+
+export default function CustomFieldsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-sky-500 border-t-transparent rounded-full"></div></div>}>
+      <CustomFieldsContent />
+    </Suspense>
   );
 }

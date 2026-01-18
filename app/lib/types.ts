@@ -15,7 +15,8 @@ export type ComponentType =
   | "heading"
   | "divider"
   | "spacer"
-  | "table";
+  | "table"
+  | "box-layout";
 
 // ============================================
 // Custom Scripts & Validation Types
@@ -456,6 +457,22 @@ export type TableVueformProps = BaseVueformProps & {
 };
 
 // ============================================
+// Box Layout Props
+// ============================================
+
+export type BoxLayoutSectionType = {
+  id: string;
+  title: string;
+  collapsed: boolean;
+  columns: VueformColumn[];
+  rows: { id: string; data: Record<string, unknown> }[];
+};
+
+export type BoxLayoutVueformProps = BaseVueformProps & {
+  sections?: BoxLayoutSectionType[];
+};
+
+// ============================================
 // Combined Props Type
 // ============================================
 
@@ -471,7 +488,8 @@ export type VueformProps =
   | HeadingVueformProps
   | DividerVueformProps
   | SpacerVueformProps
-  | TableVueformProps;
+  | TableVueformProps
+  | BoxLayoutVueformProps;
 
 // ============================================
 // Form Field Type (Main)
@@ -489,6 +507,7 @@ export type FormField = {
   options?: string[];
   width?: "full" | "half";
   widthPercent?: number;
+  widthColumns?: number; // 1-12 column grid system
   name?: string;
   default?: any;
   disabled?: boolean;
@@ -634,6 +653,15 @@ export type FormField = {
   addRowLabel?: string;
   removeRowLabel?: string;
   emptyText?: string;
+  
+  // Box Layout specific
+  sections?: {
+    id: string;
+    title: string;
+    collapsed: boolean;
+    columns: VueformColumn[];
+    rows: { id: string; data: Record<string, unknown> }[];
+  }[];
   
   // Text slots
   before?: string;

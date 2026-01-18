@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormField, VueformItem, VueformColumn, CustomScript, ValidationRule, ConditionalLogic } from "@/app/lib/types";
+import { ColumnWidthSelector } from "@/app/components/shared/ColumnWidthSelector";
 
 type ChoiceOption = VueformItem;
 type TableColumn = VueformColumn;
@@ -340,6 +341,7 @@ export default function InspectorSidebar({
   const isFileField = field.type === "file";
   const isSliderField = field.type === "slider";
   const isTableField = field.type === "table";
+  const isBoxLayoutField = field.type === "box-layout";
   const isHeadingField = field.type === "heading";
   const isDividerField = field.type === "divider";
   const isSpacerField = field.type === "spacer";
@@ -448,27 +450,13 @@ export default function InspectorSidebar({
 
             {/* Layout Section */}
             <Section title="Layout" defaultOpen={true}>
-              {/* Width Slider */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Width: {field.widthPercent || 100}%
-                </label>
-                <input
-                  type="range"
-                  min="25"
-                  max="100"
-                  step="5"
-                  value={field.widthPercent || 100}
-                  onChange={(e) => handleChange("widthPercent", parseInt(e.target.value))}
-                  className="w-full cursor-pointer h-1.5 bg-gray-200 rounded-lg appearance-none"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>25%</span>
-                  <span>50%</span>
-                  <span>75%</span>
-                  <span>100%</span>
-                </div>
-              </div>
+              {/* 12-Column Width Selector */}
+              <ColumnWidthSelector
+                value={field.widthColumns || 12}
+                onChange={(columns) => handleChange("widthColumns", columns)}
+                label="Width"
+                description="Select how many columns this field spans (1-12)"
+              />
 
               {/* Size */}
               {!isLayoutField && (
@@ -1194,6 +1182,154 @@ export default function InspectorSidebar({
                     checked={field.reorderable || false}
                     onChange={(val) => handleChange("reorderable", val)}
                   />
+                </Section>
+              </>
+            )}
+
+            {/* Box Layout Options */}
+            {isBoxLayoutField && (
+              <>
+                <Section title="Sections" defaultOpen={true}>
+                  <div className="space-y-3">
+                    {(field.sections || []).map((section, sectionIndex) => (
+                      <div
+                        key={section.id}
+                        className="p-3 border border-gray-200 rounded-lg space-y-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={section.title}
+                            onChange={(e) => {
+                              const newSections = [...(field.sections || [])];
+                              newSections[sectionIndex] = { ...section, title: e.target.value };
+                              handleChange("sections", newSections);
+                            }}
+                            placeholder="Section title"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
+                          />
+                          <button
+                            onClick={() => {
+                              const newSections = (field.sections || []).filter((_, i) => i !== sectionIndex);
+                              handleChange("sections", newSections);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
+                        
+                        {/* Columns for this section */}
+                        <div className="pl-2 border-l-2 border-gray-200 space-y-2">
+                          <span className="text-xs font-medium text-gray-500">Columns</span>
+                          {(section.columns || []).map((col, colIndex) => (
+                            <div key={colIndex} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={col.label}
+                                onChange={(e) => {
+                                  const newSections = [...(field.sections || [])];
+                                  const newColumns = [...(section.columns || [])];
+                                  newColumns[colIndex] = { 
+                                    ...col, 
+                                    label: e.target.value,
+                                    name: e.target.value.toLowerCase().replace(/\s+/g, "_"),
+                                  };
+                                  newSections[sectionIndex] = { ...section, columns: newColumns };
+                                  handleChange("sections", newSections);
+                                }}
+                                placeholder="Column label"
+                                className="flex-1 px-2 py-1.5 border border-gray-300 rounded outline-none text-xs"
+                              />
+                              <select
+                                value={col.type}
+                                onChange={(e) => {
+                                  const newSections = [...(field.sections || [])];
+                                  const newColumns = [...(section.columns || [])];
+                                  newColumns[colIndex] = { ...col, type: e.target.value as VueformColumn["type"] };
+                                  newSections[sectionIndex] = { ...section, columns: newColumns };
+                                  handleChange("sections", newSections);
+                                }}
+                                className="px-2 py-1.5 border border-gray-300 rounded outline-none text-xs"
+                              >
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="email">Email</option>
+                                <option value="date">Date</option>
+                                <option value="select">Select</option>
+                                <option value="checkbox">Checkbox</option>
+                              </select>
+                              <button
+                                onClick={() => {
+                                  const newSections = [...(field.sections || [])];
+                                  const newColumns = (section.columns || []).filter((_, i) => i !== colIndex);
+                                  newSections[sectionIndex] = { ...section, columns: newColumns };
+                                  handleChange("sections", newSections);
+                                }}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                              >
+                                <TrashIcon />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => {
+                              const newSections = [...(field.sections || [])];
+                              const newColumns = [
+                                ...(section.columns || []),
+                                { name: `field_${Date.now()}`, label: "New Field", type: "text" as const, placeholder: "" },
+                              ];
+                              newSections[sectionIndex] = { 
+                                ...section, 
+                                columns: newColumns,
+                                rows: section.rows.map(row => ({
+                                  ...row,
+                                  data: { ...row.data, [`field_${Date.now()}`]: "" }
+                                }))
+                              };
+                              handleChange("sections", newSections);
+                            }}
+                            className="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-600 font-medium"
+                          >
+                            <PlusIcon />
+                            Add Column
+                          </button>
+                        </div>
+                        
+                        <Toggle
+                          label="Collapsed by default"
+                          checked={section.collapsed}
+                          onChange={(val) => {
+                            const newSections = [...(field.sections || [])];
+                            newSections[sectionIndex] = { ...section, collapsed: val };
+                            handleChange("sections", newSections);
+                          }}
+                        />
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => {
+                        const newSections = [
+                          ...(field.sections || []),
+                          {
+                            id: `section_${Date.now()}`,
+                            title: "New Section",
+                            collapsed: false,
+                            columns: [
+                              { name: "field1", label: "Field 1", type: "text" as const, placeholder: "Enter value" },
+                              { name: "field2", label: "Field 2", type: "text" as const, placeholder: "Enter value" },
+                            ],
+                            rows: [{ id: `row_${Date.now()}`, data: { field1: "", field2: "" } }],
+                          },
+                        ];
+                        handleChange("sections", newSections);
+                      }}
+                      className="flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-600 font-medium"
+                    >
+                      <PlusIcon />
+                      Add Section
+                    </button>
+                  </div>
                 </Section>
               </>
             )}

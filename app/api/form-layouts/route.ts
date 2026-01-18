@@ -10,13 +10,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const layoutType = searchParams.get('type');
     const category = searchParams.get('category');
+    const search = searchParams.get('search');
     
     const query: Record<string, any> = {};
     if (layoutType) {
+      // Handle each type separately
       query.layoutType = layoutType;
     }
     if (category) {
       query.category = category;
+    }
+    if (search) {
+      query.layoutName = { $regex: search, $options: 'i' };
     }
     
     const layouts = await FormLayout.find(query)
@@ -49,9 +54,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!['form-group', 'box-layout'].includes(layoutType)) {
+    if (!['form-group', 'grid-layout', 'box-layout'].includes(layoutType)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid layout type. Must be "form-group" or "box-layout"' },
+        { success: false, error: 'Invalid layout type. Must be "form-group", "grid-layout", or "box-layout"' },
         { status: 400 }
       );
     }

@@ -54,7 +54,7 @@ export function FormCanvas({
             <div className="flex items-center justify-center py-16" />
           ) : (
             <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-              <div className="flex flex-wrap gap-4">
+              <div className="grid grid-cols-12 gap-4">
                 {fields.map((field, index) => (
                   <CanvasCard
                     key={field.id}

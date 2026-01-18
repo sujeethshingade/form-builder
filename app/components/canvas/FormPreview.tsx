@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { FormField, FormStyles, VueformItem, ValidationRule, CustomScript } from "../../lib/types";
+import { getFieldColumnSpan } from "../../lib/form";
 
 interface FormPreviewProps {
   fields: FormField[];
@@ -134,7 +135,8 @@ function PreviewField({
   onBlur?: () => void;
 }) {
   const size = field.size || "md";
-  const widthStyle = { width: `${field.widthPercent || 100}%` };
+  const columnSpan = getFieldColumnSpan(field);
+  const gridStyle = { gridColumn: `span ${columnSpan} / span ${columnSpan}` };
   const hasError = !!error;
 
   // Execute onChange scripts
@@ -177,7 +179,7 @@ function PreviewField({
     const style = field.dividerStyle || "solid";
     const thickness = field.thickness || 1;
     return (
-      <div className="p-3 w-full" style={widthStyle}>
+      <div className="p-3 w-full" style={gridStyle}>
         <hr 
           className="border-slate-300" 
           style={{ 
@@ -201,7 +203,7 @@ function PreviewField({
   // Spacer
   if (field.type === "spacer") {
     return (
-      <div style={{ ...widthStyle, height: field.height || "24px" }} />
+      <div style={{ ...gridStyle, height: field.height || "24px" }} />
     );
   }
 
@@ -243,7 +245,7 @@ function PreviewField({
     })();
 
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         {headingElement}
         {field.description && (
           <p className="text-slate-500 text-sm mt-1">{field.description}</p>
@@ -276,7 +278,7 @@ function PreviewField({
     };
 
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-2">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -352,7 +354,7 @@ function PreviewField({
   // Textarea
   if (field.type === "textarea") {
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -384,7 +386,7 @@ function PreviewField({
   // Text, Email, URL, Number, Date inputs
   if (["text", "email", "url", "number", "date"].includes(field.type)) {
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -447,7 +449,7 @@ function PreviewField({
 
     if (field.native) {
       return (
-        <div className="p-2" style={widthStyle}>
+        <div className="p-2" style={gridStyle}>
           <label className="block text-sm font-medium text-slate-900 mb-1">
             {field.label}
             {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -484,7 +486,7 @@ function PreviewField({
 
     // Custom dropdown (styled)
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -573,7 +575,7 @@ function PreviewField({
     const acceptValue = Array.isArray(field.accept) ? field.accept.join(",") : field.accept;
 
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -641,7 +643,7 @@ function PreviewField({
     const currentValue = (value as number) ?? field.default ?? min;
     
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -682,7 +684,7 @@ function PreviewField({
     const inlineClass = field.inlineOptions ? "flex flex-wrap gap-4" : gridClass;
     
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-2">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -754,7 +756,7 @@ function PreviewField({
     };
 
     return (
-      <div className="p-2" style={widthStyle}>
+      <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-2">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -814,7 +816,7 @@ function PreviewField({
 
   // Default fallback
   return (
-    <div className="p-2" style={widthStyle}>
+    <div className="p-2" style={gridStyle}>
       <label className="block text-sm font-medium text-slate-900 mb-1">
         {field.label}
         {field.required && <span className="ml-1 text-red-500">*</span>}
@@ -973,7 +975,7 @@ export function FormPreview({
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div className="flex flex-wrap gap-4">
+              <div className="grid grid-cols-12 gap-4">
                 {fields.map((field) => (
                   <PreviewField
                     key={field.id}

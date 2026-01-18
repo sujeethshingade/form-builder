@@ -10,11 +10,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
+    const dataType = searchParams.get('dataType');
     
     let query: any = {};
     
     if (category) {
       query.category = category;
+    }
+    
+    if (dataType) {
+      query.dataType = dataType;
     }
     
     if (search) {

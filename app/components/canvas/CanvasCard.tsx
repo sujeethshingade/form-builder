@@ -3,6 +3,7 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import type { FormField, FormStyles } from "../../lib/types";
+import { getFieldColumnSpan } from "../../lib/form";
 import { CardControls } from "../shared/CardControls";
 import {
   FormFieldRenderer,
@@ -10,6 +11,7 @@ import {
   SpacerRenderer,
   HeadingRenderer,
   TableRenderer,
+  BoxLayoutSectionRenderer,
 } from "../shared/FieldRenderer";
 
 type CanvasCardProps = {
@@ -82,8 +84,9 @@ export function CanvasCard({
     selected ? "ring-2 ring-sky-400" : "hover:ring-2 hover:ring-slate-200"
   } ${isDragging ? "opacity-50" : ""}`;
 
-  const widthStyle = {
-    width: `${field.widthPercent || 100}%`,
+  const columnSpan = getFieldColumnSpan(field);
+  const gridStyle = {
+    gridColumn: `span ${columnSpan} / span ${columnSpan}`,
   };
 
   const controls = (
@@ -101,7 +104,7 @@ export function CanvasCard({
 
   if (field.type === "divider") {
     return (
-      <div ref={setNodeRef} style={{ ...style, ...widthStyle }} onClick={handleClick} className={`${wrapperClasses} p-3`}>
+      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-3`}>
         {controls}
         <DividerRenderer selected={selected} />
       </div>
@@ -110,7 +113,7 @@ export function CanvasCard({
 
   if (field.type === "spacer") {
     return (
-      <div ref={setNodeRef} style={{ ...style, ...widthStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
+      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
         <SpacerRenderer field={field} selected={selected} />
       </div>
@@ -119,7 +122,7 @@ export function CanvasCard({
 
   if (field.type === "heading") {
     return (
-      <div ref={setNodeRef} style={{ ...style, ...widthStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
+      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
         <HeadingRenderer field={field} />
       </div>
@@ -128,7 +131,7 @@ export function CanvasCard({
 
   if (field.type === "table") {
     return (
-      <div ref={setNodeRef} style={{ ...style, ...widthStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
+      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
         <div className="pb-2">
           <label className="block text-sm font-medium text-slate-900">
@@ -144,10 +147,28 @@ export function CanvasCard({
     );
   }
 
+  if (field.type === "box-layout") {
+    return (
+      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
+        {controls}
+        <div className="pb-2">
+          <label className="block text-sm font-medium text-slate-900">
+            {field.label}
+            {field.required && <span className="ml-1 text-red-500">*</span>}
+          </label>
+          {field.description && (
+            <p className="text-xs text-slate-500">{field.description}</p>
+          )}
+        </div>
+        <BoxLayoutSectionRenderer field={field} disabled />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={setNodeRef}
-      style={{ ...style, ...widthStyle }}
+      style={{ ...style, ...gridStyle }}
       onClick={handleClick}
       className={`${wrapperClasses} p-2 ${isDragging ? "shadow-lg" : ""}`}
     >

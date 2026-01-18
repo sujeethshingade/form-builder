@@ -10,6 +10,7 @@ export interface IFormField {
   options?: string[];
   width?: 'full' | 'half';
   widthPercent?: number;
+  widthColumns?: number;
   name?: string;
   default?: any;
   disabled?: boolean;

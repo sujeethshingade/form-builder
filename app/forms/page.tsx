@@ -132,6 +132,15 @@ export default function FormsPage() {
           <h1 className="text-2xl font-semibold text-slate-800">Form Builder</h1>
           <div className="flex items-center text-sm gap-3">
             <button
+              onClick={() => router.push('/layouts')}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
+              </svg>
+              Layouts
+            </button>
+            <button
               onClick={() => router.push('/builder/new')}
               className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
             >

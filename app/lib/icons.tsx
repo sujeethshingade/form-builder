@@ -206,6 +206,14 @@ export const CursorIcon = ({ className = "h-8 w-8" }: { className?: string }) =>
   </svg>
 );
 
+// Box Layout Icon
+export const BoxLayoutIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zM4 13h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2a1 1 0 011-1z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 5v4M12 5v4M16 5v4M8 13v4M12 13v4M16 13v4" />
+  </svg>
+);
+
 export function getIconForType(type: ComponentType): ReactNode {
   const iconMap: Record<ComponentType, ReactNode> = {
     text: <TextIcon />,
@@ -223,6 +231,7 @@ export function getIconForType(type: ComponentType): ReactNode {
     divider: <DividerIcon />,
     spacer: <SpacerIcon />,
     table: <TableIcon />,
+    "box-layout": <BoxLayoutIcon />,
   };
   return iconMap[type] || null;
 }

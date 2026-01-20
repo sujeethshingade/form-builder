@@ -22,6 +22,13 @@ interface APIConfig {
   labelKey: string;
 }
 
+interface TableColumn {
+  name: string;
+  label: string;
+  type: string;
+  required?: boolean;
+}
+
 interface CustomFieldForm {
   fieldName: string;
   fieldLabel: string;
@@ -33,6 +40,7 @@ interface CustomFieldForm {
   lovType: "user-defined" | "dynamic-api";
   lovItems: LOVItem[];
   apiConfig: APIConfig;
+  tableColumns: TableColumn[];
 }
 
 const dataTypes = [
@@ -82,6 +90,7 @@ function CustomFieldsContent() {
       valueKey: "",
       labelKey: "",
     },
+    tableColumns: [],
   });
 
   const [apiTestResult, setApiTestResult] = useState<any[] | null>(null);
@@ -215,6 +224,7 @@ function CustomFieldsContent() {
         valueKey: "",
         labelKey: "",
       },
+      tableColumns: field.tableColumns || [],
     });
     setApiTestResult(null);
     setApiTestError(null);
@@ -270,6 +280,7 @@ function CustomFieldsContent() {
           lovType: form.lovType,
           lovItems: form.lovItems,
           apiConfig: form.apiConfig,
+          tableColumns: form.tableColumns,
         }),
       });
 
@@ -313,6 +324,7 @@ function CustomFieldsContent() {
         valueKey: "",
         labelKey: "",
       },
+      tableColumns: [],
     });
     setNewCategory("");
     setShowNewCategory(false);
@@ -783,6 +795,118 @@ function CustomFieldsContent() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Table Configuration - only for table type */}
+              {form.dataType === "table" && (
+                <div className="pt-4 mt-4">
+                  <h3 className="text-md font-medium text-slate-600 mb-3">Table Columns</h3>
+                  
+                  <div className="space-y-4">
+                    {form.tableColumns.map((column, index) => (
+                      <div key={index} className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-slate-700">Column {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newColumns = [...form.tableColumns];
+                              newColumns.splice(index, 1);
+                              setForm({ ...form, tableColumns: newColumns });
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Label *</label>
+                            <input
+                              type="text"
+                              value={column.label}
+                              onChange={(e) => {
+                                const newColumns = [...form.tableColumns];
+                                newColumns[index] = { 
+                                  ...column, 
+                                  label: e.target.value,
+                                  name: e.target.value.toLowerCase().replace(/\s+/g, '_')
+                                };
+                                setForm({ ...form, tableColumns: newColumns });
+                              }}
+                              placeholder="Column Label"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Type *</label>
+                            <select
+                              value={column.type}
+                              onChange={(e) => {
+                                const newColumns = [...form.tableColumns];
+                                newColumns[index] = { ...column, type: e.target.value };
+                                setForm({ ...form, tableColumns: newColumns });
+                              }}
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            >
+                              <option value="text">Text</option>
+                              <option value="number">Number</option>
+                              <option value="email">Email</option>
+                              <option value="date">Date</option>
+                              <option value="dropdown">Dropdown</option>
+                              <option value="checkbox">Checkbox</option>
+                              <option value="radio">Radio Button</option>
+                            </select>
+                          </div>
+
+                          <div className="flex items-center pt-6">
+                             <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={column.required}
+                                onChange={(e) => {
+                                  const newColumns = [...form.tableColumns];
+                                  newColumns[index] = { ...column, required: e.target.checked };
+                                  setForm({ ...form, tableColumns: newColumns });
+                                }}
+                                className="w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"
+                              />
+                              <span className="text-sm text-slate-700">Required</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm({
+                          ...form,
+                          tableColumns: [
+                            ...form.tableColumns,
+                            { 
+                              name: `column_${form.tableColumns.length + 1}`, 
+                              label: `Column ${form.tableColumns.length + 1}`, 
+                              type: 'text',
+                              required: false
+                            }
+                          ]
+                        });
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sky-600 border border-sky-300 rounded-md hover:bg-sky-50 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Column
+                    </button>
                   </div>
                 </div>
               )}

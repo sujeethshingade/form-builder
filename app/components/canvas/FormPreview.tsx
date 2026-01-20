@@ -245,24 +245,102 @@ function PreviewField({
   // Table
   if (field.type === "table") {
     const columns = (field.columns as any[]) || [];
-    const rows = (value as Record<string, unknown>[]) || field.rows || [{}];
+    const rows = (value as Record<string, unknown>[]) || field.tableRows || [];
 
-    const handleRowChange = (rowIndex: number, colName: string, cellValue: unknown) => {
+    const handleCellChange = (rowIndex: number, colName: string, cellValue: unknown) => {
       const newRows = [...rows];
       newRows[rowIndex] = { ...newRows[rowIndex], [colName]: cellValue };
       handleChange(newRows);
     };
 
-    const addRow = () => {
-      if (field.maxRowsTable && rows.length >= field.maxRowsTable) return;
-      const newRow: Record<string, unknown> = {};
-      columns.forEach(col => { newRow[col.name] = ""; });
-      handleChange([...rows, newRow]);
-    };
-
-    const removeRow = (index: number) => {
-      if (field.minRowsTable && rows.length <= field.minRowsTable) return;
-      handleChange(rows.filter((_, i) => i !== index));
+    const renderCellInput = (col: any, row: Record<string, unknown>, rowIndex: number) => {
+      const cellValue = row[col.name];
+      
+      switch (col.type) {
+        case "dropdown":
+          return (
+            <select
+              value={(cellValue as string) || ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            >
+              <option value="">Select...</option>
+              {(col.options || []).map((opt: any) => (
+                <option key={String(opt.value)} value={String(opt.value)}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          );
+        
+        case "checkbox":
+          return (
+            <input
+              type="checkbox"
+              checked={Boolean(cellValue)}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.checked)}
+              className="rounded text-sky-500 focus:ring-sky-500"
+            />
+          );
+        
+        case "number":
+          return (
+            <input
+              type="number"
+              value={(cellValue as number) ?? ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value ? Number(e.target.value) : "")}
+              placeholder={col.placeholder}
+              min={col.min}
+              max={col.max}
+              step={col.step}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          );
+        
+        case "email":
+          return (
+            <input
+              type="email"
+              value={(cellValue as string) || ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+              placeholder={col.placeholder}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          );
+        
+        case "date":
+          return (
+            <input
+              type="date"
+              value={(cellValue as string) || ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          );
+        
+        case "textarea":
+          return (
+            <textarea
+              value={(cellValue as string) || ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+              placeholder={col.placeholder}
+              rows={col.rows || 2}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          );
+        
+        case "text":
+        default:
+          return (
+            <input
+              type="text"
+              value={(cellValue as string) || ""}
+              onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+              placeholder={col.placeholder}
+              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          );
+      }
     };
 
     return (
@@ -282,14 +360,13 @@ function PreviewField({
                       {col.label}
                     </th>
                   ))}
-                  {field.removable !== false && <th className="w-10"></th>}
                 </tr>
               </thead>
             )}
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length + 1} className="px-3 py-4 text-center text-slate-500">
+                  <td colSpan={columns.length} className="px-3 py-4 text-center text-slate-500">
                     {field.emptyText || "No rows added"}
                   </td>
                 </tr>
@@ -298,41 +375,14 @@ function PreviewField({
                   <tr key={rowIndex} className={`border-t border-slate-200 ${field.hover !== false ? "hover:bg-slate-50" : ""} ${field.striped && rowIndex % 2 === 1 ? "bg-slate-50" : ""}`}>
                     {columns.map((col) => (
                       <td key={col.name} className={`px-3 py-2 ${field.compact ? "px-2 py-1" : ""}`}>
-                        <input
-                          type={col.type === "number" ? "number" : col.type === "email" ? "email" : col.type === "date" ? "date" : "text"}
-                          value={(row[col.name] as string) || ""}
-                          onChange={(e) => handleRowChange(rowIndex, col.name, e.target.value)}
-                          placeholder={col.placeholder}
-                          className="w-full px-2 py-1 border border-slate-300 rounded text-sm"
-                        />
+                        {renderCellInput(col, row, rowIndex)}
                       </td>
                     ))}
-                    {field.removable !== false && (
-                      <td className="px-2">
-                        <button
-                          type="button"
-                          onClick={() => removeRow(rowIndex)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          ×
-                        </button>
-                      </td>
-                    )}
                   </tr>
                 ))
               )}
             </tbody>
           </table>
-          {field.addable !== false && (
-            <button
-              type="button"
-              onClick={addRow}
-              disabled={field.maxRowsTable ? rows.length >= field.maxRowsTable : false}
-              className="w-full py-2 text-sm text-sky-600 hover:bg-slate-50 border-t border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              + {field.addRowLabel || "Add Row"}
-            </button>
-          )}
         </div>
         {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>

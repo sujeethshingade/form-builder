@@ -8,6 +8,13 @@ export interface ILOVItem {
   status: 'Active' | 'Inactive';
 }
 
+export interface ITableColumn {
+  name: string;
+  label: string;
+  type: string;
+  required?: boolean;
+}
+
 export interface ICustomField extends Document {
   fieldName: string;
   fieldLabel: string;
@@ -16,6 +23,7 @@ export interface ICustomField extends Document {
   category: string;
   lovType?: 'user-defined' | 'api';
   lovItems?: ILOVItem[];
+  tableColumns?: ITableColumn[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +34,13 @@ const LOVItemSchema = new Schema({
   description: { type: String },
   seamlessMapping: { type: String },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+});
+
+const TableColumnSchema = new Schema({
+  name: { type: String, required: true },
+  label: { type: String, required: true },
+  type: { type: String, required: true },
+  required: { type: Boolean, default: false },
 });
 
 const CustomFieldSchema = new Schema<ICustomField>({
@@ -59,6 +74,7 @@ const CustomFieldSchema = new Schema<ICustomField>({
     enum: ['user-defined', 'api'],
   },
   lovItems: [LOVItemSchema],
+  tableColumns: [TableColumnSchema],
 }, {
   timestamps: true,
 });

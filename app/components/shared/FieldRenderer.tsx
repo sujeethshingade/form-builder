@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { FormField, VueformItem, VueformColumn } from "../../lib/types";
 
 type FieldRendererProps = {
@@ -381,11 +381,36 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
   );
 }
 
-export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
+export function TableRenderer({ field, disabled = true, preview = false, onUpdateRows }: FieldRendererProps & { preview?: boolean; onUpdateRows?: (rows: Record<string, unknown>[]) => void }) {
   const columns: VueformColumn[] = Array.isArray(field.columns) ? field.columns : [];
-  const rows: Record<string, unknown>[] = field.tableRows || [];
+  const [rows, setRows] = useState<Record<string, unknown>[]>(field.tableRows || []);
   const size = field.size || "md";
   const renderKey = `${field.id}-${columns.length}-${rows.length}`;
+
+  // Update internal state when field.tableRows changes
+  useEffect(() => {
+    setRows(field.tableRows || []);
+  }, [field.tableRows]);
+
+  const addRow = () => {
+    const newRow: Record<string, unknown> = {};
+    columns.forEach(col => {
+      newRow[col.name] = "";
+    });
+    const updatedRows = [...rows, newRow];
+    setRows(updatedRows);
+    if (onUpdateRows) {
+      onUpdateRows(updatedRows);
+    }
+  };
+
+  const removeRow = (index: number) => {
+    const updatedRows = rows.filter((_, i) => i !== index);
+    setRows(updatedRows);
+    if (onUpdateRows) {
+      onUpdateRows(updatedRows);
+    }
+  };
 
   return (
     <div key={renderKey} className="w-full overflow-x-auto">
@@ -401,12 +426,17 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
                 {col.label}
               </th>
             ))}
+            {!preview && (
+              <th className="border border-slate-300 px-3 py-2 text-left font-medium text-slate-700 w-20">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="border border-slate-300 p-4 text-center text-slate-500">
+              <td colSpan={columns.length + (preview ? 0 : 1)} className="border border-slate-300 p-4 text-center text-slate-500">
                 No rows added
               </td>
             </tr>
@@ -415,35 +445,44 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
               <tr key={rowIndex}>
                 {columns.map((col) => (
                   <td key={col.name} className="border border-slate-300 p-1">
-                    {col.type === "dropdown" ? (
-                      <select
-                        disabled={disabled || field.disabled}
-                        className={`w-full border-0 bg-transparent ${sizeClasses[size]} text-slate-500 focus:outline-none`}
-                        defaultValue={String(row[col.name] ?? "")}
-                      >
-                        <option value="">Select...</option>
-                        {(col.options || []).map((opt) => (
-                          <option key={String(opt.value)} value={String(opt.value)}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type={col.type || "text"}
-                        placeholder={col.placeholder || ""}
-                        disabled={disabled || field.disabled}
-                        className={`w-full border-0 bg-transparent ${sizeClasses[size]} text-slate-500 focus:outline-none`}
-                        defaultValue={String(row[col.name] ?? "")}
-                      />
-                    )}
+                    <div className={`w-full ${sizeClasses[size]} text-slate-700`}>
+                      {col.type === "checkbox" 
+                        ? (Boolean(row[col.name]) ? "✓" : "")
+                        : String(row[col.name] ?? "")}
+                    </div>
                   </td>
                 ))}
+                {!preview && (
+                  <td className="border border-slate-300 p-1 text-center">
+                    {!disabled && (
+                      <button
+                        onClick={() => removeRow(rowIndex)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        title="Remove row"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))
           )}
         </tbody>
       </table>
+      {!preview && !disabled && (
+        <button
+          onClick={addRow}
+          className="mt-2 flex items-center gap-1 text-sm text-sky-500 hover:text-sky-600 font-medium"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Row
+        </button>
+      )}
     </div>
   );
 }

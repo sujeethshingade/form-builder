@@ -225,25 +225,6 @@ export default function InspectorSidebar({
     handleColumnsChange(currentColumns.filter((_: VueformColumn, i: number) => i !== index));
   };
 
-  // Row handlers
-  const handleRowsChange = (rows: Record<string, unknown>[]) => {
-    onUpdate({ tableRows: rows });
-  };
-
-  const addRow = () => {
-    const currentRows = field.tableRows || [];
-    const newRow: Record<string, unknown> = {};
-    (Array.isArray(field.columns) ? field.columns : []).forEach((col: VueformColumn) => {
-      newRow[col.name] = "";
-    });
-    handleRowsChange([...currentRows, newRow]);
-  };
-
-  const removeRow = (index: number) => {
-    const currentRows = field.tableRows || [];
-    handleRowsChange(currentRows.filter((_: Record<string, unknown>, i: number) => i !== index));
-  };
-
   // Custom Scripts handlers
   const handleScriptsChange = (scripts: CustomScript[]) => {
     onUpdate({ scripts });
@@ -950,104 +931,25 @@ export default function InspectorSidebar({
             {isTableField && (
               <>
                 <Section title="Columns" defaultOpen={true}>
-                  <div className="space-y-3">
-                    {((field.columns as VueformColumn[]) || []).map((col, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border border-gray-200 rounded-lg space-y-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={col.label}
-                            onChange={(e) =>
-                              updateColumn(index, {
-                                label: e.target.value,
-                                name: e.target.value.toLowerCase().replace(/\s+/g, "_"),
-                              })
-                            }
-                            placeholder="Column label"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
-                          />
-                          <button
-                            onClick={() => removeColumn(index)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <TrashIcon />
-                          </button>
-                        </div>
-                        <select
-                          value={col.type}
-                          onChange={(e) =>
-                            updateColumn(index, {
-                              type: e.target.value as VueformColumn["type"],
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
-                        >
-                          <option value="text">Text</option>
-                          <option value="number">Number</option>
-                          <option value="email">Email</option>
-                          <option value="date">Date</option>
-                          <option value="dropdown">Dropdown</option>
-                          <option value="checkbox">Checkbox</option>
-                        </select>
-                      </div>
-                    ))}
-                    <button
-                      onClick={addColumn}
-                      className="flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-600 font-medium"
-                    >
-                      <PlusIcon />
-                      Add Column
-                    </button>
+                  <div className="text-sm text-gray-500 italic p-3 bg-gray-50 rounded border border-gray-200 mb-3">
+                    Columns are managed by the associated Custom Field settings. Rows can be added/removed directly in the canvas.
                   </div>
-                </Section>
-
-                <Section title="Rows" defaultOpen={false}>
                   <div className="space-y-2">
-                    {(field.tableRows || []).map((row, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg">
-                        <span className="text-sm text-gray-600">Row {index + 1}</span>
-                        <button
-                          onClick={() => removeRow(index)}
-                          className="ml-auto p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-                        >
-                          <TrashIcon />
-                        </button>
+                    {((field.columns as VueformColumn[]) || []).map((col, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 border border-gray-100 rounded bg-gray-50">
+                        <span className="text-sm font-medium text-gray-700 flex-1">{col.label}</span>
+                        <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">{col.type}</span>
                       </div>
                     ))}
-                    <button
-                      onClick={addRow}
-                      className="flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-600 font-medium"
-                    >
-                      <PlusIcon />
-                      Add Row
-                    </button>
+                    {(!field.columns || (Array.isArray(field.columns) && field.columns.length === 0)) && (
+                      <div className="text-sm text-gray-400 text-center py-2">
+                        No columns defined.
+                      </div>
+                    )}
                   </div>
                 </Section>
 
                 <Section title="Table Options" defaultOpen={false}>
-                  <InputField
-                    label="Min Rows"
-                    value={field.minRowsTable}
-                    onChange={(val) => handleChange("minRowsTable", val ? parseInt(val) : undefined)}
-                    type="number"
-                    min={0}
-                  />
-                  <InputField
-                    label="Max Rows"
-                    value={field.maxRowsTable}
-                    onChange={(val) => handleChange("maxRowsTable", val ? parseInt(val) : undefined)}
-                    type="number"
-                    min={1}
-                  />
-                  <InputField
-                    label="Add Row Label"
-                    value={field.addRowLabel}
-                    onChange={(val) => handleChange("addRowLabel", val)}
-                    placeholder="Add Row"
-                  />
                   <InputField
                     label="Empty Text"
                     value={field.emptyText}
@@ -1058,16 +960,6 @@ export default function InspectorSidebar({
                     label="Show Header"
                     checked={field.showHeader !== false}
                     onChange={(val) => handleChange("showHeader", val)}
-                  />
-                  <Toggle
-                    label="Addable"
-                    checked={field.addable !== false}
-                    onChange={(val) => handleChange("addable", val)}
-                  />
-                  <Toggle
-                    label="Removable"
-                    checked={field.removable !== false}
-                    onChange={(val) => handleChange("removable", val)}
                   />
                   <Toggle
                     label="Striped Rows"
@@ -1088,11 +980,6 @@ export default function InspectorSidebar({
                     label="Compact"
                     checked={field.compact || false}
                     onChange={(val) => handleChange("compact", val)}
-                  />
-                  <Toggle
-                    label="Reorderable"
-                    checked={field.reorderable || false}
-                    onChange={(val) => handleChange("reorderable", val)}
                   />
                 </Section>
               </>

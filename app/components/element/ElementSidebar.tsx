@@ -11,6 +11,13 @@ interface LOVItem {
   status: "Active" | "Inactive";
 }
 
+interface TableColumn {
+  name: string;
+  label: string;
+  type: string;
+  required?: boolean;
+}
+
 interface CustomFieldData {
   _id: string;
   fieldName: string;
@@ -21,6 +28,7 @@ interface CustomFieldData {
   lovEnabled: boolean;
   lovType?: string;
   lovItems?: LOVItem[];
+  tableColumns?: TableColumn[];
 }
 
 interface FormLayoutData {
@@ -42,6 +50,7 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
       fieldLabel: field.fieldLabel,
       lovEnabled: field.lovEnabled,
       lovItems: field.lovItems,
+      tableColumns: field.tableColumns,
     },
   });
 

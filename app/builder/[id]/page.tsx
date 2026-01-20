@@ -400,6 +400,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
       const fieldName = activeData?.fieldName;
       const customFieldId = activeData?.customFieldId;
       const lovItems = activeData?.lovItems;
+      const tableColumns = activeData?.tableColumns;
 
       if (!fieldType) return;
 
@@ -432,6 +433,17 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             value: item.code,
             label: item.shortName,
           }));
+      }
+
+      // If it's a table field with columns, add the columns
+      if (fieldType === "table" && tableColumns && tableColumns.length > 0) {
+        newField.columns = tableColumns.map((col: any) => ({
+          name: col.name,
+          label: col.label,
+          type: col.type || "text",
+          required: col.required || false,
+        }));
+        newField.tableRows = []; // Initialize with empty rows
       }
 
       if (!overId || overId === "canvas") {
@@ -490,6 +502,13 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     pushUndo(fields);
     setFields((prev) =>
       prev.map((f) => (f.id === selectedId ? { ...f, ...patch } : f))
+    );
+  };
+
+  const handleFieldUpdateById = (fieldId: string, patch: Partial<FormField>) => {
+    pushUndo(fields);
+    setFields((prev) =>
+      prev.map((f) => (f.id === fieldId ? { ...f, ...patch } : f))
     );
   };
 
@@ -612,6 +631,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                 onMoveUp={handleMoveUp}
                 onMoveDown={handleMoveDown}
                 styles={styles}
+                onUpdateField={handleFieldUpdateById}
               />
             ) : workspaceView === "preview" ? (
               <FormPreview 

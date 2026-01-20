@@ -65,7 +65,7 @@ export type VueformItem = {
 export type VueformColumn = {
   name: string;
   label: string;
-  type: "text" | "number" | "email" | "dropdown" | "date" | "checkbox" | "phone" | "textarea";
+  type: "text" | "number" | "email" | "dropdown" | "date" | "checkbox" | "phone" | "textarea" | "radio";
   width?: string;
   placeholder?: string;
   options?: VueformItem[];
@@ -401,14 +401,7 @@ export type SpacerVueformProps = DividerVueformProps & {
 
 export type TableVueformProps = BaseVueformProps & {
   columns: VueformColumn[];
-  rows?: Record<string, any>[];
   tableRows?: Record<string, any>[];
-
-  // Validation
-  minRows?: number;
-  maxRows?: number;
-  minRowsTable?: number;
-  maxRowsTable?: number;
 
   // Display
   showHeader?: boolean;
@@ -417,22 +410,7 @@ export type TableVueformProps = BaseVueformProps & {
   hover?: boolean;
   compact?: boolean;
 
-  // Behavior
-  addable?: boolean;
-  removable?: boolean;
-  sortable?: boolean;
-  reorderable?: boolean;
-
-  // Columns
-  resizable?: boolean;
-
-  // Pagination
-  pagination?: boolean;
-  rowsPerPage?: number;
-
   // Labels
-  addRowLabel?: string;
-  removeRowLabel?: string;
   emptyText?: string;
 };
 
@@ -488,7 +466,7 @@ export type FormField = {
   size?: "sm" | "md" | "lg";
   inputType?: string;
   addons?: VueformAddon;
-  
+
   // Custom field reference for LOV-based fields (dropdown, checkbox, radio)
   customFieldId?: string;
   lovItems?: LOVItem[];
@@ -604,22 +582,11 @@ export type FormField = {
 
   // Table specific
   tableRows?: Record<string, any>[];
-  minRowsTable?: number;
-  maxRowsTable?: number;
   showHeader?: boolean;
   striped?: boolean;
   bordered?: boolean;
   hover?: boolean;
   compact?: boolean;
-  addable?: boolean;
-  removable?: boolean;
-  sortable?: boolean;
-  reorderable?: boolean;
-  resizable?: boolean;
-  pagination?: boolean;
-  rowsPerPage?: number;
-  addRowLabel?: string;
-  removeRowLabel?: string;
   emptyText?: string;
 
   // Text slots
@@ -641,9 +608,6 @@ export type FormField = {
 
   // Validation Rules
   validationRules?: ValidationRule[];
-
-  // Legacy rows field for table (use tableRows instead)
-  rows?: number;
 
   [key: string]: any;
 };

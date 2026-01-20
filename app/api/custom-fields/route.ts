@@ -6,31 +6,31 @@ import CustomField from '@/app/lib/models/CustomField';
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const dataType = searchParams.get('dataType');
-    
+
     let query: any = {};
-    
+
     if (category) {
       query.category = category;
     }
-    
+
     if (dataType) {
       query.dataType = dataType;
     }
-    
+
     if (search) {
       query.$or = [
         { fieldName: { $regex: search, $options: 'i' } },
         { fieldLabel: { $regex: search, $options: 'i' } },
       ];
     }
-    
+
     const customFields = await CustomField.find(query).sort({ createdAt: -1 });
-    
+
     return NextResponse.json({ success: true, data: customFields });
   } catch (error: any) {
     return NextResponse.json(
@@ -44,17 +44,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
-    
+
     const body = await request.json();
-    const { fieldName, fieldLabel, dataType, className, category, lovType, lovItems } = body;
-    
+    const { fieldName, fieldLabel, dataType, className, category, lovType, lovItems, tableColumns } = body;
+
     if (!fieldName || !fieldLabel || !dataType || !category) {
       return NextResponse.json(
         { success: false, error: 'Field name, label, data type, and category are required' },
         { status: 400 }
       );
     }
-    
+
     const customField = await CustomField.create({
       fieldName,
       fieldLabel,
@@ -63,8 +63,9 @@ export async function POST(request: NextRequest) {
       category,
       lovType,
       lovItems: lovItems || [],
+      tableColumns: tableColumns || [],
     });
-    
+
     return NextResponse.json({ success: true, data: customField }, { status: 201 });
   } catch (error: any) {
     if (error.code === 11000) {

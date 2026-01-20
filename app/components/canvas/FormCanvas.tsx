@@ -14,6 +14,7 @@ type FormCanvasProps = {
   onMoveUp?: (id: string) => void;
   onMoveDown?: (id: string) => void;
   styles: FormStyles;
+  onUpdateField?: (fieldId: string, updates: Partial<FormField>) => void;
 };
 
 export function FormCanvas({
@@ -25,6 +26,7 @@ export function FormCanvas({
   onMoveUp,
   onMoveDown,
   styles,
+  onUpdateField,
 }: FormCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
 
@@ -68,6 +70,7 @@ export function FormCanvas({
                     canMoveUp={index > 0}
                     canMoveDown={index < fields.length - 1}
                     styles={styles}
+                    onUpdateField={onUpdateField}
                   />
                 ))}
               </div>

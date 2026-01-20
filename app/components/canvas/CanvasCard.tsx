@@ -24,6 +24,7 @@ type CanvasCardProps = {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   styles: FormStyles;
+  onUpdateField?: (fieldId: string, updates: Partial<FormField>) => void;
 };
 
 export function CanvasCard({
@@ -36,6 +37,7 @@ export function CanvasCard({
   onMoveDown,
   canMoveUp = true,
   canMoveDown = true,
+  onUpdateField,
 }: CanvasCardProps) {
   const {
     attributes,
@@ -129,6 +131,12 @@ export function CanvasCard({
   }
 
   if (field.type === "table") {
+    const handleRowsUpdate = (rows: Record<string, unknown>[]) => {
+      if (onUpdateField) {
+        onUpdateField(field.id, { tableRows: rows });
+      }
+    };
+
     return (
       <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
@@ -141,7 +149,7 @@ export function CanvasCard({
             <p className="text-xs text-slate-500">{field.description}</p>
           )}
         </div>
-        <TableRenderer field={field} disabled />
+        <TableRenderer field={field} disabled={false} preview={false} onUpdateRows={handleRowsUpdate} />
       </div>
     );
   }

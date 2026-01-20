@@ -10,16 +10,16 @@ export async function GET(
   try {
     await connectDB();
     const { id } = await params;
-    
+
     const customField = await CustomField.findById(id);
-    
+
     if (!customField) {
       return NextResponse.json(
         { success: false, error: 'Custom field not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({ success: true, data: customField });
   } catch (error: any) {
     return NextResponse.json(
@@ -38,20 +38,20 @@ export async function PUT(
     await connectDB();
     const { id } = await params;
     const body = await request.json();
-    
+
     const customField = await CustomField.findByIdAndUpdate(
       id,
       { $set: body },
       { new: true, runValidators: true }
     );
-    
+
     if (!customField) {
       return NextResponse.json(
         { success: false, error: 'Custom field not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({ success: true, data: customField });
   } catch (error: any) {
     if (error.code === 11000) {
@@ -75,16 +75,16 @@ export async function DELETE(
   try {
     await connectDB();
     const { id } = await params;
-    
+
     const customField = await CustomField.findByIdAndDelete(id);
-    
+
     if (!customField) {
       return NextResponse.json(
         { success: false, error: 'Custom field not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({ success: true, data: customField });
   } catch (error: any) {
     return NextResponse.json(

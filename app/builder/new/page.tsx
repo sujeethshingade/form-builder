@@ -252,6 +252,7 @@ export default function NewFormBuilderPage() {
       const fieldName = activeData?.fieldName;
       const customFieldId = activeData?.customFieldId;
       const lovItems = activeData?.lovItems;
+      const tableColumns = activeData?.tableColumns;
 
       if (!fieldType) return;
 
@@ -281,6 +282,17 @@ export default function NewFormBuilderPage() {
             value: item.code,
             label: item.shortName,
           }));
+      }
+
+      // If it's a table field with columns, add the columns
+      if (fieldType === "table" && tableColumns && tableColumns.length > 0) {
+        newField.columns = tableColumns.map((col: any) => ({
+          name: col.name,
+          label: col.label,
+          type: col.type || "text",
+          required: col.required || false,
+        }));
+        newField.tableRows = []; // Initialize with empty rows
       }
 
       if (!overId || overId === "canvas") {
@@ -339,6 +351,13 @@ export default function NewFormBuilderPage() {
     pushUndo(fields);
     setFields((prev) =>
       prev.map((f) => (f.id === selectedId ? { ...f, ...patch } : f))
+    );
+  };
+
+  const handleFieldUpdateById = (fieldId: string, patch: Partial<FormField>) => {
+    pushUndo(fields);
+    setFields((prev) =>
+      prev.map((f) => (f.id === fieldId ? { ...f, ...patch } : f))
     );
   };
 
@@ -429,6 +448,7 @@ export default function NewFormBuilderPage() {
                 onMoveUp={handleMoveUp}
                 onMoveDown={handleMoveDown}
                 styles={styles}
+                onUpdateField={handleFieldUpdateById}
               />
             ) : workspaceView === "preview" ? (
               <FormPreview 

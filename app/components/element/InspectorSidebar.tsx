@@ -406,7 +406,6 @@ export default function InspectorSidebar({
                 value={field.widthColumns || 12}
                 onChange={(columns) => handleChange("widthColumns", columns)}
                 label="Width"
-                description="Select how many columns this field spans (1-12)"
               />
 
               {/* Size */}

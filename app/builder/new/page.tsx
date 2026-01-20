@@ -193,6 +193,9 @@ export default function NewFormBuilderPage() {
       const layoutName = event?.active?.data?.current?.layoutName;
       const layoutType = event?.active?.data?.current?.layoutType;
       setActiveDrag({ type: "layout", label: layoutName || (layoutType === "form-group" ? "Form Group" : "Grid Layout") });
+    } else if (event?.active?.data?.current?.from === "form") {
+      const formName = event?.active?.data?.current?.formName;
+      setActiveDrag({ type: "form", label: formName || "Form" });
     } else if (activeType) {
       const libItem = library.find((l) => l.type === activeType);
       if (libItem) setActiveDrag({ type: libItem.type, label: libItem.label });
@@ -216,7 +219,7 @@ export default function NewFormBuilderPage() {
       pushUndo(fields);
       
       // Create new fields with new IDs from the layout
-      const newFields: FormField[] = layoutFields.map((field: any) => ({
+      const newFields: FormField[] = layoutFields.map((field: FormField) => ({
         ...field,
         id: nanoid(), // Generate new unique ID
       }));
@@ -237,6 +240,47 @@ export default function NewFormBuilderPage() {
       }
       
       // Select the first field of the added layout
+      if (newFields.length > 0) {
+        setSelectedId(newFields[0].id);
+      }
+      
+      setActiveDrag(null);
+      return;
+    }
+
+    // Handle form drop - add all fields from the form
+    if (activeData?.from === "form") {
+      const formFields = activeData?.fields;
+      
+      if (!formFields || !Array.isArray(formFields) || formFields.length === 0) {
+        setActiveDrag(null);
+        return;
+      }
+
+      pushUndo(fields);
+      
+      // Create new fields with new IDs from the form
+      const newFields: FormField[] = formFields.map((field: FormField) => ({
+        ...field,
+        id: nanoid(), // Generate new unique ID
+      }));
+
+      if (!overId || overId === "canvas") {
+        setFields((prev) => [...prev, ...newFields]);
+      } else {
+        const targetIndex = fields.findIndex((f) => f.id === overId);
+        if (targetIndex >= 0) {
+          setFields((prev) => {
+            const next = [...prev];
+            next.splice(targetIndex, 0, ...newFields);
+            return next;
+          });
+        } else {
+          setFields((prev) => [...prev, ...newFields]);
+        }
+      }
+      
+      // Select the first field of the added form
       if (newFields.length > 0) {
         setSelectedId(newFields[0].id);
       }

@@ -39,6 +39,20 @@ interface FormLayoutData {
   fields: any[];
 }
 
+interface FormData {
+  _id: string;
+  formName: string;
+  collectionName: string;
+  formJson?: {
+    fields: any[];
+  };
+}
+
+interface Collection {
+  _id: string;
+  name: string;
+}
+
 function CustomFieldCard({ field }: { field: CustomFieldData }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `custom-field-${field._id}`,
@@ -116,20 +130,53 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
   );
 }
 
+function FormCard({ form }: { form: FormData }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `form-${form._id}`,
+    data: { 
+      from: "form", 
+      formId: form._id, 
+      formName: form.formName,
+      collectionName: form.collectionName,
+      fields: form.formJson?.fields || []
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={`flex items-center gap-2 border rounded-sm px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing bg-white border-slate-200 hover:bg-slate-50 ${
+        isDragging ? "opacity-50 shadow-md" : ""
+      }`}
+    >
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium text-slate-700 truncate">{form.formName}</div>
+        <div className="text-xs text-slate-400 truncate">{form.collectionName}</div>
+      </div>
+    </div>
+  );
+}
+
 export function ElementSidebar({ 
   formCategory 
 }: { 
   formCategory?: string;
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"fields" | "layouts">("fields");
+  const [activeTab, setActiveTab] = useState<"fields" | "layouts" | "forms">("fields");
   const [customFields, setCustomFields] = useState<CustomFieldData[]>([]);
   const [formLayouts, setFormLayouts] = useState<FormLayoutData[]>([]);
+  const [forms, setForms] = useState<FormData[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [layoutFilter, setLayoutFilter] = useState<string>("all");
+  const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [fieldSearch, setFieldSearch] = useState<string>("");
   const [layoutSearch, setLayoutSearch] = useState<string>("");
+  const [formSearch, setFormSearch] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   // Fetch custom fields
@@ -201,6 +248,49 @@ export function ElementSidebar({
     fetchCategories();
   }, []);
 
+  // Fetch collections
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await fetch("/api/collections");
+        const data = await response.json();
+        if (data.success) {
+          setCollections(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch collections:", err);
+      }
+    };
+
+    fetchCollections();
+  }, []);
+
+  // Fetch forms
+  useEffect(() => {
+    if (activeTab !== "forms") return;
+    
+    const fetchForms = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (selectedCollection) params.set("collection", selectedCollection);
+        if (formSearch.trim()) params.set("search", formSearch.trim());
+        const queryString = params.toString();
+        const response = await fetch(`/api/forms${queryString ? `?${queryString}` : ""}`);
+        const data = await response.json();
+        if (data.success) {
+          setForms(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch forms:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchForms();
+  }, [selectedCollection, formSearch, activeTab]);
+
   // Auto-select form category if provided
   useEffect(() => {
     if (formCategory && categories.includes(formCategory)) {
@@ -231,6 +321,16 @@ export function ElementSidebar({
           }`}
         >
           Layouts
+        </button>
+        <button
+          onClick={() => setActiveTab("forms")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === "forms"
+              ? "bg-sky-100 text-sky-700"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          Forms
         </button>
       </div>
 
@@ -295,7 +395,7 @@ export function ElementSidebar({
             </div>
           </div>
         </>
-      ) : (
+      ) : activeTab === "layouts" ? (
         <>
           {/* Layout Search */}
           <div className="p-2">
@@ -334,6 +434,52 @@ export function ElementSidebar({
               ) : (
                 formLayouts.map((layout) => (
                   <FormLayoutCard key={layout._id} layout={layout} />
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Form Search */}
+          <div className="p-2">
+            <input
+              type="text"
+              value={formSearch}
+              onChange={(e) => setFormSearch(e.target.value)}
+              placeholder="Search forms..."
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
+            />
+          </div>
+
+          {/* Collection Filter */}
+          <div className="p-2">
+            <select
+              value={selectedCollection}
+              onChange={(e) => setSelectedCollection(e.target.value)}
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
+            >
+              <option value="">All Collections</option>
+              {collections.map((collection) => (
+                <option key={collection._id} value={collection.name}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Forms List */}
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-2">
+              {loading ? (
+                <div className="text-center py-8 text-slate-400 text-sm">Loading forms...</div>
+              ) : forms.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-sm">
+                  No forms found.
+                </div>
+              ) : (
+                forms.map((form) => (
+                  <FormCard key={form._id} form={form} />
                 ))
               )}
             </div>

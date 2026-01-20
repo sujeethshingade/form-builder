@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     const forms = await Form.find(query)
       .sort({ createdAt: -1 })
-      .select('collectionName formName createdAt updatedAt')
+      .select('collectionName formName formJson createdAt updatedAt')
       .lean();
 
     return NextResponse.json({ success: true, data: forms });

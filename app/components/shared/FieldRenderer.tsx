@@ -446,40 +446,68 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
               <tr key={rowIndex}>
                 {columns.map((col) => (
                   <td key={col.name} className="border border-slate-300 p-1">
-                    <div className={`w-full ${sizeClasses[size]} text-slate-700`}>
-                      {col.type === "dropdown" && col.options && col.options.length > 0 ? (
-                        <div className="text-slate-500 text-xs">
-                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
-                            <div key={idx}>{opt.label || opt.shortName}</div>
-                          ))}
-                          {col.options.length > 3 && (
-                            <div className="text-slate-400">+{col.options.length - 3} more</div>
-                          )}
-                        </div>
-                      ) : col.type === "radio" && col.options && col.options.length > 0 ? (
-                        <div className="text-slate-500 text-xs">
-                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
-                            <div key={idx}>○ {opt.label || opt.shortName}</div>
-                          ))}
-                          {col.options.length > 3 && (
-                            <div className="text-slate-400">+{col.options.length - 3} more</div>
-                          )}
-                        </div>
-                      ) : col.type === "checkbox" && col.options && col.options.length > 0 ? (
-                        <div className="text-slate-500 text-xs">
-                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
-                            <div key={idx}>☐ {opt.label || opt.shortName}</div>
-                          ))}
-                          {col.options.length > 3 && (
-                            <div className="text-slate-400">+{col.options.length - 3} more</div>
-                          )}
-                        </div>
-                      ) : col.type === "checkbox" ? (
-                        Boolean(row[col.name]) ? "✓" : ""
-                      ) : (
-                        String(row[col.name] ?? "")
-                      )}
-                    </div>
+                    {col.type === "dropdown" && col.options && col.options.length > 0 ? (
+                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                        {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                          <div key={idx}>{opt.label || opt.shortName}</div>
+                        ))}
+                        {col.options.length > 3 && (
+                          <div className="text-slate-400">+{col.options.length - 3} more</div>
+                        )}
+                      </div>
+                    ) : col.type === "radio" && col.options && col.options.length > 0 ? (
+                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                        {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                          <div key={idx}>○ {opt.label || opt.shortName}</div>
+                        ))}
+                        {col.options.length > 3 && (
+                          <div className="text-slate-400">+{col.options.length - 3} more</div>
+                        )}
+                      </div>
+                    ) : col.type === "checkbox" && col.options && col.options.length > 0 ? (
+                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                        {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                          <div key={idx}>☐ {opt.label || opt.shortName}</div>
+                        ))}
+                        {col.options.length > 3 && (
+                          <div className="text-slate-400">+{col.options.length - 3} more</div>
+                        )}
+                      </div>
+                    ) : col.type === "number" ? (
+                      <input
+                        type="number"
+                        disabled
+                        placeholder="Number"
+                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
+                      />
+                    ) : col.type === "email" ? (
+                      <input
+                        type="email"
+                        disabled
+                        placeholder="Email"
+                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
+                      />
+                    ) : col.type === "date" ? (
+                      <input
+                        type="date"
+                        disabled
+                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
+                      />
+                    ) : col.type === "textarea" ? (
+                      <textarea
+                        disabled
+                        placeholder="Text area"
+                        rows={2}
+                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm resize-none focus:outline-none"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        disabled
+                        placeholder="Text"
+                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
+                      />
+                    )}
                   </td>
                 ))}
                 {!preview && (

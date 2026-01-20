@@ -333,12 +333,11 @@ export default function InspectorSidebar({
   };
 
   // Field type checks
-  const isTextInput = ["text", "email", "url"].includes(field.type);
+  const isTextInput = ["text", "email"].includes(field.type);
   const isNumberInput = field.type === "number";
   const isTextarea = field.type === "textarea";
-  const isChoiceField = ["checkbox", "radio", "select"].includes(field.type);
+  const isChoiceField = ["checkbox", "radio", "dropdown"].includes(field.type);
   const isDateField = field.type === "date";
-  const isFileField = field.type === "file";
   const isSliderField = field.type === "slider";
   const isTableField = field.type === "table";
   const isBoxLayoutField = field.type === "box-layout";
@@ -347,7 +346,7 @@ export default function InspectorSidebar({
   const isSpacerField = field.type === "spacer";
   const isLayoutField = ["heading", "divider", "spacer"].includes(field.type);
   
-  const showPlaceholder = ["text", "number", "url", "email", "select", "textarea"].includes(field.type);
+  const showPlaceholder = ["text", "number", "email", "dropdown", "textarea"].includes(field.type);
   const showRequired = !isLayoutField;
 
   return (
@@ -568,7 +567,6 @@ export default function InspectorSidebar({
                   options={[
                     { value: "text", label: "Text" },
                     { value: "email", label: "Email" },
-                    { value: "url", label: "URL" },
                     { value: "tel", label: "Telephone" },
                     { value: "numeric", label: "Numeric" },
                     { value: "decimal", label: "Decimal" },
@@ -760,7 +758,7 @@ export default function InspectorSidebar({
             {/* Choice Display Options */}
             {isChoiceField && (
               <Section title="Display Options" defaultOpen={false}>
-                {field.type !== "select" && (
+                {field.type !== "dropdown" && (
                   <>
                     <SelectField
                       label="View Style"
@@ -821,7 +819,7 @@ export default function InspectorSidebar({
                   </>
                 )}
 
-                {field.type === "select" && (
+                {field.type === "dropdown" && (
                   <>
                     <Toggle
                       label="Multiple Selection"
@@ -927,57 +925,7 @@ export default function InspectorSidebar({
             )}
 
             {/* File Upload Options */}
-            {isFileField && (
-              <Section title="File Options" defaultOpen={false}>
-                <InputField
-                  label="Accept"
-                  value={Array.isArray(field.accept) ? field.accept.join(",") : field.accept}
-                  onChange={(val) => handleChange("accept", val ? val.split(",").map(s => s.trim()) : [])}
-                  placeholder=".pdf,.doc,image/*"
-                  description="Comma-separated file types"
-                />
-                <InputField
-                  label="Max Size (bytes)"
-                  value={field.maxSize}
-                  onChange={(val) => handleChange("maxSize", val ? parseInt(val) : undefined)}
-                  type="number"
-                />
-                <InputField
-                  label="Max Files"
-                  value={field.maxFiles}
-                  onChange={(val) => handleChange("maxFiles", val ? parseInt(val) : undefined)}
-                  type="number"
-                  min={1}
-                />
-                <InputField
-                  label="Button Label"
-                  value={field.buttonLabel}
-                  onChange={(val) => handleChange("buttonLabel", val)}
-                  placeholder="Choose File"
-                />
-                <InputField
-                  label="Drop Label"
-                  value={field.dropLabel}
-                  onChange={(val) => handleChange("dropLabel", val)}
-                  placeholder="or drop files here"
-                />
-                <Toggle
-                  label="Multiple Files"
-                  checked={field.multiple || false}
-                  onChange={(val) => handleChange("multiple", val)}
-                />
-                <Toggle
-                  label="Show Preview"
-                  checked={field.preview !== false}
-                  onChange={(val) => handleChange("preview", val)}
-                />
-                <Toggle
-                  label="Drag & Drop"
-                  checked={field.drop !== false}
-                  onChange={(val) => handleChange("drop", val)}
-                />
-              </Section>
-            )}
+
 
             {/* Slider Options */}
             {isSliderField && (
@@ -1077,7 +1025,7 @@ export default function InspectorSidebar({
                           <option value="number">Number</option>
                           <option value="email">Email</option>
                           <option value="date">Date</option>
-                          <option value="select">Select</option>
+                          <option value="dropdown">Dropdown</option>
                           <option value="checkbox">Checkbox</option>
                         </select>
                       </div>
@@ -1257,10 +1205,9 @@ export default function InspectorSidebar({
                                 <option value="email">Email</option>
                                 <option value="phone">Phone</option>
                                 <option value="date">Date</option>
-                                <option value="select">Select</option>
+                                <option value="dropdown">Dropdown</option>
                                 <option value="checkbox">Checkbox</option>
                                 <option value="textarea">Textarea</option>
-                                <option value="url">URL</option>
                               </select>
                               <button
                                 onClick={() => {
@@ -1448,7 +1395,6 @@ export default function InspectorSidebar({
                         { value: "max", label: "Max Value" },
                         { value: "pattern", label: "Pattern (Regex)" },
                         { value: "email", label: "Email Format" },
-                        { value: "url", label: "URL Format" },
                         { value: "custom", label: "Custom (JavaScript)" },
                       ]}
                     />

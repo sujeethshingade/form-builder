@@ -11,7 +11,7 @@ export interface ILOVItem {
 export interface IBoxLayoutColumn {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'email' | 'select' | 'date' | 'checkbox' | 'phone' | 'textarea' | 'url';
+  type: 'text' | 'number' | 'email' | 'dropdown' | 'date' | 'checkbox' | 'phone' | 'textarea';
   placeholder?: string;
   width?: string;
   required?: boolean;
@@ -25,7 +25,7 @@ export interface IBoxLayoutColumn {
 export interface ICustomField extends Document {
   fieldName: string;
   fieldLabel: string;
-  dataType: 'text' | 'number' | 'email' | 'date' | 'select' | 'radio' | 'checkbox' | 'file' | 'url' | 'heading' | 'divider' | 'spacer' | 'table' | 'box-layout';
+  dataType: 'text' | 'number' | 'email' | 'date' | 'dropdown' | 'radio' | 'checkbox' | 'heading' | 'divider' | 'spacer' | 'table' | 'box-layout';
   className?: string;
   category: string;
   lovType?: 'user-defined' | 'api';
@@ -46,10 +46,10 @@ const LOVItemSchema = new Schema({
 const BoxLayoutColumnSchema = new Schema({
   name: { type: String, required: true },
   label: { type: String, required: true },
-  type: { 
-    type: String, 
+  type: {
+    type: String,
     required: true,
-    enum: ['text', 'number', 'email', 'select', 'date', 'checkbox', 'phone', 'textarea', 'url'],
+    enum: ['text', 'number', 'email', 'dropdown', 'date', 'checkbox', 'phone', 'textarea'],
     default: 'text'
   },
   placeholder: { type: String },
@@ -66,28 +66,28 @@ const BoxLayoutColumnSchema = new Schema({
 });
 
 const CustomFieldSchema = new Schema<ICustomField>({
-  fieldName: { 
-    type: String, 
+  fieldName: {
+    type: String,
     required: true,
     unique: true,
     trim: true,
   },
-  fieldLabel: { 
-    type: String, 
+  fieldLabel: {
+    type: String,
     required: true,
     trim: true,
   },
-  dataType: { 
-    type: String, 
+  dataType: {
+    type: String,
     required: true,
-    enum: ['text', 'number', 'email', 'date', 'select', 'radio', 'checkbox', 'file', 'url', 'heading', 'divider', 'spacer', 'table', 'box-layout'],
+    enum: ['text', 'number', 'email', 'date', 'dropdown', 'radio', 'checkbox', 'heading', 'divider', 'spacer', 'table', 'box-layout'],
   },
-  className: { 
+  className: {
     type: String,
     trim: true,
   },
-  category: { 
-    type: String, 
+  category: {
+    type: String,
     required: true,
     trim: true,
   },
@@ -101,7 +101,12 @@ const CustomFieldSchema = new Schema<ICustomField>({
   timestamps: true,
 });
 
+// Clear cached model to ensure schema changes are applied
+if (mongoose.models.CustomField) {
+  delete mongoose.models.CustomField;
+}
+
 // Prevent model recompilation error in Next.js
-const CustomField: Model<ICustomField> = mongoose.models.CustomField || mongoose.model<ICustomField>('CustomField', CustomFieldSchema);
+const CustomField: Model<ICustomField> = mongoose.model<ICustomField>('CustomField', CustomFieldSchema);
 
 export default CustomField;

@@ -3,12 +3,11 @@ import {
   TextIcon,
   NumberIcon,
   EmailIcon,
-  UrlIcon,
+
   CheckboxIcon,
   RadioIcon,
-  SelectIcon,
+  DropdownIcon,
   DateIcon,
-  FileIcon,
   SliderIcon,
   HeadingIcon,
   DividerIcon,
@@ -170,35 +169,7 @@ export const elements: ElementDefinition[] = [
     },
   },
   
-  // URL Component
-  {
-    type: "url",
-    label: "URL",
-    icon: <UrlIcon />,
-    defaultProps: {
-      name: "url_field",
-      label: "Website URL",
-      placeholder: "https://example.com",
-      default: "",
-      required: false,
-      disabled: false,
-      readonly: false,
-      inputType: "url",
-      size: "md",
-      width: "full",
-      // New properties
-      pattern: "",
-      inputmode: "url",
-      clearable: false,
-      autocomplete: "url",
-      helper: "",
-      description: "",
-      // Validation & Scripts
-      validationRules: [],
-      scripts: [],
-      conditions: [],
-    },
-  },
+
   
   // Single Choice (Radio) Component
   {
@@ -275,13 +246,13 @@ export const elements: ElementDefinition[] = [
     },
   },
   
-  // Select/Dropdown Component
+  // Dropdown Component
   {
-    type: "select",
+    type: "dropdown",
     label: "Dropdown",
-    icon: <SelectIcon />,
+    icon: <DropdownIcon />,
     defaultProps: {
-      name: "select_field",
+      name: "dropdown_field",
       label: "Select Option",
       placeholder: "Select an option...",
       default: null,
@@ -295,7 +266,7 @@ export const elements: ElementDefinition[] = [
       ],
       size: "md",
       width: "full",
-      // Select specific
+      // Dropdown specific
       multiple: false,
       search: false,
       canClear: true,
@@ -363,38 +334,7 @@ export const elements: ElementDefinition[] = [
     },
   },
   
-  // File Upload Component
-  {
-    type: "file",
-    label: "File Upload",
-    icon: <FileIcon />,
-    defaultProps: {
-      name: "file_field",
-      label: "Upload File",
-      default: null,
-      required: false,
-      disabled: false,
-      readonly: false,
-      size: "md",
-      width: "full",
-      // File specific
-      accept: "",
-      multiple: false,
-      maxSize: 10485760, // 10MB default
-      maxFiles: 5,
-      preview: true,
-      drop: true,
-      clickable: true,
-      buttonLabel: "Choose File",
-      dropLabel: "or drop files here",
-      helper: "",
-      description: "",
-      // Validation & Scripts
-      validationRules: [],
-      scripts: [],
-      conditions: [],
-    },
-  },
+
   
   // Slider Component
   {

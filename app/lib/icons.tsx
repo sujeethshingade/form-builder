@@ -29,12 +29,7 @@ export const EmailIcon = ({ className = "h-5 w-5" }: { className?: string }) => 
   </svg>
 );
 
-// URL Icon
-export const UrlIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-  </svg>
-);
+
 
 // Checkbox Icon
 export const CheckboxIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
@@ -50,8 +45,8 @@ export const RadioIcon = ({ className = "h-5 w-5" }: { className?: string }) => 
   </svg>
 );
 
-// Select Icon
-export const SelectIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+// Dropdown Icon
+export const DropdownIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
   </svg>
@@ -100,12 +95,7 @@ export const TableIcon = ({ className = "h-5 w-5" }: { className?: string }) => 
   </svg>
 );
 
-// File Upload Icon
-export const FileIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-  </svg>
-);
+
 
 // Slider Icon
 export const SliderIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
@@ -220,12 +210,10 @@ export function getIconForType(type: ComponentType): ReactNode {
     textarea: <TextareaIcon />,
     number: <NumberIcon />,
     email: <EmailIcon />,
-    url: <UrlIcon />,
     checkbox: <CheckboxIcon />,
     radio: <RadioIcon />,
-    select: <SelectIcon />,
+    dropdown: <DropdownIcon />,
     date: <DateIcon />,
-    file: <FileIcon />,
     slider: <SliderIcon />,
     heading: <HeadingIcon />,
     divider: <DividerIcon />,

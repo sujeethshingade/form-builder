@@ -339,9 +339,7 @@ export function ElementSidebar({
                 <div className="text-center py-8 text-slate-400 text-sm">Loading layouts...</div>
               ) : formLayouts.length === 0 ? (
                 <div className="text-center py-8 text-slate-400 text-sm">
-                  No form layouts found.
-                  <br />
-                  <span className="text-xs">Save a form as "Form Group" or "Grid Layout" to view.</span>
+                  Form layout not found.
                 </div>
               ) : (
                 formLayouts.map((layout) => (

@@ -19,10 +19,10 @@ export {
   TextareaIcon,
   NumberIcon,
   EmailIcon,
-  UrlIcon,
+
   CheckboxIcon,
   RadioIcon,
-  SelectIcon,
+  DropdownIcon,
   DateIcon,
   HeadingIcon,
   DividerIcon,

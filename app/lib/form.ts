@@ -15,7 +15,8 @@ export const library: LibraryItem[] = [
   { type: "text", label: "Text", icon: "T", category: "input" },
   { type: "number", label: "Number", icon: "#", category: "input" },
   { type: "email", label: "Email", icon: "@", category: "input" },
-  { type: "url", label: "URL", icon: "🔗", category: "input" },
+  { type: "dropdown", label: "Dropdown", icon: "▼", category: "choice" },
+
   { type: "radio", label: "Single choice", icon: "◉", category: "choice" },
   { type: "checkbox", label: "Multiple choice", icon: "☑", category: "choice" },
   { type: "date", label: "Date", icon: "📅", category: "input" },
@@ -26,7 +27,7 @@ export const library: LibraryItem[] = [
 ];
 
 function hasOptions(type: ComponentType): boolean {
-  return ["checkbox", "radio"].includes(type);
+  return ["checkbox", "radio", "dropdown"].includes(type);
 }
 
 function getDefaultPlaceholder(type: ComponentType): string | undefined {
@@ -41,12 +42,12 @@ export function makeField(item: LibraryItem): FormField {
     placeholder: getDefaultPlaceholder(item.type),
     helper: "",
     required: false,
-    items: hasOptions(item.type) 
+    items: hasOptions(item.type)
       ? [
-          { value: "option_1", label: "Option 1", disabled: false },
-          { value: "option_2", label: "Option 2", disabled: false },
-          { value: "option_3", label: "Option 3", disabled: false },
-        ] 
+        { value: "option_1", label: "Option 1", disabled: false },
+        { value: "option_2", label: "Option 2", disabled: false },
+        { value: "option_3", label: "Option 3", disabled: false },
+      ]
       : undefined,
     width: "full",
     widthColumns: 12,
@@ -90,14 +91,15 @@ export function fieldToSurveyJSON(fields: FormField[]) {
               return { ...base, type: "text", inputType: "email", placeholder: field.placeholder };
             case "number":
               return { ...base, type: "text", inputType: "number", placeholder: field.placeholder };
-            case "url":
-              return { ...base, type: "text", inputType: "url", placeholder: field.placeholder };
+
             case "checkbox":
               return { ...base, type: "checkbox", choices: field.options ?? [] };
             case "radio":
               return { ...base, type: "radiogroup", choices: field.options ?? [] };
             case "date":
               return { ...base, type: "text", inputType: "date" };
+            case "dropdown":
+              return { ...base, type: "dropdown", choices: field.items ?? [] };
             case "heading":
               return { ...base, type: "html", html: `<h2>${field.label}</h2>` };
             case "divider":

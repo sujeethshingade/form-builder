@@ -41,11 +41,9 @@ const dataTypes = [
   { value: "number", label: "Number" },
   { value: "email", label: "Email" },
   { value: "date", label: "Date" },
-  { value: "select", label: "Select/Dropdown" },
+  { value: "dropdown", label: "Dropdown" },
   { value: "radio", label: "Radio Button" },
   { value: "checkbox", label: "Checkbox" },
-  { value: "file", label: "File Upload" },
-  { value: "url", label: "URL" },
   { value: "heading", label: "Heading" },
   { value: "divider", label: "Divider" },
   { value: "spacer", label: "Spacer" },
@@ -60,10 +58,9 @@ const boxLayoutColumnTypes = [
   { value: "email", label: "Email" },
   { value: "phone", label: "Phone" },
   { value: "date", label: "Date" },
-  { value: "select", label: "Select/Dropdown" },
+  { value: "dropdown", label: "Dropdown" },
   { value: "checkbox", label: "Checkbox" },
   { value: "textarea", label: "Textarea" },
-  { value: "url", label: "URL" },
 ];
 
 interface BoxLayoutColumn {
@@ -541,7 +538,7 @@ function CustomFieldsContent() {
             </div>
           </div>
 
-              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && (
+              {["dropdown", "radio", "checkbox"].includes(form.dataType) && (
               <div className="pt-4 mt-4">
                 <h3 className="text-md font-medium text-slate-700 mb-3">List of Values (LOV)</h3>
                 
@@ -575,7 +572,7 @@ function CustomFieldsContent() {
               </div>
               )}
 
-              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && form.lovType === "dynamic-api" && (
+              {["dropdown", "radio", "checkbox"].includes(form.dataType) && form.lovType === "dynamic-api" && (
                 <div className="mt-4 space-y-4">
                   <h4 className="text-sm font-medium text-slate-700">API Configuration</h4>
                   
@@ -725,7 +722,7 @@ function CustomFieldsContent() {
                 </div>
               )}
 
-              {!["heading", "spacer", "divider", "table"].includes(form.dataType) && form.lovType === "user-defined" && (
+              {["dropdown", "radio", "checkbox"].includes(form.dataType) && form.lovType === "user-defined" && (
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-medium text-slate-700">User Defined LOVs</h4>
@@ -988,8 +985,8 @@ function CustomFieldsContent() {
                           </div>
                         )}
                         
-                        {/* Options - only show for select type */}
-                        {column.type === "select" && (
+                        {/* Options - only show for dropdown type */}
+                        {column.type === "dropdown" && (
                           <div className="mt-3 pt-3 border-t border-slate-200">
                             <label className="block text-xs font-medium text-slate-600 mb-2">Options</label>
                             <div className="space-y-2">

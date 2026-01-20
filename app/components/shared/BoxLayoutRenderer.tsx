@@ -225,7 +225,7 @@ export function BoxLayoutRenderer({
       "w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:border-sky-400 text-sm bg-white";
 
     switch (column.type) {
-      case "select":
+      case "dropdown":
         return (
           <select
             value={(value as string) || ""}
@@ -308,17 +308,7 @@ export function BoxLayoutRenderer({
             className={commonClasses + " resize-none"}
           />
         );
-      case "url":
-        return (
-          <input
-            type="url"
-            value={(value as string) || ""}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={disabled}
-            placeholder={column.placeholder || "https://"}
-            className={commonClasses}
-          />
-        );
+
       default:
         return (
           <input
@@ -526,7 +516,7 @@ export const contactDetailsSection: BoxLayoutSection = {
     {
       name: "contactType",
       label: "Contact Type",
-      type: "select",
+      type: "dropdown",
       options: [
         { value: "primary", label: "Primary" },
         { value: "secondary", label: "Secondary" },
@@ -555,7 +545,7 @@ export const addressDetailsSection: BoxLayoutSection = {
     {
       name: "country",
       label: "Country",
-      type: "select",
+      type: "dropdown",
       options: [
         { value: "us", label: "United States" },
         { value: "ca", label: "Canada" },
@@ -566,7 +556,7 @@ export const addressDetailsSection: BoxLayoutSection = {
     {
       name: "addressType",
       label: "Address Type",
-      type: "select",
+      type: "dropdown",
       options: [
         { value: "home", label: "Home" },
         { value: "work", label: "Work" },

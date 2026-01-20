@@ -191,7 +191,7 @@ export function DateInputRenderer({ field, disabled = true }: FieldRendererProps
   return input;
 }
 
-export function SelectRenderer({ field, disabled = true }: FieldRendererProps) {
+export function DropdownRenderer({ field, disabled = true }: FieldRendererProps) {
   const size = field.size || "md";
   const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
   
@@ -401,7 +401,7 @@ export function TableRenderer({ field, disabled = true }: FieldRendererProps) {
               <tr key={rowIndex}>
                 {columns.map((col) => (
                   <td key={col.name} className="border border-slate-300 p-1">
-                    {col.type === "select" ? (
+                    {col.type === "dropdown" ? (
                       <select
                         disabled={disabled || field.disabled}
                         className={`w-full border-0 bg-transparent ${sizeClasses[size]} text-slate-500 focus:outline-none`}
@@ -450,63 +450,7 @@ export function BoxLayoutSectionRenderer({
   );
 }
 
-export function FileRenderer({ field, disabled = true }: FieldRendererProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const acceptValue = Array.isArray(field.accept) ? field.accept.join(",") : (field.accept || "");
-  const maxSize = field.maxFileSize;
-  const multiple = field.multiple || false;
-  
-  const formatSize = (bytes?: number) => {
-    if (!bytes) return "";
-    const mb = bytes / (1024 * 1024);
-    return mb >= 1 ? `${mb.toFixed(1)}MB` : `${(bytes / 1024).toFixed(0)}KB`;
-  };
 
-  if (field.dragDrop) {
-    return (
-      <div
-        className={`w-full border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-          transition-colors hover:border-sky-400 hover:bg-sky-50
-          ${disabled || field.disabled ? "opacity-50 cursor-not-allowed bg-slate-50" : "border-slate-300 bg-white"}`}
-        onClick={() => !disabled && !field.disabled && fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={acceptValue}
-          multiple={multiple}
-          disabled={disabled || field.disabled}
-          className="hidden"
-        />
-        <div className="flex flex-col items-center gap-2">
-          <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-          <div className="text-sm text-slate-600">
-            <span className="font-medium text-sky-600">Click to upload</span> or drag and drop
-          </div>
-          <div className="text-xs text-slate-400">
-            {Array.isArray(field.accept) && field.accept.length ? field.accept.join(", ") : "Any file"}
-            {maxSize && ` (max ${formatSize(maxSize)})`}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={acceptValue}
-        multiple={multiple}
-        disabled={disabled || field.disabled}
-        className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 disabled:opacity-50"
-      />
-    </div>
-  );
-}
 
 export function SliderRenderer({ field, disabled = true }: FieldRendererProps) {
   const [value, setValue] = useState(field.default as number || field.min as number || 0);
@@ -674,7 +618,6 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
   switch (field.type) {
     case "text":
     case "email":
-    case "url":
       return <TextInputRenderer field={field} disabled={disabled} />;
     case "number":
       return <NumberInputRenderer field={field} disabled={disabled} />;
@@ -686,10 +629,8 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
       return <CheckboxRenderer field={field} disabled={disabled} />;
     case "radio":
       return <RadioRenderer field={field} disabled={disabled} />;
-    case "select":
-      return <SelectRenderer field={field} disabled={disabled} />;
-    case "file":
-      return <FileRenderer field={field} disabled={disabled} />;
+    case "dropdown":
+      return <DropdownRenderer field={field} disabled={disabled} />;
     case "slider":
       return <SliderRenderer field={field} disabled={disabled} />;
     case "table":

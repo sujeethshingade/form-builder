@@ -91,15 +91,7 @@ function validateField(
           }
         }
         break;
-      case "url":
-        if (typeof value === "string" && value) {
-          try {
-            new URL(value);
-          } catch {
-            return rule.message;
-          }
-        }
-        break;
+
       case "custom":
         if (rule.customValidator) {
           try {
@@ -383,8 +375,8 @@ function PreviewField({
     );
   }
 
-  // Text, Email, URL, Number, Date inputs
-  if (["text", "email", "url", "number", "date"].includes(field.type)) {
+  // Text, Email, Number, Date inputs
+  if (["text", "email", "number", "date"].includes(field.type)) {
     return (
       <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-1">
@@ -399,7 +391,7 @@ function PreviewField({
             </span>
           )}
           <input
-            type={field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "url" ? "url" : field.type === "date" ? "date" : "text"}
+            type={field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "date" ? "date" : "text"}
             value={(value as string) || ""}
             onChange={(e) => handleChange(field.type === "number" ? parseFloat(e.target.value) || "" : e.target.value)}
             onBlur={onBlur}
@@ -442,8 +434,8 @@ function PreviewField({
     );
   }
 
-  // Select/Dropdown
-  if (field.type === "select") {
+  // Dropdown
+  if (field.type === "dropdown") {
     const items: VueformItem[] = field.items || [];
     const isMultiple = field.multiple;
 
@@ -520,120 +512,7 @@ function PreviewField({
     );
   }
 
-  // File Upload
-  if (field.type === "file") {
-    const [dragOver, setDragOver] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const files = (value as File[]) || [];
 
-    const handleFiles = (newFiles: FileList | null) => {
-      if (!newFiles) return;
-      
-      const validFiles: File[] = [];
-      const maxSize = field.maxSize || 10485760;
-      const fieldAccept = field.accept;
-      const acceptTypes: string[] = Array.isArray(fieldAccept) 
-        ? fieldAccept 
-        : (fieldAccept ? String(fieldAccept).split(",").map((t) => t.trim()) : []);
-      
-      Array.from(newFiles).forEach(file => {
-        // Check size
-        if (file.size > maxSize) {
-          alert(`File ${file.name} is too large`);
-          return;
-        }
-        
-        // Check type
-        if (acceptTypes.length > 0) {
-          const isAccepted = acceptTypes.some((type: string) => {
-            if (type.startsWith(".")) {
-              return file.name.toLowerCase().endsWith(type.toLowerCase());
-            }
-            if (type.endsWith("/*")) {
-              return file.type.startsWith(type.replace("/*", "/"));
-            }
-            return file.type === type;
-          });
-          if (!isAccepted) {
-            alert(`File ${file.name} type not accepted`);
-            return;
-          }
-        }
-        
-        validFiles.push(file);
-      });
-      
-      const maxFiles = field.maxFiles || 5;
-      const allFiles = field.multiple ? [...files, ...validFiles].slice(0, maxFiles) : validFiles.slice(0, 1);
-      handleChange(allFiles);
-    };
-
-    const removeFile = (index: number) => {
-      handleChange(files.filter((_, i) => i !== index));
-    };
-
-    const acceptValue = Array.isArray(field.accept) ? field.accept.join(",") : field.accept;
-
-    return (
-      <div className="p-2" style={gridStyle}>
-        <label className="block text-sm font-medium text-slate-900 mb-1">
-          {field.label}
-          {field.required && <span className="ml-1 text-red-500">*</span>}
-        </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
-        
-        <div
-          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-            dragOver ? "border-sky-500 bg-sky-50" : hasError ? "border-red-300" : "border-slate-300"
-          } ${field.drop !== false ? "cursor-pointer" : ""}`}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-            if (field.drop !== false) {
-              handleFiles(e.dataTransfer.files);
-            }
-          }}
-          onClick={() => field.clickable !== false && fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={acceptValue}
-            multiple={field.multiple}
-            onChange={(e) => handleFiles(e.target.files)}
-            className="hidden"
-          />
-          <div className="text-slate-500">
-            <svg className="w-8 h-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <p className="text-sm font-medium">{field.buttonLabel || "Choose File"}</p>
-            {field.drop !== false && <p className="text-xs">{field.dropLabel || "or drop files here"}</p>}
-          </div>
-        </div>
-        
-        {files.length > 0 && field.preview !== false && (
-          <div className="mt-2 space-y-1">
-            {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-2 bg-slate-100 rounded text-sm">
-                <span className="truncate">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(index)}
-                  className="text-red-500 hover:text-red-700 ml-2"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
-      </div>
-    );
-  }
 
   // Slider
   if (field.type === "slider") {

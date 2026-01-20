@@ -384,13 +384,13 @@ export function ElementSidebar({
           {/* Manage Fields Button */}
           <div className="p-2 border-b border-slate-200">
             <button
-              onClick={() => router.push("/fields")}
+              onClick={() => router.push("/custom-fields")}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Manage Fields
+              Create Fields
             </button>
           </div>
 
@@ -400,7 +400,7 @@ export function ElementSidebar({
               type="text"
               value={fieldSearch}
               onChange={(e) => setFieldSearch(e.target.value)}
-              placeholder="Search fields by name"
+              placeholder="Search fields..."
               className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
             />
           </div>
@@ -430,7 +430,7 @@ export function ElementSidebar({
                 <div className="text-center py-8 text-slate-400 text-sm">
                   No custom fields found.
                   <br />
-                  <span className="text-xs">Click "Manage Fields" to create or edit.</span>
+                  <span className="text-xs">Click "Create Fields" to create or edit.</span>
                 </div>
               ) : (
                 customFields.map((field) => (
@@ -448,7 +448,7 @@ export function ElementSidebar({
               type="text"
               value={layoutSearch}
               onChange={(e) => setLayoutSearch(e.target.value)}
-              placeholder="Search layouts by name"
+              placeholder="Search layouts..."
               className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
             />
           </div>

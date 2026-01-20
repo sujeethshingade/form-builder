@@ -213,6 +213,7 @@ function CustomFieldsContent() {
         resetForm();
         fetchCustomFields();
         fetchCategories();
+        router.push("/fields");
       } else {
         alert(data.error);
       }
@@ -309,7 +310,7 @@ function CustomFieldsContent() {
         setShowSaveAsModal(false);
         alert("Field saved as new successfully!");
         resetForm();
-        router.replace("/custom-fields");
+        router.replace("/fields");
         fetchCustomFields();
         fetchCategories();
       } else {
@@ -386,7 +387,6 @@ function CustomFieldsContent() {
       const response = await fetch(form.apiConfig.url, fetchOptions);
       const data = await response.json();
 
-      // Extract data using response key path
       let extractedData = data;
       if (form.apiConfig.responseKeyPath) {
         const keys = form.apiConfig.responseKeyPath.split(".");
@@ -408,120 +408,138 @@ function CustomFieldsContent() {
   };
 
   return (
-    <div className="min-h-full bg-white">
+    <div>
+    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200">
+        <h2 className="text-lg font-semibold text-slate-800">
+          {editingId ? "Edit Custom Field" : "Create Custom Field"}
+        </h2>
+        <button
+          onClick={() => {
+            if (editingId) {
+              resetForm();
+              router.replace("/fields");
+            } else {
+              router.back();
+            }
+          }}
+          className="p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-700"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
+      <div className="flex-1 overflow-y-auto bg-slate-50 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Field Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.fieldName}
+                onChange={(e) => setForm({ ...form, fieldName: e.target.value })}
+                placeholder="Enter field name"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+              />
+            </div>
 
-          <div className="bg-white p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">
-              {editingId ? "Edit Field" : "Add Field"}
-            </h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Field Label <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.fieldLabel}
+                onChange={(e) => setForm({ ...form, fieldLabel: e.target.value })}
+                placeholder="Enter field label"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+              />
+            </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Field Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.fieldName}
-                  onChange={(e) => setForm({ ...form, fieldName: e.target.value })}
-                  placeholder="Enter field name"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Select Data Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={form.dataType}
+                onChange={(e) => setForm({ ...form, dataType: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+              >
+                <option value="">Select data type</option>
+                {dataTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Field Label <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.fieldLabel}
-                  onChange={(e) => setForm({ ...form, fieldLabel: e.target.value })}
-                  placeholder="Enter field label"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Class Name
+              </label>
+              <input
+                type="text"
+                value={form.className}
+                onChange={(e) => setForm({ ...form, className: e.target.value })}
+                placeholder="Enter class name"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Select Data Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={form.dataType}
-                  onChange={(e) => setForm({ ...form, dataType: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                >
-                  <option value="">Select data type</option>
-                  {dataTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Select Class Name
-                </label>
-                <input
-                  type="text"
-                  value={form.className}
-                  onChange={(e) => setForm({ ...form, className: e.target.value })}
-                  placeholder="Enter class name"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                {!showNewCategory ? (
-                  <div className="flex gap-2">
-                    <select
-                      value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                    >
-                      <option value="">Select category</option>
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewCategory(true)}
-                      className="px-3 py-2 text-sky-600 hover:bg-sky-50 rounded-md text-sm font-medium"
-                    >
-                      + New
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      placeholder="Enter new category"
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowNewCategory(false);
-                        setNewCategory("");
-                      }}
-                      className="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-md text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-              </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Category <span className="text-red-500">*</span>
+              </label>
+              {!showNewCategory ? (
+                <div className="flex gap-2">
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewCategory(true)}
+                    className="px-3 py-2 text-sky-600 hover:bg-sky-50 rounded-md text-sm font-medium whitespace-nowrap"
+                  >
+                    + New Category
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder="Enter new category"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewCategory(false);
+                      setNewCategory("");
+                    }}
+                    className="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-md text-sm whitespace-nowrap"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
 
               {/* LOV section - only show for data input types, not layout types */}
               {!["heading", "spacer", "divider", "table"].includes(form.dataType) && (
@@ -1070,7 +1088,7 @@ function CustomFieldsContent() {
               )}
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="mt-8 flex items-center justify-end gap-3">
               {editingId && (
                 <button
                   onClick={() => setShowSaveAsModal(true)}
@@ -1086,31 +1104,16 @@ function CustomFieldsContent() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {saving ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={() => {
-                  if (editingId) {
-                    resetForm();
-                    router.replace("/custom-fields");
-                  } else {
-                    router.back();
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                {editingId ? "Cancel Edit" : "Close"}
+                {saving ? "Saving..." : "Save Field"}
               </button>
             </div>
           </div>
+      </div>
 
       <SaveAsModal
         isOpen={showSaveAsModal}

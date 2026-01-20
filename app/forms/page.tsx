@@ -146,7 +146,7 @@ export default function FormsPage() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-slate-600">Filter by Collection:</label>
+              <label className="text-sm text-slate-600">Collection:</label>
               <select
                 value={filterCollection}
                 onChange={(e) => setFilterCollection(e.target.value)}
@@ -182,11 +182,11 @@ export default function FormsPage() {
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-slate-600">Collection Name</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-slate-600">Collection</th>
                 <th className="px-6 py-3 text-left text-sm font-medium text-slate-600">Form Name</th>
                 <th className="px-6 py-3 text-left text-sm font-medium text-slate-600">Created</th>
                 <th className="px-6 py-3 text-left text-sm font-medium text-slate-600">Updated</th>
-                <th className="px-6 py-3 text-center text-sm font-medium text-slate-600">Actions</th>
+                <th className="px-6 py-3 text-right text-sm font-medium text-slate-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -206,31 +206,39 @@ export default function FormsPage() {
                 forms.map((form) => (
                   <tr key={form._id} className="hover:bg-slate-50">
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-700">{form.collectionName}</span>
+                      <span className="text-sm text-slate-600">{form.collectionName}</span>
                     </td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleFormClick(form._id)}
-                        className="text-sm text-sky-600 hover:underline"
+                        className="text-sm text-slate-600 hover:text-sky-600 font-medium transition-colors"
                       >
                         {form.formName}
                       </button>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">{formatDate(form.createdAt)}</td>
                     <td className="px-6 py-4 text-sm text-slate-500">{formatDate(form.updatedAt)}</td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleFormClick(form._id)}
-                        className="px-3 py-1.5 bg-sky-500 text-white text-sm rounded hover:bg-sky-600 transition-colors"
-                      >
-                        Edit Form
-                      </button>
-                      <button
-                        onClick={() => handleDeleteForm(form._id)}
-                        className="ml-2 px-3 py-1.5 bg-red-50 text-red-600 text-sm rounded hover:bg-red-100 transition-colors"
-                      >
-                        Delete
-                      </button>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleFormClick(form._id)}
+                          className="p-1.5 text-slate-400 hover:text-sky-600 transition-colors"
+                          title="Edit Form"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteForm(form._id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                          title="Delete Form"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

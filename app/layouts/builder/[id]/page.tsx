@@ -16,9 +16,8 @@ import { JsonPreview } from "@/app/components/canvas/JsonPreview";
 import { FormPreview } from "@/app/components/canvas/FormPreview";
 import InspectorSidebar from "@/app/components/element/InspectorSidebar";
 import { ElementSidebar } from "@/app/components/element/ElementSidebar";
-import { TopBar } from "@/app/components/element/Navbar";
+import { BuilderNavbar } from "@/app/components/builder/BuilderNavbar";
 import { library, makeField, defaultStyles } from "@/app/lib/form";
-import { getIconForType } from "@/app/lib/icons";
 import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
@@ -470,34 +469,25 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <TopBar
+        <BuilderNavbar
           canUndo={undoStack.length > 0}
           canRedo={redoStack.length > 0}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          isLeftSidebarOpen={isLeftSidebarOpen}
-          onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
-          isRightSidebarOpen={isRightSidebarOpen}
-          onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
           workspaceView={workspaceView}
           onWorkspaceViewChange={setWorkspaceView}
-          formName={layoutData?.layoutName}
-          formCollection={
-            layoutData?.layoutType === "form-group" 
-              ? "Form Group" 
-              : layoutData?.layoutType === "box-layout"
-                ? "Box Layout"
-                : "Grid Layout"
-          }
           hasUnsavedChanges={hasUnsavedChanges}
           onSave={handleSave}
           onSaveAs={() => setShowSaveAsModal(true)}
           saveAsLabel="Save As New"
           saving={saving}
-          onBack={() => router.push("/layouts")}
+          isLeftSidebarOpen={isLeftSidebarOpen}
+          onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+          isRightSidebarOpen={isRightSidebarOpen}
+          onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
         />
 
-        <div className="flex h-full overflow-hidden">
+        <div className="flex flex-1 overflow-hidden min-h-0">
           <aside
             className={`flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-300 ease-out ${
               isLeftSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
@@ -574,33 +564,11 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            activeDrag.type === "layout" ? (
-              <div className="flex items-center gap-2 border rounded-sm border-purple-300 bg-purple-50 px-2 py-1.5 text-slate-900 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-purple-500 shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-                </div>
+            <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-lg">
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
               </div>
-            ) : isLeftSidebarOpen ? (
-              <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 text-slate-900 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-                  {getIconForType(activeDrag.type as any)}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center border rounded-sm border-slate-200 bg-white py-1.5 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-                  {getIconForType(activeDrag.type as any)}
-                </div>
-              </div>
-            )
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>

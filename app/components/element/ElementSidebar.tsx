@@ -255,7 +255,7 @@ export function ElementSidebar({
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Create Fields
+              Create Field
             </button>
           </div>
 
@@ -295,7 +295,7 @@ export function ElementSidebar({
                 <div className="text-center py-8 text-slate-400 text-sm">
                   No custom fields found.
                   <br />
-                  <span className="text-xs">Click "Create Fields" to create or edit.</span>
+                  <span className="text-xs">Click "Create Field" to create or edit.</span>
                 </div>
               ) : (
                 customFields.map((field) => (

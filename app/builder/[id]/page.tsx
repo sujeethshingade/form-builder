@@ -16,9 +16,8 @@ import { JsonPreview } from "@/app/components/canvas/JsonPreview";
 import { FormPreview } from "@/app/components/canvas/FormPreview";
 import InspectorSidebar from "@/app/components/element/InspectorSidebar";
 import { ElementSidebar } from "@/app/components/element/ElementSidebar";
-import { TopBar } from "@/app/components/element/Navbar";
+import { BuilderNavbar } from "@/app/components/builder/BuilderNavbar";
 import { library, makeField, defaultStyles } from "@/app/lib/form";
-import { getIconForType } from "@/app/lib/icons";
 import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
@@ -620,23 +619,20 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <TopBar
+        <BuilderNavbar
           canUndo={undoStack.length > 0}
           canRedo={redoStack.length > 0}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          workspaceView={workspaceView}
+          onWorkspaceViewChange={setWorkspaceView}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSave={handleSaveClick}
+          saving={saving}
           isLeftSidebarOpen={isLeftSidebarOpen}
           onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
           isRightSidebarOpen={isRightSidebarOpen}
           onToggleRightSidebar={() => setIsRightSidebarOpen((prev) => !prev)}
-          workspaceView={workspaceView}
-          onWorkspaceViewChange={setWorkspaceView}
-          formName={formData?.formName}
-          formCollection={formData?.collectionName}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSave={handleSaveClick}
-          saving={saving}
-          onBack={() => router.push("/forms")}
         />
 
         <SaveModal
@@ -647,7 +643,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           formName={formData?.formName}
         />
 
-        <div className="flex h-full overflow-hidden">
+        <div className="flex flex-1 overflow-hidden min-h-0">
           <aside
             className={`flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-300 ease-out ${
               isLeftSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"

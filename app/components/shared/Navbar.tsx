@@ -10,13 +10,17 @@ export function Navbar() {
     return pathname.startsWith(path);
   };
 
+  if (pathname.startsWith("/builder") || pathname.startsWith("/layouts/builder")) {
+    return null;
+  }
+
   return (
     <nav className="bg-white border-b border-slate-200 px-6 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <h1 className="text-xl font-bold text-slate-800">
-            FormBuilder
-          </h1>
+          <Link href="/builder/new" className="text-xl font-bold text-slate-800">
+            Form Builder
+          </Link>
           <div className="flex items-center gap-1">
             <Link
               href="/forms"

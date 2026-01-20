@@ -960,7 +960,7 @@ export function FormPreview({
 
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-8xl">
         <div
           className="min-h-150 bg-white shadow-lg p-8"
           style={{

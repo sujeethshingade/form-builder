@@ -36,7 +36,7 @@ export function FormCanvas({
 
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8" onClick={handleBackgroundClick}>
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-8xl">
         {/* Canvas */}
         <div
           ref={setNodeRef}

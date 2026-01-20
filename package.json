@@ -13,6 +13,7 @@
     "@dnd-kit/modifiers": "^6.0.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.1",
+    "framer-motion": "^12.27.1",
     "mongodb": "^7.0.0",
     "mongoose": "^9.1.1",
     "nanoid": "^5.0.8",

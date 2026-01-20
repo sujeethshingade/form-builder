@@ -345,15 +345,6 @@ export default function FieldsPage() {
                           Edit
                         </button>
                         <button
-                          onClick={() => {
-                            setSelectedField(field);
-                            setShowSaveAsModal(true);
-                          }}
-                          className="px-3 py-1.5 bg-emerald-50 text-emerald-600 text-sm rounded hover:bg-emerald-100 transition-colors"
-                        >
-                          Clone
-                        </button>
-                        <button
                           onClick={() => handleDeleteField(field._id)}
                           className="px-3 py-1.5 bg-red-50 text-red-600 text-sm rounded hover:bg-red-100 transition-colors"
                         >

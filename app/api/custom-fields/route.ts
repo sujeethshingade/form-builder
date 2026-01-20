@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { fieldName, fieldLabel, dataType, className, category, lovType, lovItems } = body;
+    const { fieldName, fieldLabel, dataType, className, category, lovType, lovItems, boxLayoutColumns } = body;
     
     if (!fieldName || !fieldLabel || !dataType || !category) {
       return NextResponse.json(
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       category,
       lovType,
       lovItems: lovItems || [],
+      boxLayoutColumns: boxLayoutColumns || [],
     });
     
     return NextResponse.json({ success: true, data: customField }, { status: 201 });

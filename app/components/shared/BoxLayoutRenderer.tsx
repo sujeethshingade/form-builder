@@ -1,6 +1,7 @@
 "use client";
 
-import type { VueformColumn } from "@/app/lib/types";
+import { useState } from "react";
+import type { VueformColumn, VueformItem } from "@/app/lib/types";
 
 interface BoxLayoutRow {
   id: string;
@@ -21,17 +22,139 @@ interface BoxLayoutRendererProps {
   disabled?: boolean;
 }
 
+// Country codes for phone input
+const countryCodes = [
+  { code: "+1", flag: "🇺🇸", country: "US" },
+  { code: "+44", flag: "🇬🇧", country: "UK" },
+  { code: "+91", flag: "🇮🇳", country: "IN" },
+  { code: "+86", flag: "🇨🇳", country: "CN" },
+  { code: "+81", flag: "🇯🇵", country: "JP" },
+  { code: "+49", flag: "🇩🇪", country: "DE" },
+  { code: "+33", flag: "🇫🇷", country: "FR" },
+  { code: "+61", flag: "🇦🇺", country: "AU" },
+  { code: "+55", flag: "🇧🇷", country: "BR" },
+  { code: "+82", flag: "🇰🇷", country: "KR" },
+  { code: "+39", flag: "🇮🇹", country: "IT" },
+  { code: "+34", flag: "🇪🇸", country: "ES" },
+  { code: "+7", flag: "🇷🇺", country: "RU" },
+  { code: "+52", flag: "🇲🇽", country: "MX" },
+  { code: "+971", flag: "🇦🇪", country: "AE" },
+  { code: "+65", flag: "🇸🇬", country: "SG" },
+  { code: "+27", flag: "🇿🇦", country: "ZA" },
+  { code: "+62", flag: "🇮🇩", country: "ID" },
+  { code: "+60", flag: "🇲🇾", country: "MY" },
+  { code: "+63", flag: "🇵🇭", country: "PH" },
+];
+
+// Phone Input Component
+interface PhoneInputProps {
+  value?: { countryCode: string; number: string };
+  onChange: (val: { countryCode: string; number: string }) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  defaultCountry?: string;
+  showCountryCode?: boolean;
+}
+
+function PhoneInput({ 
+  value, 
+  onChange, 
+  disabled, 
+  placeholder = "xxx-xxxx-xxx",
+  defaultCountry = "US",
+  showCountryCode = true
+}: PhoneInputProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const currentCountry = countryCodes.find(c => c.country === (value?.countryCode || defaultCountry)) || countryCodes[0];
+  
+  const handleCountrySelect = (country: typeof countryCodes[0]) => {
+    onChange({ 
+      countryCode: country.country, 
+      number: value?.number || "" 
+    });
+    setIsOpen(false);
+  };
+  
+  const handleNumberChange = (num: string) => {
+    onChange({ 
+      countryCode: value?.countryCode || defaultCountry, 
+      number: num 
+    });
+  };
+
+  return (
+    <div className="flex">
+      {showCountryCode && (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => !disabled && setIsOpen(!isOpen)}
+            disabled={disabled}
+            className="flex items-center gap-1 px-2 py-2 border border-r-0 border-slate-200 rounded-l-md bg-slate-50 text-sm hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>{currentCountry.flag}</span>
+            <span className="text-slate-600">{currentCountry.code}</span>
+            <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {isOpen && (
+            <div className="absolute z-50 mt-1 w-48 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-md shadow-lg">
+              {countryCodes.map((country) => (
+                <button
+                  key={country.country}
+                  type="button"
+                  onClick={() => handleCountrySelect(country)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-slate-100"
+                >
+                  <span>{country.flag}</span>
+                  <span className="text-slate-600">{country.code}</span>
+                  <span className="text-slate-400 text-xs">({country.country})</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      <input
+        type="tel"
+        value={value?.number || ""}
+        onChange={(e) => handleNumberChange(e.target.value)}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={`flex-1 px-3 py-2 border border-slate-200 focus:outline-none focus:border-sky-400 text-sm bg-white ${
+          showCountryCode ? "rounded-r-md" : "rounded-md"
+        }`}
+      />
+    </div>
+  );
+}
+
 const defaultColumns: VueformColumn[] = [
   { name: "field1", label: "Field 1", type: "text", placeholder: "Enter value" },
   { name: "field2", label: "Field 2", type: "text", placeholder: "Enter value" },
   { name: "field3", label: "Field 3", type: "text", placeholder: "Enter value" },
 ];
 
+const defaultSections: BoxLayoutSection[] = [
+  {
+    id: "default_section",
+    title: "Section 1",
+    collapsed: false,
+    columns: defaultColumns,
+    rows: [{ id: "default_row", data: { field1: "", field2: "", field3: "" } }],
+  },
+];
+
 export function BoxLayoutRenderer({
-  sections,
+  sections: propSections,
   onSectionsChange,
   disabled = false,
 }: BoxLayoutRendererProps) {
+  // Use default sections if none provided
+  const sections = propSections && propSections.length > 0 ? propSections : defaultSections;
+  
   const toggleSection = (sectionId: string) => {
     if (!onSectionsChange) return;
     onSectionsChange(
@@ -126,6 +249,9 @@ export function BoxLayoutRenderer({
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
             placeholder={column.placeholder}
+            min={column.min}
+            max={column.max}
+            step={column.step}
             className={commonClasses}
           />
         );
@@ -157,6 +283,39 @@ export function BoxLayoutRenderer({
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
             placeholder={column.placeholder}
+            className={commonClasses}
+          />
+        );
+      case "phone":
+        return (
+          <PhoneInput
+            value={value as { countryCode: string; number: string } | undefined}
+            onChange={onChange}
+            disabled={disabled}
+            placeholder={column.placeholder}
+            defaultCountry={column.phoneConfig?.defaultCountry || "US"}
+            showCountryCode={column.phoneConfig?.showCountryCode !== false}
+          />
+        );
+      case "textarea":
+        return (
+          <textarea
+            value={(value as string) || ""}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            placeholder={column.placeholder}
+            rows={column.rows || 2}
+            className={commonClasses + " resize-none"}
+          />
+        );
+      case "url":
+        return (
+          <input
+            type="url"
+            value={(value as string) || ""}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            placeholder={column.placeholder || "https://"}
             className={commonClasses}
           />
         );

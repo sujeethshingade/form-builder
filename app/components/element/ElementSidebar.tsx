@@ -11,6 +11,20 @@ interface LOVItem {
   status: "Active" | "Inactive";
 }
 
+interface BoxLayoutColumn {
+  name: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  width?: string;
+  required?: boolean;
+  options?: { value: string; label: string }[];
+  phoneConfig?: {
+    defaultCountry?: string;
+    showCountryCode?: boolean;
+  };
+}
+
 interface CustomFieldData {
   _id: string;
   fieldName: string;
@@ -21,6 +35,7 @@ interface CustomFieldData {
   lovEnabled: boolean;
   lovType?: string;
   lovItems?: LOVItem[];
+  boxLayoutColumns?: BoxLayoutColumn[];
 }
 
 interface FormLayoutData {
@@ -42,6 +57,7 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
       fieldLabel: field.fieldLabel,
       lovEnabled: field.lovEnabled,
       lovItems: field.lovItems,
+      boxLayoutColumns: field.boxLayoutColumns,
     },
   });
 
@@ -130,6 +146,13 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
         return (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" />
+          </svg>
+        );
+      case "box-layout":
+        return (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zM4 13h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2a1 1 0 011-1z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 5v4M12 5v4M16 5v4M8 13v4M12 13v4M16 13v4" />
           </svg>
         );
       default:

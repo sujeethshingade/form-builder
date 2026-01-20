@@ -68,12 +68,23 @@ export type VueformItem = {
 export type VueformColumn = {
   name: string;
   label: string;
-  type: "text" | "number" | "email" | "select" | "date" | "checkbox";
+  type: "text" | "number" | "email" | "select" | "date" | "checkbox" | "phone" | "textarea" | "url";
   width?: string;
   placeholder?: string;
   options?: VueformItem[];
   required?: boolean;
   align?: "left" | "center" | "right";
+  // Phone specific
+  phoneConfig?: {
+    defaultCountry?: string;
+    showCountryCode?: boolean;
+  };
+  // Textarea specific
+  rows?: number;
+  // Number specific
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 export type VueformAddon = {

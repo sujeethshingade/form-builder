@@ -1255,9 +1255,12 @@ export default function InspectorSidebar({
                                 <option value="text">Text</option>
                                 <option value="number">Number</option>
                                 <option value="email">Email</option>
+                                <option value="phone">Phone</option>
                                 <option value="date">Date</option>
                                 <option value="select">Select</option>
                                 <option value="checkbox">Checkbox</option>
+                                <option value="textarea">Textarea</option>
+                                <option value="url">URL</option>
                               </select>
                               <button
                                 onClick={() => {

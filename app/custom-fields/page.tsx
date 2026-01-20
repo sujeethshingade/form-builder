@@ -33,6 +33,7 @@ interface CustomFieldForm {
   lovType: "user-defined" | "dynamic-api";
   lovItems: LOVItem[];
   apiConfig: APIConfig;
+  boxLayoutColumns: BoxLayoutColumn[];
 }
 
 const dataTypes = [
@@ -49,7 +50,35 @@ const dataTypes = [
   { value: "divider", label: "Divider" },
   { value: "spacer", label: "Spacer" },
   { value: "table", label: "Table" },
+  { value: "box-layout", label: "Box Layout" },
 ];
+
+// Column types for box layout
+const boxLayoutColumnTypes = [
+  { value: "text", label: "Text" },
+  { value: "number", label: "Number" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Phone" },
+  { value: "date", label: "Date" },
+  { value: "select", label: "Select/Dropdown" },
+  { value: "checkbox", label: "Checkbox" },
+  { value: "textarea", label: "Textarea" },
+  { value: "url", label: "URL" },
+];
+
+interface BoxLayoutColumn {
+  name: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  width: string;
+  required: boolean;
+  options: { value: string; label: string }[];
+  phoneConfig?: {
+    defaultCountry: string;
+    showCountryCode: boolean;
+  };
+}
 
 function CustomFieldsContent() {
   const router = useRouter();
@@ -82,6 +111,7 @@ function CustomFieldsContent() {
       valueKey: "",
       labelKey: "",
     },
+    boxLayoutColumns: [],
   });
 
   const [apiTestResult, setApiTestResult] = useState<any[] | null>(null);
@@ -214,6 +244,7 @@ function CustomFieldsContent() {
         valueKey: "",
         labelKey: "",
       },
+      boxLayoutColumns: field.boxLayoutColumns || [],
     });
     setApiTestResult(null);
     setApiTestError(null);
@@ -312,6 +343,7 @@ function CustomFieldsContent() {
         valueKey: "",
         labelKey: "",
       },
+      boxLayoutColumns: [],
     });
     setNewCategory("");
     setShowNewCategory(false);
@@ -779,6 +811,273 @@ function CustomFieldsContent() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Box Layout Configuration - only show when box-layout is selected */}
+              {form.dataType === "box-layout" && (
+                <div className="pt-4 mt-4 border-t border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">Box Layout Columns</h3>
+                  <p className="text-sm text-slate-500 mb-4">
+                    Configure the columns that will appear in your box layout. Users can add multiple rows with these fields.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    {form.boxLayoutColumns.map((column, index) => (
+                      <div key={index} className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-slate-700">Column {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newColumns = [...form.boxLayoutColumns];
+                              newColumns.splice(index, 1);
+                              setForm({ ...form, boxLayoutColumns: newColumns });
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Label *</label>
+                            <input
+                              type="text"
+                              value={column.label}
+                              onChange={(e) => {
+                                const newColumns = [...form.boxLayoutColumns];
+                                newColumns[index] = { 
+                                  ...column, 
+                                  label: e.target.value,
+                                  name: e.target.value.toLowerCase().replace(/\s+/g, '_')
+                                };
+                                setForm({ ...form, boxLayoutColumns: newColumns });
+                              }}
+                              placeholder="Column label"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Type *</label>
+                            <select
+                              value={column.type}
+                              onChange={(e) => {
+                                const newColumns = [...form.boxLayoutColumns];
+                                newColumns[index] = { ...column, type: e.target.value };
+                                setForm({ ...form, boxLayoutColumns: newColumns });
+                              }}
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            >
+                              {boxLayoutColumnTypes.map((type) => (
+                                <option key={type.value} value={type.value}>{type.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Placeholder</label>
+                            <input
+                              type="text"
+                              value={column.placeholder}
+                              onChange={(e) => {
+                                const newColumns = [...form.boxLayoutColumns];
+                                newColumns[index] = { ...column, placeholder: e.target.value };
+                                setForm({ ...form, boxLayoutColumns: newColumns });
+                              }}
+                              placeholder="Enter placeholder"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Width</label>
+                            <input
+                              type="text"
+                              value={column.width}
+                              onChange={(e) => {
+                                const newColumns = [...form.boxLayoutColumns];
+                                newColumns[index] = { ...column, width: e.target.value };
+                                setForm({ ...form, boxLayoutColumns: newColumns });
+                              }}
+                              placeholder="e.g., 150px, 20%"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`required-${index}`}
+                              checked={column.required}
+                              onChange={(e) => {
+                                const newColumns = [...form.boxLayoutColumns];
+                                newColumns[index] = { ...column, required: e.target.checked };
+                                setForm({ ...form, boxLayoutColumns: newColumns });
+                              }}
+                              className="w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"
+                            />
+                            <label htmlFor={`required-${index}`} className="text-sm text-slate-700">Required</label>
+                          </div>
+                        </div>
+                        
+                        {/* Phone Config - only show for phone type */}
+                        {column.type === "phone" && (
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <label className="block text-xs font-medium text-slate-600 mb-2">Phone Configuration</label>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id={`showCountry-${index}`}
+                                  checked={column.phoneConfig?.showCountryCode !== false}
+                                  onChange={(e) => {
+                                    const newColumns = [...form.boxLayoutColumns];
+                                    newColumns[index] = { 
+                                      ...column, 
+                                      phoneConfig: { 
+                                        ...column.phoneConfig, 
+                                        showCountryCode: e.target.checked,
+                                        defaultCountry: column.phoneConfig?.defaultCountry || 'US'
+                                      } 
+                                    };
+                                    setForm({ ...form, boxLayoutColumns: newColumns });
+                                  }}
+                                  className="w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"
+                                />
+                                <label htmlFor={`showCountry-${index}`} className="text-sm text-slate-700">Show Country Code</label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <label className="text-xs text-slate-600">Default Country:</label>
+                                <select
+                                  value={column.phoneConfig?.defaultCountry || 'US'}
+                                  onChange={(e) => {
+                                    const newColumns = [...form.boxLayoutColumns];
+                                    newColumns[index] = { 
+                                      ...column, 
+                                      phoneConfig: { 
+                                        ...column.phoneConfig, 
+                                        defaultCountry: e.target.value,
+                                        showCountryCode: column.phoneConfig?.showCountryCode !== false
+                                      } 
+                                    };
+                                    setForm({ ...form, boxLayoutColumns: newColumns });
+                                  }}
+                                  className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:border-sky-500"
+                                >
+                                  <option value="US">🇺🇸 US (+1)</option>
+                                  <option value="UK">🇬🇧 UK (+44)</option>
+                                  <option value="IN">🇮🇳 IN (+91)</option>
+                                  <option value="DE">🇩🇪 DE (+49)</option>
+                                  <option value="FR">🇫🇷 FR (+33)</option>
+                                  <option value="AU">🇦🇺 AU (+61)</option>
+                                  <option value="JP">🇯🇵 JP (+81)</option>
+                                  <option value="CN">🇨🇳 CN (+86)</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Options - only show for select type */}
+                        {column.type === "select" && (
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <label className="block text-xs font-medium text-slate-600 mb-2">Options</label>
+                            <div className="space-y-2">
+                              {(column.options || []).map((option, optIndex) => (
+                                <div key={optIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={option.value}
+                                    onChange={(e) => {
+                                      const newColumns = [...form.boxLayoutColumns];
+                                      const newOptions = [...(column.options || [])];
+                                      newOptions[optIndex] = { ...option, value: e.target.value };
+                                      newColumns[index] = { ...column, options: newOptions };
+                                      setForm({ ...form, boxLayoutColumns: newColumns });
+                                    }}
+                                    placeholder="Value"
+                                    className="flex-1 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:border-sky-500"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={option.label}
+                                    onChange={(e) => {
+                                      const newColumns = [...form.boxLayoutColumns];
+                                      const newOptions = [...(column.options || [])];
+                                      newOptions[optIndex] = { ...option, label: e.target.value };
+                                      newColumns[index] = { ...column, options: newOptions };
+                                      setForm({ ...form, boxLayoutColumns: newColumns });
+                                    }}
+                                    placeholder="Label"
+                                    className="flex-1 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:border-sky-500"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newColumns = [...form.boxLayoutColumns];
+                                      const newOptions = [...(column.options || [])];
+                                      newOptions.splice(optIndex, 1);
+                                      newColumns[index] = { ...column, options: newOptions };
+                                      setForm({ ...form, boxLayoutColumns: newColumns });
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newColumns = [...form.boxLayoutColumns];
+                                  const newOptions = [...(column.options || []), { value: '', label: '' }];
+                                  newColumns[index] = { ...column, options: newOptions };
+                                  setForm({ ...form, boxLayoutColumns: newColumns });
+                                }}
+                                className="text-sm text-sky-600 hover:text-sky-800 font-medium"
+                              >
+                                + Add Option
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm({
+                          ...form,
+                          boxLayoutColumns: [
+                            ...form.boxLayoutColumns,
+                            { 
+                              name: `column_${form.boxLayoutColumns.length + 1}`, 
+                              label: `Column ${form.boxLayoutColumns.length + 1}`, 
+                              type: 'text',
+                              placeholder: '',
+                              width: '',
+                              required: false,
+                              options: []
+                            }
+                          ]
+                        });
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sky-600 border border-sky-300 rounded-md hover:bg-sky-50 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Column
+                    </button>
                   </div>
                 </div>
               )}

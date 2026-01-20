@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { FormField, VueformItem, VueformColumn, CustomScript, ValidationRule, ConditionalLogic } from "@/app/lib/types";
+import { FormField, VueformColumn, CustomScript, ValidationRule, ConditionalLogic, LOVItem } from "@/app/lib/types";
 import { ColumnWidthSelector } from "@/app/components/shared/ColumnWidthSelector";
 
-type ChoiceOption = VueformItem;
 type TableColumn = VueformColumn;
 
 const PlusIcon = () => (
@@ -196,33 +195,6 @@ export default function InspectorSidebar({
   // Common handlers
   const handleChange = (key: string, value: any) => {
     onUpdate({ [key]: value });
-  };
-
-  // Options handlers for checkbox/radio/select
-  const handleOptionsChange = (items: ChoiceOption[]) => {
-    onUpdate({ items });
-  };
-
-  const addOption = () => {
-    const currentItems = field.items || [];
-    const newOption: ChoiceOption = {
-      value: `option_${currentItems.length + 1}`,
-      label: `Option ${currentItems.length + 1}`,
-    };
-    handleOptionsChange([...currentItems, newOption]);
-  };
-
-  const updateOption = (index: number, updates: Partial<ChoiceOption>) => {
-    const currentItems = field.items || [];
-    const updatedItems = currentItems.map((item, i) =>
-      i === index ? { ...item, ...updates } : item
-    );
-    handleOptionsChange(updatedItems);
-  };
-
-  const removeOption = (index: number) => {
-    const currentItems = field.items || [];
-    handleOptionsChange(currentItems.filter((_, i) => i !== index));
   };
 
   // Table column handlers
@@ -718,39 +690,32 @@ export default function InspectorSidebar({
               </Section>
             )}
 
-            {/* Choice Field Options (Radio/Checkbox/Select) */}
-            {isChoiceField && (
-              <Section title="Options" defaultOpen={true}>
+            {/* Choice Field LOV Display (Radio/Checkbox/Select) - Read-only, managed via Custom Fields */}
+            {isChoiceField && field.lovItems && field.lovItems.length > 0 && (
+              <Section title="Options (from LOV)" defaultOpen={true}>
                 <div className="space-y-2">
-                  {(field.items || []).map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={item.label}
-                        onChange={(e) =>
-                          updateOption(index, {
-                            label: e.target.value,
-                            value: e.target.value.toLowerCase().replace(/\s+/g, "_"),
-                          })
-                        }
-                        placeholder="Option label"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none text-sm"
-                      />
-                      <button
-                        onClick={() => removeOption(index)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <TrashIcon />
-                      </button>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Options are managed via Custom Fields. Only active items are shown in the form.
+                  </p>
+                  {field.lovItems.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm ${
+                        item.status === 'Active' 
+                          ? 'border-green-200 bg-green-50 text-green-700' 
+                          : 'border-gray-200 bg-gray-50 text-gray-400 line-through'
+                      }`}
+                    >
+                      <span className="flex-1">{item.shortName}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        item.status === 'Active' 
+                          ? 'bg-green-100 text-green-600' 
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {item.status}
+                      </span>
                     </div>
                   ))}
-                  <button
-                    onClick={addOption}
-                    className="flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-600 font-medium mt-2"
-                  >
-                    <PlusIcon />
-                    Add Option
-                  </button>
                 </div>
               </Section>
             )}

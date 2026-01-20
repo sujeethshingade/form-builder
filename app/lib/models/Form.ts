@@ -1,5 +1,13 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+export interface ILOVItem {
+  code: string;
+  shortName: string;
+  description?: string;
+  seamlessMapping?: string;
+  status: 'Active' | 'Inactive';
+}
+
 export interface IFormField {
   id: string;
   type: string;
@@ -33,6 +41,9 @@ export interface IFormField {
   height?: string;
   columns?: any[];
   rows?: Record<string, any>[];
+  // Custom field reference for LOV-based fields (dropdown, checkbox, radio)
+  customFieldId?: string;
+  lovItems?: ILOVItem[];
 }
 
 export interface IFormStyles {

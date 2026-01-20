@@ -398,7 +398,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
       const fieldType = activeData?.type;
       const fieldLabel = activeData?.fieldLabel;
       const fieldName = activeData?.fieldName;
-      const lovEnabled = activeData?.lovEnabled;
+      const customFieldId = activeData?.customFieldId;
       const lovItems = activeData?.lovItems;
       const boxLayoutColumns = activeData?.boxLayoutColumns;
 
@@ -419,8 +419,14 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         widthColumns: 12,
       };
 
-      // If it's a select/radio with LOV items, add the options
-      if (lovEnabled && lovItems && lovItems.length > 0 && (fieldType === "select" || fieldType === "radio")) {
+      // If it's a dropdown/radio/checkbox with LOV items, store customFieldId and lovItems
+      // The items will be derived from lovItems filtered by Active status
+      const isChoiceField = ["dropdown", "radio", "checkbox"].includes(fieldType);
+      if (isChoiceField && lovItems && lovItems.length > 0) {
+        // Store the custom field reference and all LOV items
+        newField.customFieldId = customFieldId;
+        newField.lovItems = lovItems;
+        // Generate items from active LOV entries
         newField.items = lovItems
           .filter((item: any) => item.status === "Active")
           .map((item: any) => ({

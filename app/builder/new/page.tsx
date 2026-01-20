@@ -250,7 +250,7 @@ export default function NewFormBuilderPage() {
       const fieldType = activeData?.type;
       const fieldLabel = activeData?.fieldLabel;
       const fieldName = activeData?.fieldName;
-      const lovEnabled = activeData?.lovEnabled;
+      const customFieldId = activeData?.customFieldId;
       const lovItems = activeData?.lovItems;
 
       if (!fieldType) return;
@@ -270,8 +270,11 @@ export default function NewFormBuilderPage() {
         widthColumns: 12,
       };
 
-      // If it's a select/radio with LOV items, add the options
-      if (lovEnabled && lovItems && lovItems.length > 0 && (fieldType === "select" || fieldType === "radio")) {
+      // If it's a dropdown/radio/checkbox with LOV items, store customFieldId and lovItems
+      const isChoiceField = ["dropdown", "radio", "checkbox"].includes(fieldType);
+      if (isChoiceField && lovItems && lovItems.length > 0) {
+        newField.customFieldId = customFieldId;
+        newField.lovItems = lovItems;
         newField.items = lovItems
           .filter((item: any) => item.status === "Active")
           .map((item: any) => ({

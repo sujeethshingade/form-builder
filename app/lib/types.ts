@@ -476,6 +476,15 @@ export type VueformProps =
 // Form Field Type (Main)
 // ============================================
 
+// LOV Item type for custom fields
+export type LOVItem = {
+  code: string;
+  shortName: string;
+  description?: string;
+  seamlessMapping?: string;
+  status: 'Active' | 'Inactive';
+};
+
 export type FormField = {
   id: string;
   type: ComponentType;
@@ -497,6 +506,10 @@ export type FormField = {
   size?: "sm" | "md" | "lg";
   inputType?: string;
   addons?: VueformAddon;
+  
+  // Custom field reference for LOV-based fields (dropdown, checkbox, radio)
+  customFieldId?: string;
+  lovItems?: LOVItem[];
 
   // Text input specific
   minLength?: number;

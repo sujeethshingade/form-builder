@@ -191,9 +191,24 @@ export function DateInputRenderer({ field, disabled = true }: FieldRendererProps
   return input;
 }
 
+// Helper function to get active items from LOV or fallback to items/options
+function getActiveItems(field: FormField): VueformItem[] {
+  // If lovItems exist, filter by Active status and use those
+  if (field.lovItems && field.lovItems.length > 0) {
+    return field.lovItems
+      .filter((item) => item.status === 'Active')
+      .map((item) => ({
+        value: item.code,
+        label: item.shortName,
+      }));
+  }
+  // Fallback to existing items or options
+  return field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
+}
+
 export function DropdownRenderer({ field, disabled = true }: FieldRendererProps) {
   const size = field.size || "md";
-  const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
+  const items: VueformItem[] = getActiveItems(field);
   
   return (
     <select
@@ -213,7 +228,7 @@ export function DropdownRenderer({ field, disabled = true }: FieldRendererProps)
 }
 
 export function CheckboxRenderer({ field, disabled = true }: FieldRendererProps) {
-  const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
+  const items: VueformItem[] = getActiveItems(field);
   const view = field.view || "default";
   const labelPosition = field.labelPosition || "right";
   const size = field.size || "md";
@@ -289,7 +304,7 @@ export function CheckboxRenderer({ field, disabled = true }: FieldRendererProps)
 }
 
 export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
-  const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
+  const items: VueformItem[] = getActiveItems(field);
   const view = field.view || "default";
   const labelPosition = field.labelPosition || "right";
   const size = field.size || "md";
@@ -675,3 +690,6 @@ export function LayoutElementRenderer({ field, selected = false }: FieldRenderer
       return null;
   }
 }
+
+// Alias for backward compatibility
+export { DropdownRenderer as SelectRenderer };

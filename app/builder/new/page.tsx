@@ -384,7 +384,7 @@ export default function NewFormBuilderPage() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-100 flex-col">
+    <div className="flex h-full bg-slate-100 flex-col">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

@@ -408,21 +408,8 @@ function CustomFieldsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Custom Fields</h1>
-          <button
-            onClick={() => router.push("/forms")}
-            className="flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Forms
-          </button>
-        </div>
-      </header>
+    <div className="min-h-full bg-white">
+
 
           <div className="bg-white p-6">
             <h2 className="text-lg font-semibold text-slate-800 mb-4">

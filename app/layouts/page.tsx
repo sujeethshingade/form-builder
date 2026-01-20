@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { SearchInput } from "@/app/components/shared/SearchInput";
+
 
 interface FormLayoutData {
   _id: string;
@@ -19,12 +21,17 @@ export default function LayoutsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("");
+  const [search, setSearch] = useState("");
 
   const fetchLayouts = useCallback(async () => {
     try {
-      const url = filterType
-        ? `/api/form-layouts?type=${encodeURIComponent(filterType)}`
-        : "/api/form-layouts";
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("search", search.trim());
+      if (filterType) params.set("type", filterType);
+      
+      const queryString = params.toString();
+      const url = `/api/form-layouts${queryString ? `?${queryString}` : ""}`;
+      
       const response = await fetch(url);
       const data = await response.json();
       if (data.success) {
@@ -35,7 +42,7 @@ export default function LayoutsPage() {
     } catch (err) {
       setError("Failed to fetch layouts");
     }
-  }, [filterType]);
+  }, [filterType, search]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -101,28 +108,16 @@ export default function LayoutsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold text-slate-800">Form Layouts</h1>
-          </div>
-          <div className="flex items-center text-sm gap-3">
-            <button
-              onClick={() => router.push("/forms")}
-              className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Forms
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-full bg-slate-50">
       <main className="p-6">
-        <div className="mb-4 flex items-center gap-4">
+        <div className="mb-4 flex flex-wrap items-center gap-4">
+          <div className="flex-1 min-w-64">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search layouts..."
+            />
+          </div>
           <div className="flex items-center gap-2">
             <label className="text-sm text-slate-600">Filter by Type:</label>
             <select

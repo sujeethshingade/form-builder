@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { SearchInput } from "@/app/components/shared/SearchInput";
 import type { FormData as BaseFormData, CollectionData, FormField, FormStyles } from "../lib/types";
 
 interface FormJson {
@@ -21,6 +22,7 @@ export default function FormsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
   const [filterCollection, setFilterCollection] = useState<string>("");
+  const [search, setSearch] = useState("");
 
   const [newCollection, setNewCollection] = useState({
     name: "",
@@ -29,9 +31,13 @@ export default function FormsPage() {
 
   const fetchForms = useCallback(async () => {
     try {
-      const url = filterCollection 
-        ? `/api/forms?collection=${encodeURIComponent(filterCollection)}`
-        : "/api/forms";
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("search", search.trim());
+      if (filterCollection) params.set("collection", filterCollection);
+      
+      const queryString = params.toString();
+      const url = `/api/forms${queryString ? `?${queryString}` : ""}`;
+      
       const response = await fetch(url);
       const data = await response.json();
       if (data.success) {
@@ -42,7 +48,7 @@ export default function FormsPage() {
     } catch (err) {
       setError("Failed to fetch forms");
     }
-  }, [filterCollection]);
+  }, [filterCollection, search]);
 
   const fetchCollections = async () => {
     try {
@@ -126,59 +132,44 @@ export default function FormsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Form Builder</h1>
-          <div className="flex items-center text-sm gap-3">
+    <div className="min-h-full bg-slate-50">
+
+
+      <main className="p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-4">
+          <div className="flex-1 min-w-64">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search forms..."
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600">Filter by Collection:</label>
+              <select
+                value={filterCollection}
+                onChange={(e) => setFilterCollection(e.target.value)}
+                className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
+              >
+                <option value="">All Collections</option>
+                {collections.map((collection) => (
+                  <option key={collection._id} value={collection.name}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
-              onClick={() => router.push('/layouts')}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
-              </svg>
-              Layouts
-            </button>
-            <button
-              onClick={() => router.push('/builder/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
+              onClick={() => setShowNewCollectionModal(true)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              New Form
+              New Collection
             </button>
           </div>
-        </div>
-      </header>
-
-      <main className="p-6">
-        <div className="mb-4 flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Filter by Collection:</label>
-            <select
-              value={filterCollection}
-              onChange={(e) => setFilterCollection(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
-            >
-              <option value="">All Collections</option>
-              {collections.map((collection) => (
-                <option key={collection._id} value={collection.name}>
-                  {collection.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            onClick={() => setShowNewCollectionModal(true)}
-            className="flex items-center gap-2 px-4 py-1.5 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Collection
-          </button>
         </div>
 
         {error && (

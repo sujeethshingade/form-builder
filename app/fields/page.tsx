@@ -203,35 +203,7 @@ export default function FieldsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold text-slate-800">Custom Fields</h1>
-          </div>
-          <div className="flex items-center text-sm gap-3">
-            <button
-              onClick={() => router.push("/custom-fields")}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create Field
-            </button>
-            <button
-              onClick={() => router.push("/forms")}
-              className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Forms
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-full bg-slate-50">
       <main className="p-6">
         <div className="mb-4 flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-64">
@@ -241,31 +213,42 @@ export default function FieldsPage() {
               placeholder="Search fields by name..."
             />
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Category:</label>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600">Category:</label>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
+              >
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600">Type:</label>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
+              >
+                <option value="">All Types</option>
+                {dataTypes.map((type) => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={() => router.push("/custom-fields")}
+              className="flex items-center gap-2 px-4 py-1.5 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors"
             >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Type:</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none"
-            >
-              <option value="">All Types</option>
-              {dataTypes.map((type) => (
-                <option key={type.value} value={type.value}>{type.label}</option>
-              ))}
-            </select>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create Field
+            </button>
           </div>
         </div>
 

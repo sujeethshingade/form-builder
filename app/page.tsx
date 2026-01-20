@@ -7,8 +7,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to forms page
-    router.push("/forms");
+    // Redirect to builder/new
+    router.push("/builder/new");
   }, [router]);
 
   return (

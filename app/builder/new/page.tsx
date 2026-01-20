@@ -291,6 +291,7 @@ export default function NewFormBuilderPage() {
           label: col.label,
           type: col.type || "text",
           required: col.required || false,
+          options: col.options || [],
         }));
         newField.tableRows = []; // Initialize with empty rows
       }

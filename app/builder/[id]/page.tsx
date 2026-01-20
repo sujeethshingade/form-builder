@@ -442,6 +442,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           label: col.label,
           type: col.type || "text",
           required: col.required || false,
+          options: col.options || [],
         }));
         newField.tableRows = []; // Initialize with empty rows
       }

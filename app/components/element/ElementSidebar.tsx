@@ -256,7 +256,7 @@ export function ElementSidebar({
               value={fieldSearch}
               onChange={(e) => setFieldSearch(e.target.value)}
               placeholder="Search fields..."
-              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
             />
           </div>
 
@@ -265,7 +265,7 @@ export function ElementSidebar({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -304,7 +304,7 @@ export function ElementSidebar({
               value={layoutSearch}
               onChange={(e) => setLayoutSearch(e.target.value)}
               placeholder="Search layouts..."
-              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
             />
           </div>
 
@@ -313,7 +313,7 @@ export function ElementSidebar({
             <select
               value={layoutFilter}
               onChange={(e) => setLayoutFilter(e.target.value)}
-              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-sky-300"
+              className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-sm focus:outline-none "
             >
               <option value="all">All Layouts</option>
               <option value="form-group">Form Groups</option>

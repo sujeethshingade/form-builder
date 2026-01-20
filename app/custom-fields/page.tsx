@@ -27,6 +27,8 @@ interface TableColumn {
   label: string;
   type: string;
   required?: boolean;
+  customFieldId?: string;
+  options?: Array<{ value: string | number; label: string }>;
 }
 
 interface CustomFieldForm {
@@ -65,6 +67,7 @@ function CustomFieldsContent() {
   const [saving, setSaving] = useState(false);
   const [savingAs, setSavingAs] = useState(false);
   const [existingFields, setExistingFields] = useState<any[]>([]);
+  const [availableFieldsForColumns, setAvailableFieldsForColumns] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
@@ -119,6 +122,11 @@ function CustomFieldsContent() {
       const data = await response.json();
       if (data.success) {
         setExistingFields(data.data);
+
+        const selectableFields = data.data.filter((field: any) => 
+          !["heading", "divider", "spacer", "table"].includes(field.dataType)
+        );
+        setAvailableFieldsForColumns(selectableFields);
       }
     } catch (err) {
       console.error("Failed to fetch custom fields:", err);
@@ -171,6 +179,17 @@ function CustomFieldsContent() {
       return;
     }
 
+    // Filter out incomplete table columns (columns without selected custom fields)
+    const validTableColumns = form.tableColumns.filter(col => 
+      col.name && col.label && col.type
+    );
+
+    // Validate that if dataType is table, there should be at least one valid column
+    if (form.dataType === "table" && validTableColumns.length === 0) {
+      alert("Please add at least one column to the table");
+      return;
+    }
+
     setSaving(true);
     try {
       const url = editingId ? `/api/custom-fields/${editingId}` : "/api/custom-fields";
@@ -182,6 +201,7 @@ function CustomFieldsContent() {
         body: JSON.stringify({
           ...form,
           category: categoryToUse,
+          tableColumns: validTableColumns, // Use filtered columns
         }),
       });
 
@@ -263,6 +283,17 @@ function CustomFieldsContent() {
       return;
     }
 
+    // Filter out incomplete table columns (columns without selected custom fields)
+    const validTableColumns = form.tableColumns.filter(col => 
+      col.name && col.label && col.type
+    );
+
+    // Validate that if dataType is table, there should be at least one valid column
+    if (form.dataType === "table" && validTableColumns.length === 0) {
+      alert("Please add at least one column to the table");
+      return;
+    }
+
     setSavingAs(true);
     try {
       const newFieldName = newLabel.replace(/\s+/g, '_').toLowerCase();
@@ -280,7 +311,7 @@ function CustomFieldsContent() {
           lovType: form.lovType,
           lovItems: form.lovItems,
           apiConfig: form.apiConfig,
-          tableColumns: form.tableColumns,
+          tableColumns: validTableColumns, // Use filtered columns
         }),
       });
 
@@ -748,7 +779,7 @@ function CustomFieldsContent() {
                                   value={item.code}
                                   onChange={(e) => handleLOVItemChange(index, "code", e.target.value)}
                                   placeholder="Code"
-                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none focus:border-sky-300"
+                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none "
                                 />
                               </td>
                               <td className="px-2 py-2">
@@ -757,7 +788,7 @@ function CustomFieldsContent() {
                                   value={item.shortName}
                                   onChange={(e) => handleLOVItemChange(index, "shortName", e.target.value)}
                                   placeholder="Short Name"
-                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none focus:border-sky-300"
+                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none "
                                 />
                               </td>
                               <td className="px-2 py-2">
@@ -766,14 +797,14 @@ function CustomFieldsContent() {
                                   value={item.description}
                                   onChange={(e) => handleLOVItemChange(index, "description", e.target.value)}
                                   placeholder="Description"
-                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none focus:border-sky-300"
+                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none "
                                 />
                               </td>
                               <td className="px-2 py-2">
                                 <select
                                   value={item.status}
                                   onChange={(e) => handleLOVItemChange(index, "status", e.target.value)}
-                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none focus:border-sky-300"
+                                  className="w-full px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none "
                                 >
                                   <option value="Active">Active</option>
                                   <option value="Inactive">Inactive</option>
@@ -824,44 +855,42 @@ function CustomFieldsContent() {
                           </button>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Label *</label>
-                            <input
-                              type="text"
-                              value={column.label}
-                              onChange={(e) => {
-                                const newColumns = [...form.tableColumns];
-                                newColumns[index] = { 
-                                  ...column, 
-                                  label: e.target.value,
-                                  name: e.target.value.toLowerCase().replace(/\s+/g, '_')
-                                };
-                                setForm({ ...form, tableColumns: newColumns });
-                              }}
-                              placeholder="Column Label"
-                              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Type *</label>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Select Custom Field *</label>
                             <select
-                              value={column.type}
+                              value={column.customFieldId || ""}
                               onChange={(e) => {
-                                const newColumns = [...form.tableColumns];
-                                newColumns[index] = { ...column, type: e.target.value };
-                                setForm({ ...form, tableColumns: newColumns });
+                                const selectedFieldId = e.target.value;
+                                const selectedField = availableFieldsForColumns.find(f => f._id === selectedFieldId);
+                                
+                                if (selectedField) {
+                                  // Transform LOV items to VueformItem format
+                                  const transformedOptions = (selectedField.lovItems || []).map((item: LOVItem) => ({
+                                    value: item.code,
+                                    label: item.shortName
+                                  }));
+                                  
+                                  const newColumns = [...form.tableColumns];
+                                  newColumns[index] = { 
+                                    name: selectedField.fieldName,
+                                    label: selectedField.fieldLabel,
+                                    type: selectedField.dataType,
+                                    required: false,
+                                    customFieldId: selectedField._id,
+                                    options: transformedOptions
+                                  };
+                                  setForm({ ...form, tableColumns: newColumns });
+                                }
                               }}
                               className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-sky-500"
                             >
-                              <option value="text">Text</option>
-                              <option value="number">Number</option>
-                              <option value="email">Email</option>
-                              <option value="date">Date</option>
-                              <option value="dropdown">Dropdown</option>
-                              <option value="checkbox">Checkbox</option>
-                              <option value="radio">Radio Button</option>
+                              <option value="">-- Select a Field --</option>
+                              {availableFieldsForColumns.map((field) => (
+                                <option key={field._id} value={field._id}>
+                                  {field.fieldLabel} ({field.dataType})
+                                </option>
+                              ))}
                             </select>
                           </div>
 
@@ -892,10 +921,11 @@ function CustomFieldsContent() {
                           tableColumns: [
                             ...form.tableColumns,
                             { 
-                              name: `column_${form.tableColumns.length + 1}`, 
-                              label: `Column ${form.tableColumns.length + 1}`, 
-                              type: 'text',
-                              required: false
+                              name: '', 
+                              label: '', 
+                              type: '',
+                              required: false,
+                              customFieldId: ''
                             }
                           ]
                         });

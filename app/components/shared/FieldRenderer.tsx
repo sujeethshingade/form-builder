@@ -414,7 +414,8 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
 
   return (
     <div key={renderKey} className="w-full overflow-x-auto">
-      <table className="w-full border-collapse border border-slate-300">
+      <div className="border border-slate-300 rounded-lg overflow-hidden">
+      <table className="w-full border-collapse">
         <thead>
           <tr className="bg-slate-100">
             {columns.map((col) => (
@@ -427,7 +428,7 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
               </th>
             ))}
             {!preview && (
-              <th className="border border-slate-300 px-3 py-2 text-left font-medium text-slate-700 w-20">
+              <th className="border border-slate-300 px-3 py-2 text-left font-medium text-slate-700 w-18">
                 Actions
               </th>
             )}
@@ -446,9 +447,38 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
                 {columns.map((col) => (
                   <td key={col.name} className="border border-slate-300 p-1">
                     <div className={`w-full ${sizeClasses[size]} text-slate-700`}>
-                      {col.type === "checkbox" 
-                        ? (Boolean(row[col.name]) ? "✓" : "")
-                        : String(row[col.name] ?? "")}
+                      {col.type === "dropdown" && col.options && col.options.length > 0 ? (
+                        <div className="text-slate-500 text-xs">
+                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                            <div key={idx}>{opt.label || opt.shortName}</div>
+                          ))}
+                          {col.options.length > 3 && (
+                            <div className="text-slate-400">+{col.options.length - 3} more</div>
+                          )}
+                        </div>
+                      ) : col.type === "radio" && col.options && col.options.length > 0 ? (
+                        <div className="text-slate-500 text-xs">
+                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                            <div key={idx}>○ {opt.label || opt.shortName}</div>
+                          ))}
+                          {col.options.length > 3 && (
+                            <div className="text-slate-400">+{col.options.length - 3} more</div>
+                          )}
+                        </div>
+                      ) : col.type === "checkbox" && col.options && col.options.length > 0 ? (
+                        <div className="text-slate-500 text-xs">
+                          {col.options.slice(0, 3).map((opt: any, idx: number) => (
+                            <div key={idx}>☐ {opt.label || opt.shortName}</div>
+                          ))}
+                          {col.options.length > 3 && (
+                            <div className="text-slate-400">+{col.options.length - 3} more</div>
+                          )}
+                        </div>
+                      ) : col.type === "checkbox" ? (
+                        Boolean(row[col.name]) ? "✓" : ""
+                      ) : (
+                        String(row[col.name] ?? "")
+                      )}
                     </div>
                   </td>
                 ))}
@@ -472,6 +502,7 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
           )}
         </tbody>
       </table>
+      </div>
       {!preview && !disabled && (
         <button
           onClick={addRow}

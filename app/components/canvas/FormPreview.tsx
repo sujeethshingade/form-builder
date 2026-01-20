@@ -274,6 +274,32 @@ function PreviewField({
           );
         
         case "checkbox":
+          // If there are options, render as checkbox group
+          if (col.options && col.options.length > 0) {
+            const selectedValues = Array.isArray(cellValue) ? cellValue : [];
+            return (
+              <div className="flex flex-col gap-1">
+                {col.options.map((opt: any) => (
+                  <label key={String(opt.value)} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      value={String(opt.value)}
+                      checked={selectedValues.includes(opt.value)}
+                      onChange={(e) => {
+                        const newValues = e.target.checked
+                          ? [...selectedValues, opt.value]
+                          : selectedValues.filter((v: any) => v !== opt.value);
+                        handleCellChange(rowIndex, col.name, newValues);
+                      }}
+                      className="rounded text-sky-500 focus:ring-sky-500"
+                    />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            );
+          }
+          // Otherwise, render as single checkbox
           return (
             <input
               type="checkbox"
@@ -281,6 +307,25 @@ function PreviewField({
               onChange={(e) => handleCellChange(rowIndex, col.name, e.target.checked)}
               className="rounded text-sky-500 focus:ring-sky-500"
             />
+          );
+        
+        case "radio":
+          return (
+            <div className="flex flex-col gap-1">
+              {(col.options || []).map((opt: any) => (
+                <label key={String(opt.value)} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`${col.name}_${rowIndex}`}
+                    value={String(opt.value)}
+                    checked={cellValue === opt.value}
+                    onChange={(e) => handleCellChange(rowIndex, col.name, e.target.value)}
+                    className="text-sky-500 focus:ring-sky-500"
+                  />
+                  <span className="text-sm">{opt.label}</span>
+                </label>
+              ))}
+            </div>
           );
         
         case "number":

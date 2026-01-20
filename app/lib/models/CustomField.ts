@@ -13,6 +13,8 @@ export interface ITableColumn {
   label: string;
   type: string;
   required?: boolean;
+  customFieldId?: string;
+  options?: Array<{ value: string | number; label: string }> | ILOVItem[];
 }
 
 export interface ICustomField extends Document {
@@ -41,6 +43,8 @@ const TableColumnSchema = new Schema({
   label: { type: String, required: true },
   type: { type: String, required: true },
   required: { type: Boolean, default: false },
+  customFieldId: { type: String },
+  options: { type: Schema.Types.Mixed }, // Flexible to handle both LOV and VueformItem formats
 });
 
 const CustomFieldSchema = new Schema<ICustomField>({

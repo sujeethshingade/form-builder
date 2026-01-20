@@ -71,6 +71,7 @@ export type VueformColumn = {
   options?: VueformItem[];
   required?: boolean;
   align?: "left" | "center" | "right";
+  customFieldId?: string;
   // Phone specific
   phoneConfig?: {
     defaultCountry?: string;

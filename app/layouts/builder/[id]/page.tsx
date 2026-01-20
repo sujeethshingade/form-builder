@@ -500,11 +500,11 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
         <div className="flex h-full overflow-hidden">
           <aside
             className={`flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-300 ease-out ${
-              isLeftSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+              isLeftSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
             }`}
           >
             <div
-              className={`flex h-full w-84 flex-col ${
+              className={`flex h-full w-72 flex-col ${
                 isLeftSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
               } transition-opacity duration-200 ${isLeftSidebarOpen ? "delay-100" : ""}`}
             >
@@ -541,7 +541,7 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
 
           <aside
             className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
-              isRightSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+              isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
             }`}
           >
             <div

@@ -650,11 +650,11 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         <div className="flex h-full overflow-hidden">
           <aside
             className={`flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-300 ease-out ${
-              isLeftSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+              isLeftSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
             }`}
           >
             <div
-              className={`flex h-full w-84 flex-col ${
+              className={`flex h-full w-72 flex-col ${
                 isLeftSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
               } transition-opacity duration-200 ${isLeftSidebarOpen ? "delay-100" : ""}`}
             >
@@ -695,7 +695,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
           <aside
             className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
-              isRightSidebarOpen ? "w-84" : "w-0 min-w-0 overflow-hidden"
+              isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
             }`}
           >
             <div
@@ -728,33 +728,11 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            activeDrag.type === "layout" ? (
-              <div className="flex items-center gap-2 border rounded-sm border-purple-300 bg-purple-50 px-2 py-1.5 text-slate-900 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-purple-500 shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-                </div>
+            <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-lg">
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
               </div>
-            ) : isLeftSidebarOpen ? (
-              <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-2 py-1.5 text-slate-900 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-                  {getIconForType(activeDrag.type as any)}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center border rounded-sm border-slate-200 bg-white py-1.5 shadow-lg">
-                <div className="flex h-9 w-9 items-center justify-center text-slate-600 shrink-0">
-                  {getIconForType(activeDrag.type as any)}
-                </div>
-              </div>
-            )
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>

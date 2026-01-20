@@ -187,7 +187,7 @@ export default function InspectorSidebar({
   
   if (!field) {
     return (
-      <div className="w-80 bg-white border-l border-gray-200 p-4 flex items-center justify-center text-gray-500">
+      <div className="w-full bg-white border-l border-gray-200 p-4 flex items-center justify-center text-gray-500">
         Select a field to edit its properties
       </div>
     );
@@ -351,7 +351,7 @@ export default function InspectorSidebar({
   const showRequired = !isLayoutField;
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full">
+    <div className="w-full bg-white border-l border-gray-200 flex flex-col h-full">
       {/* Tab Header */}
       <div className="border-b border-gray-200 px-2 py-2 flex gap-1">
         <button

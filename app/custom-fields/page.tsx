@@ -541,10 +541,9 @@ function CustomFieldsContent() {
             </div>
           </div>
 
-              {/* LOV section - only show for data input types, not layout types */}
               {!["heading", "spacer", "divider", "table"].includes(form.dataType) && (
               <div className="pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">List of Values (LOV)</h3>
+                <h3 className="text-md font-medium text-slate-700 mb-3">List of Values (LOV)</h3>
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">

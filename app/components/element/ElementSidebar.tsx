@@ -11,20 +11,6 @@ interface LOVItem {
   status: "Active" | "Inactive";
 }
 
-interface BoxLayoutColumn {
-  name: string;
-  label: string;
-  type: string;
-  placeholder?: string;
-  width?: string;
-  required?: boolean;
-  options?: { value: string; label: string }[];
-  phoneConfig?: {
-    defaultCountry?: string;
-    showCountryCode?: boolean;
-  };
-}
-
 interface CustomFieldData {
   _id: string;
   fieldName: string;
@@ -35,13 +21,12 @@ interface CustomFieldData {
   lovEnabled: boolean;
   lovType?: string;
   lovItems?: LOVItem[];
-  boxLayoutColumns?: BoxLayoutColumn[];
 }
 
 interface FormLayoutData {
   _id: string;
   layoutName: string;
-  layoutType: 'form-group' | 'grid-layout' | 'box-layout';
+  layoutType: 'form-group' | 'grid-layout';
   category?: string;
   fields: any[];
 }
@@ -57,7 +42,6 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
       fieldLabel: field.fieldLabel,
       lovEnabled: field.lovEnabled,
       lovItems: field.lovItems,
-      boxLayoutColumns: field.boxLayoutColumns,
     },
   });
 
@@ -92,7 +76,6 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
 
   const isGroup = layout.layoutType === 'form-group';
   const isGrid = layout.layoutType === 'grid-layout';
-  const isBox = layout.layoutType === 'box-layout';
 
   const getLayoutTypeLabel = () => {
     switch (layout.layoutType) {
@@ -100,8 +83,6 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
         return 'Form Group';
       case 'grid-layout':
         return 'Grid Layout';
-      case 'box-layout':
-        return 'Box Layout';
       default:
         return 'Layout';
     }
@@ -328,7 +309,6 @@ export function ElementSidebar({
               <option value="all">All Layouts</option>
               <option value="form-group">Form Groups</option>
               <option value="grid-layout">Grid Layouts</option>
-              <option value="box-layout">Box Layouts</option>
             </select>
           </div>
 

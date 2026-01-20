@@ -8,7 +8,6 @@ export {
   CheckboxRenderer,
   RadioRenderer,
   TableRenderer,
-  BoxLayoutSectionRenderer,
   DividerRenderer,
   SpacerRenderer,
   HeadingRenderer,
@@ -26,10 +25,3 @@ export { ColumnWidthSelector } from "./ColumnWidthSelector";
 export { SaveAsModal } from "./SaveAsModal";
 export { SearchInput } from "./SearchInput";
 export { DataTable } from "./DataTable";
-export {
-  BoxLayoutRenderer,
-  createBoxLayoutSection,
-  contactDetailsSection,
-  addressDetailsSection,
-} from "./BoxLayoutRenderer";
-export type { BoxLayoutSection, BoxLayoutRow } from "./BoxLayoutRenderer";

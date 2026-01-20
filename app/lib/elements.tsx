@@ -14,7 +14,6 @@ import {
   SpacerIcon,
   TableIcon,
   TextareaIcon,
-  BoxLayoutIcon,
 } from "./icons";
 
 export const elements: ElementDefinition[] = [
@@ -466,43 +465,6 @@ export const elements: ElementDefinition[] = [
       addRowLabel: "Add Row",
       removeRowLabel: "Remove",
       emptyText: "No rows added",
-      helper: "",
-      description: "",
-      // Validation & Scripts
-      validationRules: [],
-      scripts: [],
-      conditions: [],
-    },
-  },
-  
-  // Box Layout Component
-  {
-    type: "box-layout",
-    label: "Box Layout",
-    icon: <BoxLayoutIcon />,
-    defaultProps: {
-      name: "box_layout",
-      label: "Box Layout",
-      width: "full",
-      size: "md",
-      disabled: false,
-      readonly: false,
-      // Box layout sections with rows and columns
-      sections: [
-        {
-          id: "section_1",
-          title: "Section 1",
-          collapsed: false,
-          columns: [
-            { name: "field1", label: "Field 1", type: "text", placeholder: "Enter value" },
-            { name: "field2", label: "Field 2", type: "text", placeholder: "Enter value" },
-            { name: "field3", label: "Field 3", type: "text", placeholder: "Enter value" },
-          ],
-          rows: [
-            { id: "row_1", data: { field1: "", field2: "", field3: "" } },
-          ],
-        },
-      ],
       helper: "",
       description: "",
       // Validation & Scripts

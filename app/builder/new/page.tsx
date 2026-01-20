@@ -379,12 +379,6 @@ export default function NewFormBuilderPage() {
     setFields((prev) => arrayMove(prev, index, index + 1));
   };
 
-  const handleFormSubmission = async (data: Record<string, unknown>) => {
-    // For new forms in preview mode, just show the data
-    console.log("Form submission preview:", data);
-    alert("This is a preview. Save the form first to enable submissions.");
-  };
-
   return (
     <div className="flex h-full bg-slate-100 flex-col">
       <DndContext
@@ -440,10 +434,6 @@ export default function NewFormBuilderPage() {
               <FormPreview 
                 fields={fields} 
                 styles={styles}
-                formId={undefined}
-                formName="New Form"
-                collectionName=""
-                onSubmit={handleFormSubmission}
               />
             ) : (
               <JsonPreview

@@ -11,7 +11,6 @@ import {
   SpacerRenderer,
   HeadingRenderer,
   TableRenderer,
-  BoxLayoutSectionRenderer,
 } from "../shared/FieldRenderer";
 
 type CanvasCardProps = {
@@ -143,24 +142,6 @@ export function CanvasCard({
           )}
         </div>
         <TableRenderer field={field} disabled />
-      </div>
-    );
-  }
-
-  if (field.type === "box-layout") {
-    return (
-      <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
-        {controls}
-        <div className="pb-2">
-          <label className="block text-sm font-medium text-slate-900">
-            {field.label}
-            {field.required && <span className="ml-1 text-red-500">*</span>}
-          </label>
-          {field.description && (
-            <p className="text-xs text-slate-500">{field.description}</p>
-          )}
-        </div>
-        <BoxLayoutSectionRenderer field={field} disabled />
       </div>
     );
   }

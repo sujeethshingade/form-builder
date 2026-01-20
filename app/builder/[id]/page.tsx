@@ -400,7 +400,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
       const fieldName = activeData?.fieldName;
       const customFieldId = activeData?.customFieldId;
       const lovItems = activeData?.lovItems;
-      const boxLayoutColumns = activeData?.boxLayoutColumns;
 
       if (!fieldType) return;
 
@@ -433,47 +432,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             value: item.code,
             label: item.shortName,
           }));
-      }
-
-      // If it's a box-layout, create sections from boxLayoutColumns
-      if (fieldType === "box-layout") {
-        const columns = boxLayoutColumns && boxLayoutColumns.length > 0 
-          ? boxLayoutColumns.map((col: any) => ({
-              name: col.name,
-              label: col.label,
-              type: col.type || "text",
-              placeholder: col.placeholder || "",
-              width: col.width,
-              required: col.required,
-              options: col.options,
-              phoneConfig: col.phoneConfig,
-            }))
-          : [
-              { name: "field1", label: "Field 1", type: "text" as const, placeholder: "Enter value" },
-              { name: "field2", label: "Field 2", type: "text" as const, placeholder: "Enter value" },
-              { name: "field3", label: "Field 3", type: "text" as const, placeholder: "Enter value" },
-            ];
-
-        // Create initial row data
-        const initialRowData: Record<string, unknown> = {};
-        columns.forEach((col: any) => {
-          initialRowData[col.name] = "";
-        });
-
-        newField.sections = [
-          {
-            id: `section_${Date.now()}`,
-            title: fieldLabel || fieldName || "Section 1",
-            collapsed: false,
-            columns,
-            rows: [
-              {
-                id: `row_${Date.now()}`,
-                data: initialRowData,
-              },
-            ],
-          },
-        ];
       }
 
       if (!overId || overId === "canvas") {
@@ -572,27 +530,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     setFields((prev) => arrayMove(prev, index, index + 1));
   };
 
-  // Handle form submission from preview mode
-  const handleFormSubmission = async (data: Record<string, unknown>) => {
-    if (!formData) throw new Error("Form data not available");
-    
-    const response = await fetch("/api/submissions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        formId: formData._id,
-        collectionName: formData.collectionName,
-        formName: formData.formName,
-        data,
-      }),
-    });
-    
-    const result = await response.json();
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -680,10 +617,6 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
               <FormPreview 
                 fields={fields} 
                 styles={styles}
-                formId={formData?._id}
-                formName={formData?.formName}
-                collectionName={formData?.collectionName}
-                onSubmit={handleFormSubmission}
               />
             ) : (
               <JsonPreview

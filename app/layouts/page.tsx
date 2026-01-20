@@ -8,7 +8,7 @@ import { SearchInput } from "@/app/components/shared/SearchInput";
 interface FormLayoutData {
   _id: string;
   layoutName: string;
-  layoutType: "form-group" | "grid-layout" | "box-layout";
+  layoutType: "form-group" | "grid-layout";
   category?: string;
   fields: any[];
   createdAt: string;
@@ -107,8 +107,6 @@ export default function LayoutsPage() {
         return "Form Group";
       case "grid-layout":
         return "Grid Layout";
-      case "box-layout":
-        return "Box Layout";
       default:
         return type;
     }
@@ -149,7 +147,6 @@ export default function LayoutsPage() {
                 <option value="">All Types</option>
                 <option value="form-group">Form Groups</option>
                 <option value="grid-layout">Grid Layouts</option>
-                <option value="box-layout">Box Layouts</option>
               </select>
             </div>
           </div>

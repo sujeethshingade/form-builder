@@ -7,10 +7,6 @@ import { getFieldColumnSpan } from "../../lib/form";
 interface FormPreviewProps {
   fields: FormField[];
   styles: FormStyles;
-  formId?: string;
-  formName?: string;
-  collectionName?: string;
-  onSubmit?: (data: Record<string, unknown>) => Promise<void>;
 }
 
 // Reusable size classes
@@ -716,14 +712,9 @@ function PreviewField({
 export function FormPreview({
   fields,
   styles,
-  formId,
-  formName,
-  collectionName,
-  onSubmit,
 }: FormPreviewProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
-  const [submitting, setSubmitting] = useState(false);
 
   // Initialize default values
   useEffect(() => {
@@ -760,83 +751,6 @@ export function FormPreview({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all fields
-    const newErrors: Record<string, string | null> = {};
-    let hasErrors = false;
-    
-    for (const field of fields) {
-      if (["heading", "divider", "spacer"].includes(field.type)) continue;
-      
-      // Run required check
-      if (field.required) {
-        const value = formData[field.id];
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          newErrors[field.id] = `${field.label} is required`;
-          hasErrors = true;
-          continue;
-        }
-      }
-      
-      // Run custom validation rules
-      const error = validateField(field, formData[field.id], formData);
-      if (error) {
-        newErrors[field.id] = error;
-        hasErrors = true;
-      }
-      
-      // Run onValidate scripts
-      const onValidateScripts = (field.scripts || []).filter(s => s.trigger === "onValidate");
-      for (const script of onValidateScripts) {
-        const result = executeScript(script, formData[field.id], field, formData);
-        if (typeof result === "string") {
-          newErrors[field.id] = result;
-          hasErrors = true;
-        } else if (result === false) {
-          newErrors[field.id] = `${field.label} is invalid`;
-          hasErrors = true;
-        }
-      }
-    }
-    
-    setErrors(newErrors);
-    
-    if (hasErrors) {
-      const errorMessages = Object.entries(newErrors)
-        .filter(([_, msg]) => msg)
-        .map(([id, msg]) => msg);
-      alert(`Please fix the following errors:\n${errorMessages.join("\n")}`);
-      return;
-    }
-
-    if (!onSubmit) {
-      alert("Preview mode: Form submission is not configured");
-      return;
-    }
-
-    // Run onSubmit scripts
-    for (const field of fields) {
-      const onSubmitScripts = (field.scripts || []).filter(s => s.trigger === "onSubmit");
-      for (const script of onSubmitScripts) {
-        executeScript(script, formData[field.id], field, formData);
-      }
-    }
-
-    setSubmitting(true);
-    try {
-      await onSubmit(formData);
-      setFormData({});
-      setErrors({});
-      alert("Form submitted successfully!");
-    } catch {
-      alert("Failed to submit form");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
     <div className="flex-1 overflow-auto bg-slate-100 p-8">
       <div className="mx-auto max-w-8xl">
@@ -853,34 +767,19 @@ export function FormPreview({
               No fields added.
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-12 gap-4">
-                {fields.map((field) => (
-                  <PreviewField
-                    key={field.id}
-                    field={field}
-                    value={formData[field.id]}
-                    onChange={(value) => handleFieldChange(field.id, value)}
-                    formData={formData}
-                    error={errors[field.id]}
-                    onBlur={() => handleFieldBlur(field)}
-                  />
-                ))}
-              </div>
-              
-              {onSubmit && (
-                <div className="mt-6 pt-6">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-6 py-2.5 bg-sky-400 text-white rounded-lg hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    style={{ backgroundColor: styles.primaryColor }}
-                  >
-                    {submitting ? "Submitting" : "Submit"}
-                  </button>
-                </div>
-              )}
-            </form>
+            <div className="grid grid-cols-12 gap-4">
+              {fields.map((field) => (
+                <PreviewField
+                  key={field.id}
+                  field={field}
+                  value={formData[field.id]}
+                  onChange={(value) => handleFieldChange(field.id, value)}
+                  formData={formData}
+                  error={errors[field.id]}
+                  onBlur={() => handleFieldBlur(field)}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>

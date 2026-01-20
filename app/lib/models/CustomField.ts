@@ -8,29 +8,14 @@ export interface ILOVItem {
   status: 'Active' | 'Inactive';
 }
 
-export interface IBoxLayoutColumn {
-  name: string;
-  label: string;
-  type: 'text' | 'number' | 'email' | 'dropdown' | 'date' | 'checkbox' | 'phone' | 'textarea';
-  placeholder?: string;
-  width?: string;
-  required?: boolean;
-  options?: { value: string; label: string }[];
-  phoneConfig?: {
-    defaultCountry?: string;
-    showCountryCode?: boolean;
-  };
-}
-
 export interface ICustomField extends Document {
   fieldName: string;
   fieldLabel: string;
-  dataType: 'text' | 'number' | 'email' | 'date' | 'dropdown' | 'radio' | 'checkbox' | 'heading' | 'divider' | 'spacer' | 'table' | 'box-layout';
+  dataType: 'text' | 'number' | 'email' | 'date' | 'dropdown' | 'radio' | 'checkbox' | 'heading' | 'divider' | 'spacer' | 'table';
   className?: string;
   category: string;
   lovType?: 'user-defined' | 'api';
   lovItems?: ILOVItem[];
-  boxLayoutColumns?: IBoxLayoutColumn[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,28 +26,6 @@ const LOVItemSchema = new Schema({
   description: { type: String },
   seamlessMapping: { type: String },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
-});
-
-const BoxLayoutColumnSchema = new Schema({
-  name: { type: String, required: true },
-  label: { type: String, required: true },
-  type: {
-    type: String,
-    required: true,
-    enum: ['text', 'number', 'email', 'dropdown', 'date', 'checkbox', 'phone', 'textarea'],
-    default: 'text'
-  },
-  placeholder: { type: String },
-  width: { type: String },
-  required: { type: Boolean, default: false },
-  options: [{
-    value: { type: String },
-    label: { type: String }
-  }],
-  phoneConfig: {
-    defaultCountry: { type: String, default: 'US' },
-    showCountryCode: { type: Boolean, default: true }
-  }
 });
 
 const CustomFieldSchema = new Schema<ICustomField>({
@@ -80,7 +43,7 @@ const CustomFieldSchema = new Schema<ICustomField>({
   dataType: {
     type: String,
     required: true,
-    enum: ['text', 'number', 'email', 'date', 'dropdown', 'radio', 'checkbox', 'heading', 'divider', 'spacer', 'table', 'box-layout'],
+    enum: ['text', 'number', 'email', 'date', 'dropdown', 'radio', 'checkbox', 'heading', 'divider', 'spacer', 'table'],
   },
   className: {
     type: String,
@@ -96,7 +59,6 @@ const CustomFieldSchema = new Schema<ICustomField>({
     enum: ['user-defined', 'api'],
   },
   lovItems: [LOVItemSchema],
-  boxLayoutColumns: [BoxLayoutColumnSchema],
 }, {
   timestamps: true,
 });

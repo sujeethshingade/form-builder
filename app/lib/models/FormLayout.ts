@@ -37,7 +37,7 @@ export interface IFormLayoutField {
 
 export interface IFormLayout extends Document {
   layoutName: string;
-  layoutType: 'form-group' | 'grid-layout';
+  layoutType: 'form-group' | 'grid-layout' | 'box-layout';
   category?: string;
   fields: IFormLayoutField[];
   createdAt: Date;
@@ -54,7 +54,7 @@ const FormLayoutSchema = new Schema<IFormLayout>({
   layoutType: { 
     type: String, 
     required: true,
-    enum: ['form-group', 'grid-layout'],
+    enum: ['form-group', 'grid-layout', 'box-layout'],
   },
   category: {
     type: String,

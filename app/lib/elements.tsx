@@ -442,14 +442,11 @@ export const elements: ElementDefinition[] = [
       columns: [
         { name: "column_1", label: "Column 1", type: "text", placeholder: "", width: "auto" },
       ],
-      rows: [
+      tableRows: [
         { column_1: "" },
       ],
       size: "md",
       width: "full",
-      // New properties
-      minRowsTable: undefined,
-      maxRowsTable: undefined,
       showHeader: true,
       striped: false,
       bordered: true,

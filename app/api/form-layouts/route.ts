@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!['form-group', 'grid-layout'].includes(layoutType)) {
+    if (!['form-group', 'grid-layout', 'box-layout'].includes(layoutType)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid layout type. Must be "form-group" or "grid-layout"' },
+        { success: false, error: 'Invalid layout type. Must be "form-group", "grid-layout", or "box-layout"' },
         { status: 400 }
       );
     }

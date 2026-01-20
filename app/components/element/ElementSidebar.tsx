@@ -34,7 +34,7 @@ interface CustomFieldData {
 interface FormLayoutData {
   _id: string;
   layoutName: string;
-  layoutType: 'form-group' | 'grid-layout';
+  layoutType: 'form-group' | 'grid-layout' | 'box-layout';
   category?: string;
   fields: any[];
 }
@@ -318,6 +318,7 @@ export function ElementSidebar({
               <option value="all">All Layouts</option>
               <option value="form-group">Form Groups</option>
               <option value="grid-layout">Grid Layouts</option>
+              <option value="box-layout">Box Layouts</option>
             </select>
           </div>
 

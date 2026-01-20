@@ -22,7 +22,7 @@ import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
 
-type SaveAsType = "form" | "form-group" | "grid-layout";
+type SaveAsType = "form" | "form-group" | "grid-layout" | "box-layout";
 
 interface FormJson {
   fields: FormField[];
@@ -94,7 +94,6 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
               />
               <div className="flex-1">
                 <div className="font-medium text-slate-700">Save as Form</div>
-                <div className="text-xs text-slate-500">Save as a regular form</div>
               </div>
             </label>
             
@@ -108,7 +107,6 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
               />
               <div className="flex-1">
                 <div className="font-medium text-slate-700">Save as Form Group</div>
-                <div className="text-xs text-slate-500">Create a reusable group of fields (won&apos;t affect this form)</div>
               </div>
             </label>
             
@@ -122,7 +120,19 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
               />
               <div className="flex-1">
                 <div className="font-medium text-slate-700">Save as Grid Layout</div>
-                <div className="text-xs text-slate-500">Create a grid layout template (won&apos;t affect this form)</div>
+              </div>
+            </label>
+            
+            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
+              <input
+                type="radio"
+                name="saveType"
+                checked={saveType === "box-layout"}
+                onChange={() => setSaveType("box-layout")}
+                className="w-4 h-4 text-sky-600"
+              />
+              <div className="flex-1">
+                <div className="font-medium text-slate-700">Save as Box Layout</div>
               </div>
             </label>
           </div>
@@ -132,19 +142,19 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
           <>
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                {saveType === "form-group" ? "Form Group Name" : "Grid Layout Name"} <span className="text-red-500">*</span>
+                {saveType === "form-group" ? "Form Group Name" : saveType === "grid-layout" ? "Grid Layout Name" : "Box Layout Name"} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={layoutName}
                 onChange={(e) => setLayoutName(e.target.value)}
-                placeholder={`Enter ${saveType === "form-group" ? "form group" : "grid layout"} name`}
+                placeholder={`Enter ${saveType === "form-group" ? "form group" : saveType === "grid-layout" ? "grid layout" : "box layout"} name`}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
               />
             </div>
             <div className="mb-4 p-3 bg-sky-50 border border-sky-200 rounded-md">
               <p className="text-xs text-sky-700">
-                <strong>Note:</strong> This will only create a new {saveType === "form-group" ? "form group" : "grid layout"} from the current fields. 
+                <strong>Note:</strong> This will only create a new {saveType === "form-group" ? "form group" : saveType === "grid-layout" ? "grid layout" : "box layout"} from the current fields. 
                 The form itself will not be modified. You can manage layouts from the <span className="font-medium">Layouts</span> page.
               </p>
             </div>
@@ -163,7 +173,7 @@ function SaveModal({ isOpen, onClose, onSave, saving, formName }: SaveModalProps
             disabled={saving}
             className="px-4 py-2 text-white rounded-md transition-colors disabled:opacity-50 bg-sky-500 hover:bg-sky-600"
           >
-            {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : "Grid Layout"}`}
+            {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"}`}
           </button>
         </div>
       </div>
@@ -266,7 +276,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           return;
         }
 
-        alert(`${saveType === "form-group" ? "Form Group" : "Grid Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
+        alert(`${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
         setShowSaveModal(false);
         return;
       }

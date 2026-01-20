@@ -411,7 +411,20 @@ export type TableVueformProps = BaseVueformProps & {
   hover?: boolean;
   compact?: boolean;
 
+  // Row interactions
+  addable?: boolean;
+  removable?: boolean;
+  sortable?: boolean;
+  reorderable?: boolean;
+  resizable?: boolean;
+
+  // Pagination
+  pagination?: boolean;
+  rowsPerPage?: number;
+
   // Labels
+  addRowLabel?: string;
+  removeRowLabel?: string;
   emptyText?: string;
 };
 
@@ -588,6 +601,15 @@ export type FormField = {
   bordered?: boolean;
   hover?: boolean;
   compact?: boolean;
+  addable?: boolean;
+  removable?: boolean;
+  sortable?: boolean;
+  reorderable?: boolean;
+  resizable?: boolean;
+  pagination?: boolean;
+  rowsPerPage?: number;
+  addRowLabel?: string;
+  removeRowLabel?: string;
   emptyText?: string;
 
   // Text slots

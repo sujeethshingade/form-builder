@@ -88,7 +88,7 @@ function SaveAsModal({ isOpen, onClose, onSave, saving, defaultName }: SaveAsMod
 interface LayoutData {
   _id: string;
   layoutName: string;
-  layoutType: "form-group" | "grid-layout";
+  layoutType: "form-group" | "grid-layout" | "box-layout";
   category?: string;
   fields: FormField[];
   createdAt: string;

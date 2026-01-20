@@ -23,7 +23,7 @@ import type { FormField, FormStyles, WorkspaceView, CollectionData } from "@/app
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
-type SaveAsType = "form" | "form-group" | "grid-layout";
+type SaveAsType = "form" | "form-group" | "grid-layout" | "box-layout";
 
 export default function NewFormBuilderPage() {
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function NewFormBuilderPage() {
     }
 
     if (saveType !== "form" && !layoutName.trim()) {
-      alert(`Please enter a ${saveType === "form-group" ? "Form Group" : "Grid Layout"} name`);
+      alert(`Please enter a ${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"} name`);
       return;
     }
 
@@ -117,7 +117,7 @@ export default function NewFormBuilderPage() {
         }
 
         setShowSaveModal(false);
-        alert(`${saveType === "form-group" ? "Form Group" : "Grid Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
+        alert(`${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
         router.push("/layouts");
         return;
       }
@@ -542,7 +542,6 @@ export default function NewFormBuilderPage() {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-slate-700 text-sm">Form</div>
-                      <div className="text-xs text-slate-500">Save as a regular form</div>
                     </div>
                   </label>
                   
@@ -556,7 +555,6 @@ export default function NewFormBuilderPage() {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-slate-700 text-sm">Form Group</div>
-                      <div className="text-xs text-slate-500">Save as a reusable group of fields</div>
                     </div>
                   </label>
                   
@@ -570,7 +568,19 @@ export default function NewFormBuilderPage() {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-slate-700 text-sm">Grid Layout</div>
-                      <div className="text-xs text-slate-500">Save as a grid layout template</div>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="saveType"
+                      checked={saveType === "box-layout"}
+                      onChange={() => setSaveType("box-layout")}
+                      className="w-4 h-4 text-sky-600"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-slate-700 text-sm">Box Layout</div>
                     </div>
                   </label>
                 </div>
@@ -614,17 +624,16 @@ export default function NewFormBuilderPage() {
                 </>
               )}
 
-              {/* Layout Name field for Form Group or Grid Layout */}
               {saveType !== "form" && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    {saveType === "form-group" ? "Form Group Name" : "Grid Layout Name"} <span className="text-red-500">*</span>
+                    {saveType === "form-group" ? "Form Group Name" : saveType === "grid-layout" ? "Grid Layout Name" : "Box Layout Name"} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={layoutName}
                     onChange={(e) => setLayoutName(e.target.value)}
-                    placeholder={`Enter ${saveType === "form-group" ? "form group" : "grid layout"} name`}
+                    placeholder={`Enter ${saveType === "form-group" ? "form group" : saveType === "grid-layout" ? "grid layout" : "box layout"} name`}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
                   />
                 </div>
@@ -643,7 +652,7 @@ export default function NewFormBuilderPage() {
                   disabled={saving}
                   className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : "Grid Layout"}`}
+                  {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"}`}
                 </button>
               </div>
             </form>

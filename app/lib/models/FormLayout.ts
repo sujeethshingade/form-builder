@@ -32,13 +32,63 @@ export interface IFormLayoutField {
   height?: string;
   columns?: any[];
   rows?: Record<string, any>[];
+  // For nested layouts
+  isLayout?: boolean;
+  layoutType?: 'grid-layout' | 'box-layout';
+  layoutId?: string;
+  layoutConfig?: any;
 }
+
+// Grid Layout Config
+export interface IGridColumn {
+  id: string;
+  field: IFormLayoutField | null;
+}
+
+export interface IGridRow {
+  id: string;
+  columns: IGridColumn[];
+}
+
+export interface IGridLayoutConfig {
+  gridColumns: number;
+  rows: IGridRow[];
+}
+
+// Box Layout Config
+export interface IBox {
+  id: string;
+  title: string;
+  fields: IFormLayoutField[];
+}
+
+export interface IBoxLayoutConfig {
+  boxes: IBox[];
+}
+
+// Form Group Config
+export interface IFormGroup {
+  id: string;
+  name: string;
+  subtitle?: string;
+  icon?: string;
+  status?: 'completed' | 'in-progress' | 'pending';
+  fields: IFormLayoutField[];
+  subgroups?: { id: string; name: string }[];
+}
+
+export interface IFormGroupConfig {
+  groups: IFormGroup[];
+}
+
+export type ILayoutConfig = IGridLayoutConfig | IBoxLayoutConfig | IFormGroupConfig;
 
 export interface IFormLayout extends Document {
   layoutName: string;
   layoutType: 'form-group' | 'grid-layout' | 'box-layout';
   category?: string;
   fields: IFormLayoutField[];
+  layoutConfig?: ILayoutConfig;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,6 +112,10 @@ const FormLayoutSchema = new Schema<IFormLayout>({
   fields: {
     type: Schema.Types.Mixed,
     default: [],
+  },
+  layoutConfig: {
+    type: Schema.Types.Mixed,
+    default: null,
   },
 }, {
   timestamps: true,

@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { layoutName, layoutType, category, fields } = body;
+    const { layoutName, layoutType, category, fields, layoutConfig } = body;
     
     if (!layoutName || !layoutType) {
       return NextResponse.json(
@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       layoutType,
       category,
       fields: fields || [],
+      layoutConfig: layoutConfig || null,
     });
     
     return NextResponse.json({ success: true, data: layout }, { status: 201 });

@@ -144,7 +144,7 @@ export default function FieldsPage() {
     const colors: Record<string, string> = {
       text: "bg-blue-100 text-blue-700",
       textarea: "bg-blue-100 text-blue-700",
-      number: "bg-purple-100 text-purple-700",
+      number: "bg-sky-100 text-sky-700",
       email: "bg-green-100 text-green-700",
       date: "bg-orange-100 text-orange-700",
       dropdown: "bg-indigo-100 text-indigo-700",
@@ -153,7 +153,7 @@ export default function FieldsPage() {
       heading: "bg-slate-100 text-slate-700",
       divider: "bg-slate-100 text-slate-700",
       spacer: "bg-slate-100 text-slate-700",
-      table: "bg-emerald-100 text-emerald-700",
+      table: "bg-sky-100 text-sky-700",
     };
     return colors[type] || "bg-gray-100 text-gray-700";
   };

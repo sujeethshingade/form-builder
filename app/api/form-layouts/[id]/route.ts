@@ -41,7 +41,7 @@ export async function PUT(
     
     const { id } = await params;
     const body = await request.json();
-    const { layoutName, category, fields } = body;
+    const { layoutName, category, fields, layoutConfig } = body;
     
     const updateData: Record<string, unknown> = {
       updatedAt: new Date(),
@@ -55,6 +55,9 @@ export async function PUT(
     }
     if (fields) {
       updateData.fields = fields;
+    }
+    if (layoutConfig !== undefined) {
+      updateData.layoutConfig = layoutConfig;
     }
     
     const layout = await FormLayout.findByIdAndUpdate(

@@ -23,7 +23,7 @@ import type { FormField, FormStyles, WorkspaceView, CollectionData } from "@/app
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
-type SaveAsType = "form" | "form-group" | "grid-layout" | "box-layout";
+type SaveAsType = "form";
 
 export default function NewFormBuilderPage() {
   const router = useRouter();
@@ -45,8 +45,6 @@ export default function NewFormBuilderPage() {
     collectionName: "",
     formName: "",
   });
-  const [saveType, setSaveType] = useState<SaveAsType>("form");
-  const [layoutName, setLayoutName] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -75,53 +73,18 @@ export default function NewFormBuilderPage() {
 
   const handleSave = () => {
     setShowSaveModal(true);
-    setSaveType("form");
-    setLayoutName("");
   };
 
   const handleSaveConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Only validate collection and form name for form type
-    if (saveType === "form") {
-      if (!saveForm.collectionName || !saveForm.formName) {
-        alert("Please fill in all required fields");
-        return;
-      }
-    }
-
-    if (saveType !== "form" && !layoutName.trim()) {
-      alert(`Please enter a ${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"} name`);
+    if (!saveForm.collectionName || !saveForm.formName) {
+      alert("Please fill in all required fields");
       return;
     }
 
     setSaving(true);
     try {
-      // If saving as layout (form-group or grid-layout), only create the layout
-      if (saveType !== "form" && layoutName.trim()) {
-        const layoutResponse = await fetch("/api/form-layouts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            layoutName: layoutName.trim(),
-            layoutType: saveType,
-            fields,
-          }),
-        });
-
-        const layoutResult = await layoutResponse.json();
-
-        if (!layoutResult.success) {
-          alert(`Failed to create layout: ${layoutResult.error}`);
-          return;
-        }
-
-        setShowSaveModal(false);
-        alert(`${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"} "${layoutName}" created successfully! You can manage it from the Layouts page.`);
-        router.push("/layouts");
-        return;
-      }
-
       // Create the form
       const response = await fetch("/api/forms", {
         method: "POST",
@@ -570,118 +533,38 @@ export default function NewFormBuilderPage() {
               </button>
             </div>
             <form onSubmit={handleSaveConfirm} className="p-4 space-y-4">
-              {/* Save Type Options - show first */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Save As
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Select Collection <span className="text-red-500">*</span>
                 </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="saveType"
-                      checked={saveType === "form"}
-                      onChange={() => setSaveType("form")}
-                      className="w-4 h-4 text-sky-600"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-700 text-sm">Form</div>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="saveType"
-                      checked={saveType === "form-group"}
-                      onChange={() => setSaveType("form-group")}
-                      className="w-4 h-4 text-sky-600"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-700 text-sm">Form Group</div>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="saveType"
-                      checked={saveType === "grid-layout"}
-                      onChange={() => setSaveType("grid-layout")}
-                      className="w-4 h-4 text-sky-600"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-700 text-sm">Grid Layout</div>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-sky-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="saveType"
-                      checked={saveType === "box-layout"}
-                      onChange={() => setSaveType("box-layout")}
-                      className="w-4 h-4 text-sky-600"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-700 text-sm">Box Layout</div>
-                    </div>
-                  </label>
-                </div>
+                <select
+                  value={saveForm.collectionName}
+                  onChange={(e) => setSaveForm({ ...saveForm, collectionName: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
+                  required
+                >
+                  <option value="">Select a collection</option>
+                  {collections.map((collection) => (
+                    <option key={collection._id} value={collection.name}>
+                      {collection.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-
-              {/* Show Collection and Form Name only for Form type */}
-              {saveType === "form" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Select Collection <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={saveForm.collectionName}
-                      onChange={(e) => setSaveForm({ ...saveForm, collectionName: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
-                      required
-                    >
-                      <option value="">Select a collection</option>
-                      {collections.map((collection) => (
-                        <option key={collection._id} value={collection.name}>
-                          {collection.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Form Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={saveForm.formName}
-                      onChange={(e) => setSaveForm({ ...saveForm, formName: e.target.value })}
-                      placeholder="Enter form name"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {saveType !== "form" && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    {saveType === "form-group" ? "Form Group Name" : saveType === "grid-layout" ? "Grid Layout Name" : "Box Layout Name"} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={layoutName}
-                    onChange={(e) => setLayoutName(e.target.value)}
-                    placeholder={`Enter ${saveType === "form-group" ? "form group" : saveType === "grid-layout" ? "grid layout" : "box layout"} name`}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
-                  />
-                </div>
-              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Form Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={saveForm.formName}
+                  onChange={(e) => setSaveForm({ ...saveForm, formName: e.target.value })}
+                  placeholder="Enter form name"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none"
+                  required
+                />
+              </div>
               
               <div className="flex justify-end gap-3 pt-4">
                 <button
@@ -696,7 +579,7 @@ export default function NewFormBuilderPage() {
                   disabled={saving}
                   className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : saveType === "form" ? "Save Form" : `Create ${saveType === "form-group" ? "Form Group" : saveType === "grid-layout" ? "Grid Layout" : "Box Layout"}`}
+                  {saving ? "Saving..." : "Save Form"}
                 </button>
               </div>
             </form>

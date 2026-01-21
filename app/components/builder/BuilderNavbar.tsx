@@ -23,8 +23,8 @@ export type BuilderNavbarProps = {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  workspaceView: WorkspaceView;
-  onWorkspaceViewChange: (view: WorkspaceView) => void;
+  workspaceView?: WorkspaceView;
+  onWorkspaceViewChange?: (view: WorkspaceView) => void;
   hasUnsavedChanges?: boolean;
   onSave?: () => void;
   onSaveAs?: () => void;
@@ -114,7 +114,7 @@ export function BuilderNavbar({
       </div>
 
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-slate-100 rounded-lg p-1">
-        {viewTabs.map(({ key, icon, label }) => {
+        {workspaceView && onWorkspaceViewChange && viewTabs.map(({ key, icon, label }) => {
           const isActive = workspaceView === key;
           return (
             <button
@@ -177,7 +177,7 @@ export function BuilderNavbar({
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 saveAsDisabled
                   ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  : "bg-emerald-500 text-white hover:bg-emerald-600"
+                  : "bg-sky-500 text-white hover:bg-sky-600"
               }`}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

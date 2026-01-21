@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { SearchInput } from "@/app/components/shared/SearchInput";
 
 
@@ -11,6 +12,7 @@ interface FormLayoutData {
   layoutType: "form-group" | "grid-layout" | "box-layout";
   category?: string;
   fields: any[];
+  layoutConfig?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -97,8 +99,17 @@ export default function LayoutsPage() {
     return new Date(dateString).toISOString().replace("T", " ").slice(0, -5) + "Z";
   };
 
-  const handleLayoutClick = (layoutId: string) => {
-    router.push(`/layouts/builder/${layoutId}`);
+  const handleLayoutClick = (layout: FormLayoutData) => {
+    
+    if (layout.layoutType === "grid-layout") {
+      router.push(`/layouts/grid-builder/${layout._id}`);
+    } else if (layout.layoutType === "box-layout") {
+      router.push(`/layouts/box-builder/${layout._id}`);
+    } else if (layout.layoutType === "form-group") {
+      router.push(`/layouts/form-group-builder/${layout._id}`);
+    } else {
+      router.push(`/layouts/builder/${layout._id}`);
+    }
   };
 
   const getLayoutTypeLabel = (type: string) => {
@@ -153,6 +164,15 @@ export default function LayoutsPage() {
               </select>
             </div>
           </div>
+          <Link
+            href="/layouts/create"
+            className="flex items-center gap-2 px-4 py-1.5 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Layout
+          </Link>
         </div>
 
         {error && (
@@ -191,7 +211,7 @@ export default function LayoutsPage() {
                   <tr key={layout._id} className="hover:bg-slate-50">
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => handleLayoutClick(layout._id)}
+                        onClick={() => handleLayoutClick(layout)}
                         className="text-sm text-slate-600 hover:text-sky-600 font-medium transition-colors"
                       >
                         {layout.layoutName}
@@ -210,7 +230,7 @@ export default function LayoutsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleLayoutClick(layout._id)}
+                          onClick={() => handleLayoutClick(layout)}
                           className="p-1.5 text-slate-400 hover:text-sky-600 transition-colors"
                           title="Edit Layout"
                         >

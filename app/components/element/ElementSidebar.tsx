@@ -103,6 +103,8 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
         return 'Form Group';
       case 'grid-layout':
         return 'Grid Layout';
+      case 'box-layout':
+        return 'Box Layout';
       default:
         return 'Layout';
     }
@@ -392,6 +394,19 @@ export function ElementSidebar({
         </>
       ) : activeTab === "layouts" ? (
         <>
+          {/* Create Layout Button */}
+          <div className="p-2">
+            <button
+              onClick={() => router.push("/layouts/create")}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create Layout
+            </button>
+          </div>
+
           {/* Layout Search */}
           <div className="p-2">
             <input

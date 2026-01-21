@@ -10,7 +10,7 @@ export function Navbar() {
     return pathname.startsWith(path);
   };
 
-  if (pathname.startsWith("/builder") || pathname.startsWith("/layouts/builder")) {
+  if (pathname.startsWith("/builder") || pathname.startsWith("/layouts/builder") || pathname.startsWith("/layouts/grid-builder") || pathname.startsWith("/layouts/box-builder") || pathname.startsWith("/layouts/form-group-builder")) {
     return null;
   }
 

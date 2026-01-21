@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FormField, VueformColumn, CustomScript, ValidationRule, ConditionalLogic, LOVItem } from "@/app/lib/types";
+import { FormField, CustomScript } from "@/app/lib/types";
 import { ColumnWidthSelector } from "@/app/components/shared/ColumnWidthSelector";
-
-type TableColumn = VueformColumn;
 
 const PlusIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -197,34 +195,6 @@ export default function InspectorSidebar({
     onUpdate({ [key]: value });
   };
 
-  // Table column handlers
-  const handleColumnsChange = (columns: TableColumn[]) => {
-    onUpdate({ columns });
-  };
-
-  const addColumn = () => {
-    const currentColumns = Array.isArray(field.columns) ? field.columns : [];
-    const newColumn: TableColumn = {
-      name: `column_${currentColumns.length + 1}`,
-      label: `Column ${currentColumns.length + 1}`,
-      type: "text",
-    };
-    handleColumnsChange([...currentColumns, newColumn]);
-  };
-
-  const updateColumn = (index: number, updates: Partial<TableColumn>) => {
-    const currentColumns = Array.isArray(field.columns) ? field.columns : [];
-    const updatedColumns = currentColumns.map((col: VueformColumn, i: number) =>
-      i === index ? { ...col, ...updates } : col
-    );
-    handleColumnsChange(updatedColumns);
-  };
-
-  const removeColumn = (index: number) => {
-    const currentColumns = Array.isArray(field.columns) ? field.columns : [];
-    handleColumnsChange(currentColumns.filter((_: VueformColumn, i: number) => i !== index));
-  };
-
   // Custom Scripts handlers
   const handleScriptsChange = (scripts: CustomScript[]) => {
     onUpdate({ scripts });
@@ -256,45 +226,10 @@ export default function InspectorSidebar({
     handleScriptsChange(currentScripts.filter((_, i) => i !== index));
   };
 
-  // Validation Rules handlers
-  const handleValidationRulesChange = (rules: ValidationRule[]) => {
-    onUpdate({ validationRules: rules });
-  };
-
-  const addValidationRule = () => {
-    const currentRules = field.validationRules || [];
-    const newRule: ValidationRule = {
-      id: `rule_${Date.now()}`,
-      type: "required",
-      message: "This field is required",
-      enabled: true,
-    };
-    handleValidationRulesChange([...currentRules, newRule]);
-  };
-
-  const updateValidationRule = (index: number, updates: Partial<ValidationRule>) => {
-    const currentRules = field.validationRules || [];
-    const updatedRules = currentRules.map((rule, i) =>
-      i === index ? { ...rule, ...updates } : rule
-    );
-    handleValidationRulesChange(updatedRules);
-  };
-
-  const removeValidationRule = (index: number) => {
-    const currentRules = field.validationRules || [];
-    handleValidationRulesChange(currentRules.filter((_, i) => i !== index));
-  };
-
   // Field type checks
-
-
   const isTextarea = field.type === "textarea";
-  const isChoiceField = ["checkbox", "radio", "dropdown"].includes(field.type);
-
   const isSliderField = field.type === "slider";
-  const isTableField = field.type === "table";
   const isHeadingField = field.type === "heading";
-  const isDividerField = field.type === "divider";
   const isSpacerField = field.type === "spacer";
   const isLayoutField = ["heading", "divider", "spacer"].includes(field.type);
   

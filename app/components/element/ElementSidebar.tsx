@@ -97,9 +97,6 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
     },
   });
 
-  const isGroup = layout.layoutType === 'form-group';
-  const isGrid = layout.layoutType === 'grid-layout';
-
   const getLayoutTypeLabel = () => {
     switch (layout.layoutType) {
       case 'form-group':
@@ -384,8 +381,6 @@ export function ElementSidebar({
               ) : customFields.length === 0 ? (
                 <div className="text-center py-8 text-slate-400 text-sm">
                   No custom fields found.
-                  <br />
-                  <span className="text-xs">Click "Create Field" to create or edit.</span>
                 </div>
               ) : (
                 customFields.map((field) => (
@@ -429,7 +424,7 @@ export function ElementSidebar({
                 <div className="text-center py-8 text-slate-400 text-sm">Loading layouts...</div>
               ) : formLayouts.length === 0 ? (
                 <div className="text-center py-8 text-slate-400 text-sm">
-                  Form layout not found.
+                  No form layouts found.
                 </div>
               ) : (
                 formLayouts.map((layout) => (

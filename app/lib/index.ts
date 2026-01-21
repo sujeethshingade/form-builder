@@ -44,4 +44,4 @@ export {
   getIconForType,
 } from "./icons";
 
-export { fieldElements, pageElements } from "./elements";
+export { fieldElements } from "./elements";

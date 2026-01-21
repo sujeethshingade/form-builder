@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import type { FormField, FormStyles, VueformItem, ValidationRule, CustomScript } from "../../lib/types";
+import { useState, useEffect } from "react";
+import type { FormField, FormStyles, VueformItem, CustomScript } from "../../lib/types";
 import { getFieldColumnSpan } from "../../lib/form";
 
 interface FormPreviewProps {

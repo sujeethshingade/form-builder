@@ -183,7 +183,7 @@ export default function LayoutsPage() {
               ) : layouts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                    No layouts found. Create layouts from the form builder using &quot;Save as Form Group&quot; or &quot;Save as Grid Layout&quot;.
+                    No layouts found. Click &quot;Create Layout&quot; to add a new layout.
                   </td>
                 </tr>
               ) : (

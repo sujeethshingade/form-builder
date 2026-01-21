@@ -1,8 +1,6 @@
 import { nanoid } from "nanoid";
 import type { ComponentType, FormField, LibraryItem, FormStyles } from "./types";
 
-export type { ComponentType, FormField, LibraryItem, FormStyles } from "./types";
-
 export const defaultStyles: FormStyles = {
   backgroundColor: "#ffffff",
   textColor: "#1e293b",
@@ -26,23 +24,17 @@ export const library: LibraryItem[] = [
   { type: "table", label: "Table", icon: "⊞", category: "layout" },
 ];
 
-function hasOptions(type: ComponentType): boolean {
-  return ["checkbox", "radio", "dropdown"].includes(type);
-}
-
-function getDefaultPlaceholder(type: ComponentType): string | undefined {
-  return "";
-}
+const CHOICE_TYPES = ["checkbox", "radio", "dropdown"];
 
 export function makeField(item: LibraryItem): FormField {
   return {
     id: nanoid(),
     type: item.type,
     label: item.label,
-    placeholder: getDefaultPlaceholder(item.type),
+    placeholder: "",
     helper: "",
     required: false,
-    items: hasOptions(item.type)
+    items: CHOICE_TYPES.includes(item.type)
       ? [
         { value: "option_1", label: "Option 1", disabled: false },
         { value: "option_2", label: "Option 2", disabled: false },

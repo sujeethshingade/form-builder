@@ -49,7 +49,6 @@ export const elements: ElementDefinition[] = [
       default: "",
       required: false,
       width: "full",
-      // Textarea specific
       rows: 3,
       cols: undefined,
       autosize: false,
@@ -58,7 +57,6 @@ export const elements: ElementDefinition[] = [
       spellcheck: true,
       wrap: "soft",
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -79,7 +77,6 @@ export const elements: ElementDefinition[] = [
       addons: { before: "", after: "" },
       width: "full",
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -103,9 +100,7 @@ export const elements: ElementDefinition[] = [
       conditions: [],
     },
   },
-  
 
-  
   // Single Choice (Radio) Component
   {
     type: "radio",
@@ -122,7 +117,6 @@ export const elements: ElementDefinition[] = [
         { value: "option_3", label: "Option 3", disabled: false },
       ],
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -145,7 +139,6 @@ export const elements: ElementDefinition[] = [
       ],
       width: "full",
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -168,9 +161,7 @@ export const elements: ElementDefinition[] = [
         { value: "option_3", label: "Option 3", disabled: false },
       ],
       width: "full",
-      // Dropdown specific
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -192,14 +183,11 @@ export const elements: ElementDefinition[] = [
       addons: { before: "", after: "" },
       width: "full",
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
   },
-  
 
-  
   // Slider Component
   {
     type: "slider",
@@ -211,7 +199,6 @@ export const elements: ElementDefinition[] = [
       default: 50,
       required: false,
       width: "full",
-      // Slider specific
       min: 0,
       max: 100,
       step: 1,
@@ -222,7 +209,6 @@ export const elements: ElementDefinition[] = [
       tooltipFormat: "",
       marks: false,
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -235,15 +221,11 @@ export const elements: ElementDefinition[] = [
     icon: <HeadingIcon />,
     defaultProps: {
       name: "heading",
-
       tag: "h2",
       align: "left",
       width: "full",
-      // New properties
-
       collapsible: false,
       collapsed: false,
-      // Scripts for dynamic behavior
       scripts: [],
     },
   },
@@ -256,11 +238,8 @@ export const elements: ElementDefinition[] = [
     defaultProps: {
       name: "divider",
       width: "full",
-      // New properties
-
       marginTop: "",
       marginBottom: "",
-
     },
   },
   
@@ -273,7 +252,6 @@ export const elements: ElementDefinition[] = [
       name: "spacer",
       height: "1rem",
       width: "full",
-      // New properties
       minHeight: "",
       maxHeight: "",
     },
@@ -296,9 +274,7 @@ export const elements: ElementDefinition[] = [
         { column_1: "" },
       ],
       width: "full",
-
       description: "",
-      // Scripts
       scripts: [],
       conditions: [],
     },
@@ -307,4 +283,3 @@ export const elements: ElementDefinition[] = [
 
 // Keep for backward compatibility
 export const fieldElements = elements;
-export const pageElements: ElementDefinition[] = [];

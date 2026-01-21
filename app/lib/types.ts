@@ -85,8 +85,6 @@ export type VueformAddon = {
   after?: string;
 };
 
-
-
 // ============================================
 // Base Component Props
 // ============================================
@@ -103,22 +101,11 @@ export type BaseVueformProps = {
   conditions?: ConditionalLogic[];
   scripts?: CustomScript[];
   validationRules?: ValidationRule[];
-
-
-
-
-  // ============================================
-  // Text Input Props
-  // ============================================
-
   inputType?: "text" | "email";
   addons?: VueformAddon;
 };
 
-export type InputVueformProps = BaseVueformProps & {
-  inputType?: "text" | "email";
-  addons?: VueformAddon;
-};
+export type InputVueformProps = BaseVueformProps;
 
 // ============================================
 // Number Input Props
@@ -256,7 +243,6 @@ export type VueformProps =
   | InputVueformProps
   | NumberVueformProps
   | TextareaVueformProps
-  | ChoiceVueformProps
   | ChoiceVueformProps
   | DropdownVueformProps
   | DateVueformProps

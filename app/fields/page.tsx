@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SearchInput } from "@/app/components/shared/SearchInput";
-import { SaveAsModal } from "@/app/components/shared/SaveAsModal";
 
 interface LOVItem {
   code: string;
@@ -53,9 +52,6 @@ export default function FieldsPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("");
-  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
-  const [selectedField, setSelectedField] = useState<CustomFieldData | null>(null);
-  const [savingAs, setSavingAs] = useState(false);
 
   const dataTypes = [
     { value: "text", label: "Text" },
@@ -138,41 +134,7 @@ export default function FieldsPage() {
     }
   };
 
-  const handleSaveAsNew = async (newName: string) => {
-    if (!selectedField) return;
 
-    setSavingAs(true);
-    try {
-      const response = await fetch("/api/custom-fields", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fieldName: newName.replace(/\s+/g, '_').toLowerCase(),
-          fieldLabel: newName,
-          dataType: selectedField.dataType,
-          className: selectedField.className,
-          category: selectedField.category,
-          enableLOV: selectedField.lovEnabled,
-          lovType: selectedField.lovType,
-          lovItems: selectedField.lovItems,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setShowSaveAsModal(false);
-        setSelectedField(null);
-        fetchFields();
-        alert("Field saved as new successfully!");
-      } else {
-        alert(data.error);
-      }
-    } catch (err) {
-      alert("Failed to save field as new");
-    } finally {
-      setSavingAs(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toISOString().replace("T", " ").slice(0, -5) + "Z";
@@ -324,21 +286,6 @@ export default function FieldsPage() {
           </table>
         </div>
       </main>
-
-      <SaveAsModal
-        isOpen={showSaveAsModal}
-        onClose={() => {
-          setShowSaveAsModal(false);
-          setSelectedField(null);
-        }}
-        onSave={handleSaveAsNew}
-        saving={savingAs}
-        defaultName={selectedField ? `${selectedField.fieldLabel} Copy` : ""}
-        title="Clone Field"
-        nameLabel="Field Label"
-        namePlaceholder="Enter field label"
-        saveButtonText="Clone Field"
-      />
     </div>
   );
 }

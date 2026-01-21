@@ -11,7 +11,6 @@ export function ColumnWidthSelector({
   value,
   onChange,
   label = "Width",
-  description = "Select column width (1-12 columns)",
 }: ColumnWidthSelectorProps) {
   const columns = value || 12;
 
@@ -24,9 +23,6 @@ export function ColumnWidthSelector({
       <label className="block text-sm font-medium text-gray-700 mb-1.5">
         {label}: {columns} {columns === 1 ? "column" : "columns"}
       </label>
-      {description && (
-        <p className="text-xs text-gray-500 mb-2">{description}</p>
-      )}
       <div className="flex gap-0.5">
         {Array.from({ length: 12 }).map((_, index) => (
           <button

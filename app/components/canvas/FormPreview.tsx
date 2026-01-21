@@ -9,12 +9,7 @@ interface FormPreviewProps {
   styles: FormStyles;
 }
 
-// Reusable size classes
-const sizeClasses = {
-  sm: "px-2 py-1.5 text-xs",
-  md: "px-3 py-2 text-sm",
-  lg: "px-4 py-3 text-base",
-};
+const defaultSizeClass = "px-3 py-2 text-sm";
 
 // Script execution helper
 function executeScript(
@@ -122,7 +117,7 @@ function PreviewField({
   error?: string | null;
   onBlur?: () => void;
 }) {
-  const size = field.size || "md";
+
   const columnSpan = getFieldColumnSpan(field);
   const gridStyle = { gridColumn: `span ${columnSpan} / span ${columnSpan}` };
   const hasError = !!error;
@@ -138,52 +133,19 @@ function PreviewField({
       if (result !== undefined) {
         processedValue = result;
       }
-    }
-    
-    // Apply transforms for text
-    if (typeof processedValue === "string" && field.transform) {
-      switch (field.transform) {
-        case "lowercase":
-          processedValue = processedValue.toLowerCase();
-          break;
-        case "uppercase":
-          processedValue = processedValue.toUpperCase();
-          break;
-        case "capitalize":
-          processedValue = processedValue.replace(/\b\w/g, c => c.toUpperCase());
-          break;
-      }
-    }
-    
+    }    
     onChange(processedValue);
   };
 
-  const inputClassName = `w-full border rounded-lg ${sizeClasses[size]} text-slate-700 bg-white ${
+  const inputClassName = `w-full border rounded-lg ${defaultSizeClass} text-slate-700 bg-white ${
     hasError ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-sky-500"
   } focus:ring-1 focus:outline-none`;
 
   // Divider
   if (field.type === "divider") {
-    const style = field.dividerStyle || "solid";
-    const thickness = field.thickness || 1;
     return (
       <div className="p-3 w-full" style={gridStyle}>
-        <hr 
-          className="border-slate-300" 
-          style={{ 
-            borderStyle: style, 
-            borderTopWidth: `${thickness}px`,
-            borderColor: field.color || undefined
-          }} 
-        />
-        {field.content && (
-          <div className={`text-center text-sm text-slate-500 -mt-3 ${
-            field.contentPosition === "left" ? "text-left" : 
-            field.contentPosition === "right" ? "text-right" : "text-center"
-          }`}>
-            <span className="bg-white px-2">{field.content}</span>
-          </div>
-        )}
+        <div className="w-full border-t border-slate-300" />
       </div>
     );
   }
@@ -199,7 +161,7 @@ function PreviewField({
   if (field.type === "heading") {
     const tagName = field.tag || "h2";
     const alignClass = field.align === "center" ? "text-center" : field.align === "right" ? "text-right" : "text-left";
-    const content = field.content || field.label;
+    const content = field.label;
     
     const tagStyles: Record<string, string> = {
       h1: "text-4xl font-bold",
@@ -210,34 +172,23 @@ function PreviewField({
       h6: "text-sm font-medium",
     };
 
-    const fontWeightClass = field.fontWeight ? `font-${field.fontWeight}` : "";
-    const className = `text-slate-900 ${tagStyles[tagName]} ${alignClass} ${fontWeightClass}`;
-    
-    const style: React.CSSProperties = {
-      color: field.color || undefined,
-      fontSize: field.fontSize || undefined,
-      marginTop: field.marginTop || undefined,
-      marginBottom: field.marginBottom || undefined,
-    };
+    const className = `text-slate-900 ${tagStyles[tagName]} ${alignClass}`;
     
     const headingElement = (() => {
       switch (tagName) {
-        case "h1": return <h1 className={className} style={style}>{content}</h1>;
-        case "h2": return <h2 className={className} style={style}>{content}</h2>;
-        case "h3": return <h3 className={className} style={style}>{content}</h3>;
-        case "h4": return <h4 className={className} style={style}>{content}</h4>;
-        case "h5": return <h5 className={className} style={style}>{content}</h5>;
-        case "h6": return <h6 className={className} style={style}>{content}</h6>;
-        default: return <h2 className={className} style={style}>{content}</h2>;
+        case "h1": return <h1 className={className}>{content}</h1>;
+        case "h2": return <h2 className={className}>{content}</h2>;
+        case "h3": return <h3 className={className}>{content}</h3>;
+        case "h4": return <h4 className={className}>{content}</h4>;
+        case "h5": return <h5 className={className}>{content}</h5>;
+        case "h6": return <h6 className={className}>{content}</h6>;
+        default: return <h2 className={className}>{content}</h2>;
       }
     })();
 
     return (
       <div className="p-2" style={gridStyle}>
         {headingElement}
-        {field.description && (
-          <p className="text-slate-500 text-sm mt-1">{field.description}</p>
-        )}
       </div>
     );
   }
@@ -394,7 +345,7 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-2">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-2">{field.description}</p>}
         <div className={`border rounded-lg overflow-hidden ${field.bordered !== false ? "border-slate-300" : "border-transparent"}`}>
           <table className={`w-full text-sm ${field.striped ? "stripe-table" : ""}`}>
             {field.showHeader !== false && (
@@ -442,25 +393,17 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-1">{field.description}</p>}
         <textarea
           value={(value as string) || ""}
           onChange={(e) => handleChange(e.target.value)}
           onBlur={onBlur}
           placeholder={field.placeholder}
           required={field.required}
-          disabled={field.disabled}
-          readOnly={field.readonly}
           rows={field.rows || 3}
-          maxLength={field.maxLength}
           spellCheck={field.spellcheck !== false}
           className={`${inputClassName} resize-none`}
         />
-        {field.counter && field.maxLength && (
-          <p className="text-xs text-slate-400 text-right mt-1">
-            {((value as string) || "").length} / {field.maxLength}
-          </p>
-        )}
         {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     );
@@ -474,13 +417,8 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-1">{field.description}</p>}
         <div className="relative">
-          {field.prefix && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-              {field.prefix}
-            </span>
-          )}
           <input
             type={field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "date" ? "date" : "text"}
             value={(value as string) || ""}
@@ -488,38 +426,9 @@ function PreviewField({
             onBlur={onBlur}
             placeholder={field.placeholder}
             required={field.required}
-            disabled={field.disabled}
-            readOnly={field.readonly}
-            min={field.min as number}
-            max={field.max as number}
-            step={field.step}
-            minLength={field.minLength}
-            maxLength={field.maxLength}
-            pattern={field.pattern}
-            autoComplete={field.autocomplete}
-            autoFocus={field.autofocus}
-            className={`${inputClassName} ${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""}`}
+            className={`${inputClassName}`}
           />
-          {field.suffix && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-              {field.suffix}
-            </span>
-          )}
-          {field.clearable && (value as string) && (
-            <button
-              type="button"
-              onClick={() => handleChange("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              ×
-            </button>
-          )}
         </div>
-        {field.counter && field.maxLength && (
-          <p className="text-xs text-slate-400 text-right mt-1">
-            {((value as string) || "").length} / {field.maxLength}
-          </p>
-        )}
         {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     );
@@ -537,7 +446,7 @@ function PreviewField({
             {field.label}
             {field.required && <span className="ml-1 text-red-500">*</span>}
           </label>
-          {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
+          {field.description && <p className="text-xs text-slate-500 mb-1">{field.description}</p>}
           <select
             value={isMultiple ? (value as string[]) || [] : (value as string) || ""}
             onChange={(e) => {
@@ -551,7 +460,6 @@ function PreviewField({
             onBlur={onBlur}
             multiple={isMultiple}
             required={field.required}
-            disabled={field.disabled}
             className={inputClassName}
             style={{ maxHeight: field.maxHeight }}
           >
@@ -574,7 +482,7 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-1">{field.description}</p>}
         <select
           value={isMultiple ? (value as string[]) || [] : (value as string) || ""}
           onChange={(e) => {
@@ -588,7 +496,6 @@ function PreviewField({
           onBlur={onBlur}
           multiple={isMultiple}
           required={field.required}
-          disabled={field.disabled}
           className={inputClassName}
         >
           {!isMultiple && <option value="">{field.placeholder || "Select..."}</option>}
@@ -603,8 +510,6 @@ function PreviewField({
     );
   }
 
-
-
   // Slider
   if (field.type === "slider") {
     const min = (field.min as number) || 0;
@@ -618,7 +523,7 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-1">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-1">{field.description}</p>}
         <div className="flex items-center gap-3">
           <input
             type="range"
@@ -628,7 +533,6 @@ function PreviewField({
             min={min}
             max={max}
             step={step}
-            disabled={field.disabled}
             className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500"
           />
           {field.showValue !== false && (
@@ -649,18 +553,15 @@ function PreviewField({
   // Radio (single choice)
   if (field.type === "radio") {
     const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
-    const columns = field.columns as number;
-    const gridClass = columns ? `grid grid-cols-${columns} gap-2` : "space-y-2";
-    const inlineClass = field.inlineOptions ? "flex flex-wrap gap-4" : gridClass;
-    
+
     return (
       <div className="p-2" style={gridStyle}>
         <label className="block text-sm font-medium text-slate-900 mb-2">
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-2">{field.helper}</p>}
-        <div className={inlineClass}>
+        {field.description && <p className="text-xs text-slate-500 mb-2">{field.description}</p>}
+        <div className="space-y-2">
           {items.map((item) => (
             <label key={String(item.value)} className="flex items-center gap-2 cursor-pointer">
               <input
@@ -670,25 +571,12 @@ function PreviewField({
                 checked={value === item.value}
                 onChange={() => handleChange(item.value)}
                 onBlur={onBlur}
-                disabled={item.disabled || field.disabled}
+                disabled={item.disabled}
                 className="text-sky-500 focus:ring-sky-500"
               />
               <span className="text-sm text-slate-700">{item.label}</span>
             </label>
           ))}
-          {field.hasOther && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name={field.id}
-                value="__other__"
-                checked={value === "__other__"}
-                onChange={() => handleChange("__other__")}
-                className="text-sky-500 focus:ring-sky-500"
-              />
-              <span className="text-sm text-slate-700">{field.otherText || "Other"}</span>
-            </label>
-          )}
         </div>
         {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
@@ -699,16 +587,11 @@ function PreviewField({
   if (field.type === "checkbox") {
     const items: VueformItem[] = field.items || (field.options || []).map((opt: string) => ({ value: opt, label: opt }));
     const selectedValues = (value as (string | number)[]) || [];
-    const columns = field.columns as number;
-    const gridClass = columns ? `grid grid-cols-${columns} gap-2` : "space-y-2";
-    const inlineClass = field.inlineOptions ? "flex flex-wrap gap-4" : gridClass;
+
 
     const handleCheckboxChange = (itemValue: string | number, checked: boolean) => {
       let newValues: (string | number)[];
       if (checked) {
-        if (field.max && selectedValues.length >= (field.max as number)) {
-          return; // Max selections reached
-        }
         newValues = [...selectedValues, itemValue];
       } else {
         newValues = selectedValues.filter(v => v !== itemValue);
@@ -716,14 +599,7 @@ function PreviewField({
       handleChange(newValues);
     };
 
-    const handleSelectAll = (checked: boolean) => {
-      if (checked) {
-        const allValues = items.filter(i => !i.disabled).map(i => i.value);
-        handleChange(allValues);
-      } else {
-        handleChange([]);
-      }
-    };
+
 
     return (
       <div className="p-2" style={gridStyle}>
@@ -731,21 +607,9 @@ function PreviewField({
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.helper && <p className="text-xs text-slate-500 mb-2">{field.helper}</p>}
+        {field.description && <p className="text-xs text-slate-500 mb-2">{field.description}</p>}
         
-        {field.selectAll && (
-          <label className="flex items-center gap-2 cursor-pointer mb-2 pb-2 border-b border-slate-200">
-            <input
-              type="checkbox"
-              checked={selectedValues.length === items.length}
-              onChange={(e) => handleSelectAll(e.target.checked)}
-              className="rounded text-sky-500 focus:ring-sky-500"
-            />
-            <span className="text-sm font-medium text-slate-700">Select All</span>
-          </label>
-        )}
-        
-        <div className={inlineClass}>
+        <div className="space-y-2">
           {items.map((item) => (
             <label key={String(item.value)} className="flex items-center gap-2 cursor-pointer">
               <input
@@ -754,31 +618,13 @@ function PreviewField({
                 checked={selectedValues.includes(item.value)}
                 onChange={(e) => handleCheckboxChange(item.value, e.target.checked)}
                 onBlur={onBlur}
-                disabled={item.disabled || field.disabled}
+                disabled={item.disabled}
                 className="rounded text-sky-500 focus:ring-sky-500"
               />
               <span className="text-sm text-slate-700">{item.label}</span>
             </label>
           ))}
-          {field.hasOther && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                value="__other__"
-                checked={selectedValues.includes("__other__")}
-                onChange={(e) => handleCheckboxChange("__other__", e.target.checked)}
-                className="rounded text-sky-500 focus:ring-sky-500"
-              />
-              <span className="text-sm text-slate-700">{field.otherText || "Other"}</span>
-            </label>
-          )}
         </div>
-        
-        {field.min && field.max && (
-          <p className="text-xs text-slate-400 mt-1">
-            Select {field.min} to {field.max} options
-          </p>
-        )}
         {hasError && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     );

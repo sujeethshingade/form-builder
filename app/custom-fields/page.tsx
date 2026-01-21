@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SaveAsModal } from "@/app/components/shared/SaveAsModal";
 
 interface LOVItem {
   code: string;
@@ -72,7 +71,6 @@ function CustomFieldsContent() {
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
-  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
   
   const [form, setForm] = useState<CustomFieldForm>({
     fieldName: "",
@@ -271,68 +269,7 @@ function CustomFieldsContent() {
     }
   };
 
-  const handleSaveAsNew = async (newLabel: string) => {
-    if (!form.dataType) {
-      alert("Please fill in all required fields");
-      return;
-    }
 
-    const categoryToUse = showNewCategory ? newCategory : form.category;
-    if (!categoryToUse) {
-      alert("Please select or enter a category");
-      return;
-    }
-
-    // Filter out incomplete table columns (columns without selected custom fields)
-    const validTableColumns = form.tableColumns.filter(col => 
-      col.name && col.label && col.type
-    );
-
-    // Validate that if dataType is table, there should be at least one valid column
-    if (form.dataType === "table" && validTableColumns.length === 0) {
-      alert("Please add at least one column to the table");
-      return;
-    }
-
-    setSavingAs(true);
-    try {
-      const newFieldName = newLabel.replace(/\s+/g, '_').toLowerCase();
-      const response = await fetch("/api/custom-fields", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fieldName: newFieldName,
-          fieldLabel: newLabel,
-          dataType: form.dataType,
-          className: form.className,
-          category: categoryToUse,
-          enableLOV: form.enableLOV,
-          lovFieldName: form.lovFieldName,
-          lovType: form.lovType,
-          lovItems: form.lovItems,
-          apiConfig: form.apiConfig,
-          tableColumns: validTableColumns, // Use filtered columns
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setShowSaveAsModal(false);
-        alert("Field saved as new successfully!");
-        resetForm();
-        router.replace("/fields");
-        fetchCustomFields();
-        fetchCategories();
-      } else {
-        alert(data.error);
-      }
-    } catch (err) {
-      alert("Failed to save field as new");
-    } finally {
-      setSavingAs(false);
-    }
-  };
 
   const resetForm = () => {
     setEditingId(null);
@@ -943,18 +880,6 @@ function CustomFieldsContent() {
             </div>
 
             <div className="mt-8 flex items-center justify-end gap-3">
-              {editingId && (
-                <button
-                  onClick={() => setShowSaveAsModal(true)}
-                  disabled={savingAs}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Save As New
-                </button>
-              )}
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -968,18 +893,6 @@ function CustomFieldsContent() {
             </div>
           </div>
       </div>
-
-      <SaveAsModal
-        isOpen={showSaveAsModal}
-        onClose={() => setShowSaveAsModal(false)}
-        onSave={handleSaveAsNew}
-        saving={savingAs}
-        defaultName={form.fieldLabel ? `${form.fieldLabel} Copy` : ""}
-        title="Save Field As New"
-        nameLabel="Field Label"
-        namePlaceholder="Enter field label"
-        saveButtonText="Save As New"
-      />
     </div>
   );
 }

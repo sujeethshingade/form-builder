@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { FormField, VueformItem, VueformColumn } from "../../lib/types";
 
 type FieldRendererProps = {
@@ -8,11 +8,7 @@ type FieldRendererProps = {
   disabled?: boolean;
 };
 
-const sizeClasses = {
-  sm: "px-2 py-1.5 text-xs",
-  md: "px-3 py-2 text-sm",
-  lg: "px-4 py-3 text-base",
-};
+const defaultSizeClass = "px-3 py-2 text-sm";
 
 function Addon({ content, position }: { content?: string; position: "before" | "after" }) {
   if (!content) return null;
@@ -25,42 +21,23 @@ function Addon({ content, position }: { content?: string; position: "before" | "
 }
 
 export function TextInputRenderer({ field, disabled = true }: FieldRendererProps) {
-  const size = field.size || "md";
   const hasAddonBefore = field.addons?.before;
   const hasAddonAfter = field.addons?.after;
-  
-  const inputClasses = `flex-1 border border-slate-300 ${sizeClasses[size]} text-slate-500 bg-white focus:outline-none ${
+
+  const inputClasses = `flex-1 border border-slate-300 ${defaultSizeClass} text-slate-500 bg-white focus:outline-none ${
     !hasAddonBefore && !hasAddonAfter ? "rounded-lg" : ""
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
   const input = (
     <div className="relative flex-1">
-      {field.prefix && (
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-          {field.prefix}
-        </span>
-      )}
       <input
-        key={`${field.id}-${field.placeholder}-${field.min}-${field.max}`}
+        key={`${field.id}-${field.placeholder}`}
         type={field.inputType || "text"}
         placeholder={field.placeholder}
         defaultValue={field.default}
-        disabled={disabled || field.disabled}
-        readOnly={field.readonly}
-        min={field.min as number}
-        max={field.max as number}
-        step={field.step}
-        minLength={field.minLength}
-        maxLength={field.maxLength}
-        pattern={field.pattern}
-        autoComplete={field.autocomplete}
-        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`} ${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""}`}
+        disabled={disabled}
+        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`}`}
       />
-      {field.suffix && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-          {field.suffix}
-        </span>
-      )}
     </div>
   );
 
@@ -78,38 +55,23 @@ export function TextInputRenderer({ field, disabled = true }: FieldRendererProps
 }
 
 export function NumberInputRenderer({ field, disabled = true }: FieldRendererProps) {
-  const size = field.size || "md";
   const hasAddonBefore = field.addons?.before;
   const hasAddonAfter = field.addons?.after;
   
-  const inputClasses = `flex-1 border border-slate-300 ${sizeClasses[size]} text-slate-500 bg-white focus:outline-none ${
+  const inputClasses = `flex-1 border border-slate-300 ${defaultSizeClass} text-slate-500 bg-white focus:outline-none ${
     !hasAddonBefore && !hasAddonAfter ? "rounded-lg" : ""
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
   const input = (
     <div className="relative flex-1">
-      {field.prefix && (
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-          {field.prefix}
-        </span>
-      )}
       <input
-        key={`${field.id}-${field.placeholder}-${field.min}-${field.max}-${field.step}`}
+        key={`${field.id}-${field.placeholder}`}
         type="number"
         placeholder={field.placeholder}
         defaultValue={field.default}
-        disabled={disabled || field.disabled}
-        readOnly={field.readonly}
-        min={field.min as number}
-        max={field.max as number}
-        step={field.step || 1}
-        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`} ${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""}`}
+        disabled={disabled}
+        className={`${hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`}`}
       />
-      {field.suffix && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-          {field.suffix}
-        </span>
-      )}
     </div>
   );
 
@@ -127,35 +89,26 @@ export function NumberInputRenderer({ field, disabled = true }: FieldRendererPro
 }
 
 export function TextareaRenderer({ field, disabled = true }: FieldRendererProps) {
-  const size = field.size || "md";
   return (
     <div className="relative">
       <textarea
         key={`${field.id}-${field.placeholder}`}
         placeholder={field.placeholder}
         defaultValue={field.default}
-        disabled={disabled || field.disabled}
-        readOnly={field.readonly}
+        disabled={disabled}
         rows={field.rows || 3}
-        maxLength={field.maxLength}
         spellCheck={field.spellcheck}
-        className={`w-full border border-slate-300 rounded-lg ${sizeClasses[size]} text-slate-500 bg-white resize-none focus:outline-none`}
+        className={`w-full border border-slate-300 rounded-lg ${defaultSizeClass} text-slate-500 bg-white resize-none focus:outline-none`}
       />
-      {field.counter && field.maxLength && (
-        <span className="absolute bottom-2 right-2 text-xs text-slate-400">
-          0 / {field.maxLength}
-        </span>
-      )}
     </div>
   );
 }
 
 export function DateInputRenderer({ field, disabled = true }: FieldRendererProps) {
-  const size = field.size || "md";
   const hasAddonBefore = field.addons?.before;
   const hasAddonAfter = field.addons?.after;
   
-  const inputClasses = `flex-1 border border-slate-300 ${sizeClasses[size]} text-slate-500 bg-white focus:outline-none ${
+  const inputClasses = `flex-1 border border-slate-300 ${defaultSizeClass} text-slate-500 bg-white focus:outline-none ${
     !hasAddonBefore && !hasAddonAfter ? "rounded-lg" : ""
   } ${hasAddonBefore && !hasAddonAfter ? "rounded-r-lg" : ""} ${!hasAddonBefore && hasAddonAfter ? "rounded-l-lg" : ""}`;
 
@@ -165,14 +118,11 @@ export function DateInputRenderer({ field, disabled = true }: FieldRendererProps
 
   const input = (
     <input
-      key={`${field.id}-${field.format}-${field.minDate}-${field.maxDate}`}
+      key={`${field.id}-${field.format}`}
       type={inputType}
       placeholder={field.placeholder || field.format}
       defaultValue={field.default}
-      disabled={disabled || field.disabled}
-      readOnly={field.readonly}
-      min={field.minDate}
-      max={field.maxDate}
+      disabled={disabled}
       className={hasAddonBefore || hasAddonAfter ? inputClasses : `w-full ${inputClasses}`}
     />
   );
@@ -206,15 +156,14 @@ function getActiveItems(field: FormField): VueformItem[] {
 }
 
 export function DropdownRenderer({ field, disabled = true }: FieldRendererProps) {
-  const size = field.size || "md";
   const items: VueformItem[] = getActiveItems(field);
   
   return (
     <select
       key={`${field.id}-${items.length}-${field.placeholder}`}
-      disabled={disabled || field.disabled}
+      disabled={disabled}
       defaultValue={field.default}
-      className={`w-full border border-slate-300 rounded-lg ${sizeClasses[size]} text-slate-500 bg-white focus:outline-none`}
+      className={`w-full border border-slate-300 rounded-lg ${defaultSizeClass} text-slate-500 bg-white focus:outline-none`}
     >
       <option value="">{field.placeholder || "Select an option..."}</option>
       {items.map((item) => (
@@ -228,70 +177,20 @@ export function DropdownRenderer({ field, disabled = true }: FieldRendererProps)
 
 export function CheckboxRenderer({ field, disabled = true }: FieldRendererProps) {
   const items: VueformItem[] = getActiveItems(field);
-  const view = field.view || "default";
-  const labelPosition = field.labelPosition || "right";
-  const size = field.size || "md";
-  const renderKey = `${field.id}-${items.map(i => i.value).join('-')}-${view}`;
+  const renderKey = `${field.id}-${items.map(i => i.value).join('-')}`;
   
-  if (view === "tabs") {
-    return (
-      <div key={renderKey} className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <label
-            key={String(item.value)}
-            className={`flex items-center gap-2 border border-slate-300 rounded-lg ${sizeClasses[size]} cursor-pointer hover:bg-slate-50 ${
-              item.disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <input
-              type="checkbox"
-              disabled={disabled || field.disabled || item.disabled}
-              defaultChecked={Array.isArray(field.default) && field.default.includes(item.value)}
-              className="rounded border-slate-300"
-            />
-            <span className="text-slate-700">{item.label}</span>
-          </label>
-        ))}
-      </div>
-    );
-  }
-  
-  if (view === "blocks") {
-    return (
-      <div className="grid grid-cols-2 gap-2">
-        {items.map((item) => (
-          <label
-            key={String(item.value)}
-            className={`flex items-center gap-3 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-slate-50 ${
-              item.disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <input
-              type="checkbox"
-              disabled={disabled || field.disabled || item.disabled}
-              defaultChecked={Array.isArray(field.default) && field.default.includes(item.value)}
-              className="rounded border-slate-300"
-            />
-            <span className="text-slate-700">{item.label}</span>
-          </label>
-        ))}
-      </div>
-    );
-  }
-
-  // Default view
   return (
-    <div className="space-y-2">
+    <div key={renderKey} className="space-y-2">
       {items.map((item) => (
         <label
           key={String(item.value)}
           className={`flex items-center gap-2 text-sm text-slate-700 ${
             item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          } ${labelPosition === "left" ? "flex-row-reverse justify-end" : ""}`}
+          }`}
         >
           <input
             type="checkbox"
-            disabled={disabled || field.disabled || item.disabled}
+            disabled={disabled || item.disabled}
             defaultChecked={Array.isArray(field.default) && field.default.includes(item.value)}
             className="rounded border-slate-300"
           />
@@ -304,60 +203,8 @@ export function CheckboxRenderer({ field, disabled = true }: FieldRendererProps)
 
 export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
   const items: VueformItem[] = getActiveItems(field);
-  const view = field.view || "default";
-  const labelPosition = field.labelPosition || "right";
-  const size = field.size || "md";
-  const renderKey = `${field.id}-${items.map(i => i.value).join('-')}-${view}`;
+  const renderKey = `${field.id}-${items.map(i => i.value).join('-')}`;
   
-  if (view === "tabs") {
-    return (
-      <div key={renderKey} className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <label
-            key={String(item.value)}
-            className={`flex items-center gap-2 border border-slate-300 rounded-lg ${sizeClasses[size]} cursor-pointer hover:bg-slate-50 ${
-              item.disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <input
-              type="radio"
-              name={field.id || field.name}
-              disabled={disabled || field.disabled || item.disabled}
-              defaultChecked={field.default === item.value}
-              className="border-slate-300"
-            />
-            <span className="text-slate-700">{item.label}</span>
-          </label>
-        ))}
-      </div>
-    );
-  }
-  
-  if (view === "blocks") {
-    return (
-      <div key={renderKey} className="grid grid-cols-2 gap-2">
-        {items.map((item) => (
-          <label
-            key={String(item.value)}
-            className={`flex items-center gap-3 border border-slate-300 rounded-lg p-3 cursor-pointer hover:bg-slate-50 ${
-              item.disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <input
-              type="radio"
-              name={field.id || field.name}
-              disabled={disabled || field.disabled || item.disabled}
-              defaultChecked={field.default === item.value}
-              className="border-slate-300"
-            />
-            <span className="text-slate-700">{item.label}</span>
-          </label>
-        ))}
-      </div>
-    );
-  }
-
-  // Default view
   return (
     <div key={renderKey} className="space-y-2">
       {items.map((item) => (
@@ -365,12 +212,12 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
           key={String(item.value)}
           className={`flex items-center gap-2 text-sm text-slate-700 ${
             item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          } ${labelPosition === "left" ? "flex-row-reverse justify-end" : ""}`}
+          }`}
         >
           <input
             type="radio"
             name={field.id || field.name}
-            disabled={disabled || field.disabled || item.disabled}
+            disabled={disabled || item.disabled}
             defaultChecked={field.default === item.value}
             className="border-slate-300"
           />
@@ -384,7 +231,6 @@ export function RadioRenderer({ field, disabled = true }: FieldRendererProps) {
 export function TableRenderer({ field, disabled = true, preview = false, onUpdateRows }: FieldRendererProps & { preview?: boolean; onUpdateRows?: (rows: Record<string, unknown>[]) => void }) {
   const columns: VueformColumn[] = Array.isArray(field.columns) ? field.columns : [];
   const [rows, setRows] = useState<Record<string, unknown>[]>(field.tableRows || []);
-  const size = field.size || "md";
   const renderKey = `${field.id}-${columns.length}-${rows.length}`;
 
   // Update internal state when field.tableRows changes
@@ -415,20 +261,20 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
   return (
     <div key={renderKey} className="w-full overflow-x-auto">
       <div className="border border-slate-300 rounded-lg overflow-hidden">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-slate-100">
+      <table className="w-full text-sm text-left text-slate-500">
+        <thead className="text-sm text-slate-700 bg-slate-100">
+          <tr>
             {columns.map((col) => (
               <th
                 key={col.name}
-                className={`border border-slate-300 ${sizeClasses[size]} text-left font-medium text-slate-700`}
+                className="px-3 py-2 border-b font-medium border-slate-200"
                 style={{ width: col.width || "auto" }}
               >
                 {col.label}
               </th>
             ))}
             {!preview && (
-              <th className="border border-slate-300 px-3 py-2 text-left font-medium text-slate-700 w-18">
+              <th className="px-3 py-2 border-b font-medium border-slate-200 w-16">
                 Actions
               </th>
             )}
@@ -437,7 +283,7 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length + (preview ? 0 : 1)} className="border border-slate-300 p-4 text-center text-slate-500">
+              <td colSpan={columns.length + (preview ? 0 : 1)} className="border border-slate-300 p-3 text-center text-slate-500">
                 No rows added
               </td>
             </tr>
@@ -445,77 +291,40 @@ export function TableRenderer({ field, disabled = true, preview = false, onUpdat
             rows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {columns.map((col) => (
-                  <td key={col.name} className="border border-slate-300 p-1">
+                  <td key={col.name} className="px-3 py-2 border-b border-slate-200">
                     {col.type === "dropdown" && col.options && col.options.length > 0 ? (
-                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                      <div className="w-full text-xs">
                         {col.options.slice(0, 3).map((opt: any, idx: number) => (
                           <div key={idx}>{opt.label || opt.shortName}</div>
                         ))}
-                        {col.options.length > 3 && (
-                          <div className="text-slate-400">+{col.options.length - 3} more</div>
-                        )}
                       </div>
                     ) : col.type === "radio" && col.options && col.options.length > 0 ? (
-                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                      <div className="w-full text-xs">
                         {col.options.slice(0, 3).map((opt: any, idx: number) => (
                           <div key={idx}>○ {opt.label || opt.shortName}</div>
                         ))}
-                        {col.options.length > 3 && (
-                          <div className="text-slate-400">+{col.options.length - 3} more</div>
-                        )}
                       </div>
                     ) : col.type === "checkbox" && col.options && col.options.length > 0 ? (
-                      <div className={`w-full ${sizeClasses[size]} text-slate-500 text-xs`}>
+                      <div className="w-full text-xs">
                         {col.options.slice(0, 3).map((opt: any, idx: number) => (
                           <div key={idx}>☐ {opt.label || opt.shortName}</div>
                         ))}
-                        {col.options.length > 3 && (
-                          <div className="text-slate-400">+{col.options.length - 3} more</div>
-                        )}
                       </div>
                     ) : col.type === "number" ? (
-                      <input
-                        type="number"
-                        disabled
-                        placeholder="Number"
-                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
-                      />
+                      <span className="text-slate-500">Number</span>
                     ) : col.type === "email" ? (
-                      <input
-                        type="email"
-                        disabled
-                        placeholder="Email"
-                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
-                      />
-                    ) : col.type === "date" ? (
-                      <input
-                        type="date"
-                        disabled
-                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
-                      />
-                    ) : col.type === "textarea" ? (
-                      <textarea
-                        disabled
-                        placeholder="Text area"
-                        rows={2}
-                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm resize-none focus:outline-none"
-                      />
+                      <span className="text-slate-500">Email</span>
                     ) : (
-                      <input
-                        type="text"
-                        disabled
-                        placeholder="Text"
-                        className="w-full px-2 py-1 border-0 bg-transparent text-slate-400 text-sm focus:outline-none"
-                      />
+                      <span className="text-slate-500">Text</span>
                     )}
                   </td>
                 ))}
                 {!preview && (
-                  <td className="border border-slate-300 p-1 text-center">
+                  <td className="border-b border-slate-200 p-1 text-center">
                     {!disabled && (
                       <button
                         onClick={() => removeRow(rowIndex)}
-                        className="text-red-500 hover:text-red-700 p-1"
+                        className="text-red-500 hover:text-red-700 p-0.5"
                         title="Remove row"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -576,7 +385,7 @@ export function SliderRenderer({ field, disabled = true }: FieldRendererProps) {
           step={step}
           value={value}
           onChange={(e) => setValue(Number(e.target.value))}
-          disabled={disabled || field.disabled}
+          disabled={disabled}
           className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {marks.length > 0 && (
@@ -605,9 +414,11 @@ export function SliderRenderer({ field, disabled = true }: FieldRendererProps) {
   );
 }
 
-export function DividerRenderer({ selected = false }: { selected?: boolean }) {
+export function DividerRenderer({ selected = false }: { field?: FormField; selected?: boolean }) {
   return (
-    <div className={`border-t ${selected ? "border-sky-500" : "border-slate-300"}`} />
+    <div className="w-full py-4">
+      <div className={`w-full border-t border-slate-300 ${selected ? "border-sky-500 opacity-100" : "opacity-80"}`} />
+    </div>
   );
 }
 
@@ -631,7 +442,7 @@ export function HeadingRenderer({ field }: FieldRendererProps) {
   const tag = field.tag || "h2";
   const align = field.align || "left";
   const alignClass = align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
-  const content = field.content || field.label;
+  const content = field.label;
   
   const tagStyles: Record<string, string> = {
     h1: "text-4xl font-bold",
@@ -669,44 +480,18 @@ export function FieldLabel({ field }: FieldRendererProps) {
           {field.label}
           {field.required && <span className="ml-1 text-red-500">*</span>}
         </label>
-        {field.info && (
-          <span
-            className="text-slate-400 hover:text-slate-600 cursor-help"
-            title={field.info}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </span>
-        )}
       </div>
-      {field.floating && typeof field.floating === "string" && (
-        <span className="text-xs text-slate-400">{field.floating}</span>
-      )}
     </div>
   );
 }
 
-export function FieldHelper({ helper, description }: { helper?: string; description?: string }) {
-  const text = helper || description;
+export function FieldHelper({ description }: { description?: string }) {
+  const text = description;
   if (!text) return null;
   return <p className="pb-2 text-xs text-slate-500">{text}</p>;
 }
 
-export function FieldBefore({ before }: { before?: string }) {
-  if (!before) return null;
-  return <p className="pb-1 text-xs text-slate-600">{before}</p>;
-}
 
-export function FieldBetween({ between }: { between?: string }) {
-  if (!between) return null;
-  return <p className="py-1 text-xs text-slate-600">{between}</p>;
-}
-
-export function FieldAfter({ after }: { after?: string }) {
-  if (!after) return null;
-  return <p className="pt-1 text-xs text-slate-600">{after}</p>;
-}
 
 export function FieldInputRenderer({ field, disabled = true }: FieldRendererProps) {
   switch (field.type) {
@@ -737,9 +522,8 @@ export function FieldInputRenderer({ field, disabled = true }: FieldRendererProp
 export function FormFieldRenderer({ field, disabled = true }: FieldRendererProps) {
   return (
     <>
-      <FieldBefore before={field.before} />
       <FieldLabel field={field} />
-      <FieldHelper helper={field.helper} description={field.description} />
+      <FieldHelper description={field.description} />
       <div className={field.loading ? "opacity-50" : ""}>
         <FieldInputRenderer field={field} disabled={disabled} />
         {field.loading && (
@@ -748,8 +532,6 @@ export function FormFieldRenderer({ field, disabled = true }: FieldRendererProps
           </div>
         )}
       </div>
-      <FieldBetween between={field.between} />
-      <FieldAfter after={field.after} />
     </>
   );
 }
@@ -761,7 +543,7 @@ export function isLayoutElement(type: string): boolean {
 export function LayoutElementRenderer({ field, selected = false }: FieldRendererProps & { selected?: boolean }) {
   switch (field.type) {
     case "divider":
-      return <DividerRenderer selected={selected} />;
+      return <DividerRenderer field={field} selected={selected} />;
     case "spacer":
       return <SpacerRenderer field={field} selected={selected} />;
     case "heading":

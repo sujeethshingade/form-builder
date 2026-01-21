@@ -15,7 +15,6 @@ export interface IFormLayoutField {
   default?: any;
   disabled?: boolean;
   readonly?: boolean;
-  size?: 'sm' | 'md' | 'lg';
   inputType?: string;
   addons?: { before?: string; after?: string };
   min?: number | string | null;
@@ -45,14 +44,14 @@ export interface IFormLayout extends Document {
 }
 
 const FormLayoutSchema = new Schema<IFormLayout>({
-  layoutName: { 
-    type: String, 
+  layoutName: {
+    type: String,
     required: true,
     unique: true,
     trim: true,
   },
-  layoutType: { 
-    type: String, 
+  layoutType: {
+    type: String,
     required: true,
     enum: ['form-group', 'grid-layout', 'box-layout'],
   },

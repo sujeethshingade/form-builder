@@ -23,7 +23,7 @@ export interface IFormField {
   default?: any;
   disabled?: boolean;
   readonly?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+
   inputType?: string;
   addons?: { before?: string; after?: string };
   min?: number | string | null;
@@ -68,13 +68,13 @@ export interface IForm extends Document {
 }
 
 const FormSchema = new Schema<IForm>({
-  collectionName: { 
-    type: String, 
+  collectionName: {
+    type: String,
     required: true,
     trim: true,
   },
-  formName: { 
-    type: String, 
+  formName: {
+    type: String,
     required: true,
     unique: true,
     trim: true,

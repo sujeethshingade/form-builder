@@ -22,69 +22,6 @@ import { CursorIcon } from "@/app/lib/icons";
 import type { FormField, FormStyles, WorkspaceView } from "@/app/lib/types";
 import { nanoid } from "nanoid";
 
-interface SaveAsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (layoutName: string) => void;
-  saving: boolean;
-  defaultName?: string;
-}
-
-function SaveAsModal({ isOpen, onClose, onSave, saving, defaultName }: SaveAsModalProps) {
-  const [layoutName, setLayoutName] = useState(defaultName || "");
-
-  useEffect(() => {
-    if (isOpen) {
-      setLayoutName(defaultName || "");
-    }
-  }, [isOpen, defaultName]);
-
-  if (!isOpen) return null;
-
-  const handleSave = () => {
-    if (!layoutName.trim()) {
-      alert("Please enter a layout name");
-      return;
-    }
-    onSave(layoutName.trim());
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Save Layout As New</h2>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Layout Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={layoutName}
-            onChange={(e) => setLayoutName(e.target.value)}
-            placeholder="Enter layout name"
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-sky-500"
-          />
-        </div>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 text-white rounded-md transition-colors disabled:opacity-50 bg-emerald-500 hover:bg-emerald-600"
-          >
-            {saving ? "Saving..." : "Save As New"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 interface LayoutData {
   _id: string;
   layoutName: string;
@@ -101,10 +38,8 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
   const [layoutData, setLayoutData] = useState<LayoutData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingAs, setSavingAs] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
 
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -186,36 +121,7 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const handleSaveAsNew = async (layoutName: string) => {
-    if (!layoutData) return;
 
-    setSavingAs(true);
-    try {
-      const response = await fetch("/api/form-layouts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          layoutName,
-          layoutType: layoutData.layoutType,
-          fields,
-        }),
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        alert(result.error || "Failed to save layout");
-        return;
-      }
-
-      setShowSaveAsModal(false);
-      alert("Layout saved as new successfully!");
-      router.push(`/layouts/builder/${result.data._id}`);
-    } catch (err) {
-      alert("Failed to save as new");
-    } finally {
-      setSavingAs(false);
-    }
-  };
 
   const pushUndo = (prev: FormField[]) => {
     setUndoStack((stack) => [...stack.slice(-19), prev]);
@@ -482,8 +388,6 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
           onWorkspaceViewChange={setWorkspaceView}
           hasUnsavedChanges={hasUnsavedChanges}
           onSave={handleSave}
-          onSaveAs={() => setShowSaveAsModal(true)}
-          saveAsLabel="Save As New"
           saving={saving}
           isLeftSidebarOpen={isLeftSidebarOpen}
           onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
@@ -576,14 +480,6 @@ export default function LayoutBuilderPage({ params }: { params: Promise<{ id: st
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      <SaveAsModal
-        isOpen={showSaveAsModal}
-        onClose={() => setShowSaveAsModal(false)}
-        onSave={handleSaveAsNew}
-        saving={savingAs}
-        defaultName={layoutData ? `${layoutData.layoutName} Copy` : ""}
-      />
     </div>
   );
 }

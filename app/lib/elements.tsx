@@ -280,6 +280,3 @@ export const elements: ElementDefinition[] = [
     },
   },
 ];
-
-// Keep for backward compatibility
-export const fieldElements = elements;

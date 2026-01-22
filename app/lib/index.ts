@@ -11,7 +11,6 @@ export {
   defaultStyles,
   library,
   makeField,
-  fieldToSurveyJSON,
 } from "./form";
 
 export {
@@ -19,7 +18,6 @@ export {
   TextareaIcon,
   NumberIcon,
   EmailIcon,
-
   CheckboxIcon,
   RadioIcon,
   DropdownIcon,
@@ -43,5 +41,3 @@ export {
   CursorIcon,
   getIconForType,
 } from "./icons";
-
-export { fieldElements } from "./elements";

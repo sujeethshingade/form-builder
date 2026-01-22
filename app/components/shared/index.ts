@@ -20,4 +20,4 @@ export {
 } from "./FieldRenderer";
 export { ColumnWidthSelector } from "./ColumnWidthSelector";
 export { SearchInput } from "./SearchInput";
-export { DataTable } from "./DataTable";
+

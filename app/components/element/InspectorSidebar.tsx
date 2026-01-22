@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormField, CustomScript } from "@/app/lib/types";
 import { ColumnWidthSelector } from "@/app/components/shared/ColumnWidthSelector";
 import { CursorIcon } from "@/app/lib";
@@ -197,12 +197,10 @@ export default function InspectorSidebar({
     );
   }
 
-  // Common handlers
   const handleChange = (key: string, value: any) => {
     onUpdate({ [key]: value });
   };
 
-  // Custom Scripts handlers
   const handleScriptsChange = (scripts: CustomScript[]) => {
     onUpdate({ scripts });
   };
@@ -213,7 +211,7 @@ export default function InspectorSidebar({
       id: `script_${Date.now()}`,
       name: `Script ${currentScripts.length + 1}`,
       trigger: "onChange",
-      code: "// Your custom JavaScript code here\n// Available: value, field, form\nconsole.log('Field value:', value);",
+      code: "// Your custom JS code here",
       enabled: true,
       description: "",
     };
@@ -233,15 +231,19 @@ export default function InspectorSidebar({
     handleScriptsChange(currentScripts.filter((_, i) => i !== index));
   };
 
-  // Field type checks
   const isTextarea = field.type === "textarea";
   const isSliderField = field.type === "slider";
   const isHeadingField = field.type === "heading";
   const isSpacerField = field.type === "spacer";
   const isLayoutField = ["heading", "divider", "spacer"].includes(field.type);
-  
   const showPlaceholder = ["text", "number", "email", "dropdown", "textarea"].includes(field.type);
   const showScripts = !isLayoutField;
+
+  useEffect(() => {
+    if (isLayoutField && activeTab === "scripts") {
+      setActiveTab("properties");
+    }
+  }, [isLayoutField, activeTab]);
 
   return (
     <div className="w-full bg-white border-l border-gray-200 flex flex-col h-full">
@@ -463,11 +465,7 @@ export default function InspectorSidebar({
 
         {activeTab === "scripts" && (
           <>
-            {/* Custom Scripts Section */}
             <Section title="Custom Scripts" defaultOpen={true} icon={<CodeIcon />}>
-              <p className="text-xs text-gray-500 mb-3">
-                Add custom JavaScript code that runs on specific events. Available variables: <code className="bg-gray-100 px-1 rounded">value</code>, <code className="bg-gray-100 px-1 rounded">field</code>, <code className="bg-gray-100 px-1 rounded">form</code>
-              </p>
               <div className="space-y-3">
                 {(field.scripts || []).map((script, index) => (
                   <div key={script.id} className="p-3 border border-gray-200 rounded-lg space-y-2 bg-gray-50">
@@ -507,7 +505,7 @@ export default function InspectorSidebar({
                       label="Description"
                       value={script.description}
                       onChange={(val) => updateScript(index, { description: val })}
-                      placeholder="What does this script do?"
+                      placeholder="Enter description"
                     />
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -530,24 +528,6 @@ export default function InspectorSidebar({
                   <PlusIcon />
                   Add Script
                 </button>
-              </div>
-            </Section>
-
-            {/* Script Examples */}
-            <Section title="Script Examples" defaultOpen={false}>
-              <div className="space-y-3 text-xs">
-                <div className="p-2 bg-gray-50 rounded border">
-                  <p className="font-medium text-gray-700 mb-1">onChange - Transform Value</p>
-                  <pre className="text-gray-600 whitespace-pre-wrap">{"// Convert to uppercase\nreturn value.toUpperCase();"}</pre>
-                </div>
-                <div className="p-2 bg-gray-50 rounded border">
-                  <p className="font-medium text-gray-700 mb-1">onValidate - Custom Validation</p>
-                  <pre className="text-gray-600 whitespace-pre-wrap">{"// Check if value starts with 'ABC'\nif (!value.startsWith('ABC')) {\n  return 'Must start with ABC';\n}\nreturn true;"}</pre>
-                </div>
-                <div className="p-2 bg-gray-50 rounded border">
-                  <p className="font-medium text-gray-700 mb-1">onBlur - API Call</p>
-                  <pre className="text-gray-600 whitespace-pre-wrap">{"// Validate against API\nconst isValid = await fetch('/api/validate?v=' + value);\nconsole.log('Valid:', isValid);"}</pre>
-                </div>
               </div>
             </Section>
           </>

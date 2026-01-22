@@ -554,3 +554,179 @@ export function LayoutElementRenderer({ field, selected = false }: FieldRenderer
 
 // Alias for backward compatibility
 export { DropdownRenderer as SelectRenderer };
+
+// Grid Layout Renderer
+export interface LayoutConfig {
+  gridColumns?: number;
+  columnDefs?: any[];
+  rows?: any[];
+  boxes?: any[];
+  groups?: any[];
+}
+
+export function GridLayoutRenderer({ label, config }: { label: string; config?: LayoutConfig }) {
+  const columnDefs = config?.columnDefs || [];
+  
+  return (
+    <div className="border-2 border-dashed rounded-lg p-4 border-sky-300 bg-sky-50">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs px-2 py-1 rounded font-medium bg-sky-100 text-sky-700">
+          Grid Layout
+        </span>
+        <span className="text-sm font-medium text-slate-700">{label}</span>
+      </div>
+      
+      {/* Column headers */}
+      {columnDefs.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-sky-100">
+                {columnDefs.map((col: any, idx: number) => (
+                  <th key={idx} className="border border-sky-200 px-2 py-1 text-left text-sky-700 font-medium">
+                    {col?.label || col?.name || `Column ${idx + 1}`}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-white">
+                {columnDefs.map((col: any, idx: number) => (
+                  <td key={idx} className="border border-sky-200 px-2 py-1 text-slate-400">
+                    {col?.type || "text"}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-xs text-sky-400 italic">No columns defined</div>
+      )}
+    </div>
+  );
+}
+
+export function BoxLayoutRenderer({ label, config, onAddBox }: { label: string; config?: LayoutConfig; onAddBox?: () => void }) {
+  const boxes = config?.boxes || [];
+  const templateBox = boxes[0];
+  const templateFields = templateBox?.fields || [];
+  
+  // Helper to render a single field
+  const renderField = (field: any) => {
+    const formField: FormField = {
+      id: field.id,
+      type: field.type,
+      label: field.label,
+      placeholder: field.placeholder,
+      required: field.required,
+      widthColumns: field.widthColumns,
+      items: field.items,
+      lovItems: field.lovItems,
+    };
+    
+    return <FormFieldRenderer field={formField} disabled />;
+  };
+  
+  return (
+    <div className="border border-slate-200 rounded-lg p-4 bg-white">
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm font-medium text-slate-700">{label}</div>
+      </div>
+        {templateFields.length > 0 ? (
+        <div className="grid grid-cols-12 gap-4">
+          {templateFields.map((field: any, idx: number) => {
+            const columnSpan = field.widthColumns || 12;
+            return (
+              <div 
+                key={idx} 
+                className="p-2"
+                style={{ gridColumn: `span ${columnSpan} / span ${columnSpan}` }}
+              >
+                {renderField(field)}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-xs text-slate-400 italic">No fields defined</div>
+      )}
+    </div>
+  );
+}
+
+export function FormGroupRenderer({ label, config }: { label: string; config?: LayoutConfig }) {
+  const groups = config?.groups || [];
+  
+  const renderField = (field: any) => {
+    // Check if this is a nested layout
+    const isLayout = field.isLayout || field.type === "box-layout" || field.type === "grid-layout" || field.type === "form-group";
+    
+    if (isLayout) {
+      const layoutType = field.layoutType || field.type;
+      if (layoutType === "box-layout") {
+        return <BoxLayoutRenderer label={field.label} config={field.layoutConfig} />;
+      } else if (layoutType === "grid-layout") {
+        return <GridLayoutRenderer label={field.label} config={field.layoutConfig} />;
+      }
+      return null;
+    }
+    
+    const formField: FormField = {
+      id: field.id,
+      type: field.type,
+      label: field.label,
+      placeholder: field.placeholder,
+      required: field.required,
+      widthColumns: field.widthColumns,
+      items: field.items,
+      lovItems: field.lovItems,
+    };
+    
+    return <FormFieldRenderer field={formField} disabled />;
+  };
+  
+  return (
+    <div className="border border-slate-200 rounded-lg p-4 bg-white">
+      {/* Header */}
+      <div className="text-sm font-medium text-slate-700 mb-4">{label}</div>
+      
+      {/* Groups with rendered fields */}
+      {groups.length > 0 ? (
+        <div className="space-y-4">
+          {groups.map((group: any, idx: number) => {
+            const groupFields = group.fields || [];
+            return (
+              <div key={idx} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                <div className="text-xs font-medium text-slate-600 mb-3">
+                  {group.name || `Group ${idx + 1}`}
+                </div>
+                {groupFields.length > 0 ? (
+                  <div className="grid grid-cols-12 gap-4 bg-white rounded-lg p-3">
+                    {groupFields.map((field: any, fieldIdx: number) => {
+                      const columnSpan = field.widthColumns || 12;
+                      return (
+                        <div 
+                          key={fieldIdx} 
+                          className="p-2"
+                          style={{ gridColumn: `span ${columnSpan} / span ${columnSpan}` }}
+                        >
+                          {renderField(field)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-xs text-slate-400 italic">No fields in this group</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-xs text-slate-400 italic">No groups defined</div>
+      )}
+    </div>
+  );
+}

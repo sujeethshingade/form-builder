@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FormField, CustomScript } from "@/app/lib/types";
 import { ColumnWidthSelector } from "@/app/components/shared/ColumnWidthSelector";
+import { CursorIcon } from "@/app/lib";
 
 const PlusIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,9 +185,15 @@ export default function InspectorSidebar({
   
   if (!field) {
     return (
-      <div className="w-full bg-white border-l border-gray-200 p-4 flex items-center justify-center text-gray-500">
-        Select a field to edit its properties
-      </div>
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+                          <div className="mb-4 p-4">
+                            <CursorIcon className="h-8 w-8 text-slate-400" />
+                          </div>
+                          <p className="text-sm font-medium text-slate-700">No field selected</p>
+                          <p className="mt-2 text-xs text-slate-500">
+                            Click on a field in the canvas to edit it
+                          </p>
+                        </div>
     );
   }
 

@@ -80,7 +80,7 @@ function DraggableFieldCard({ field }: { field: CustomFieldData }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-2 border rounded-sm px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing bg-white border-slate-200 hover:bg-slate-50 ${
+      className={`flex items-center gap-2 border rounded-lg px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing bg-white border-slate-200 hover:bg-slate-50 ${
         isDragging ? "opacity-50 shadow-md" : ""
       }`}
     >
@@ -96,10 +96,14 @@ function DraggableFieldCard({ field }: { field: CustomFieldData }) {
 function DroppableColumnHeader({
   index,
   columnDef,
+  isSelected,
+  onSelect,
   onRemove,
 }: {
   index: number;
   columnDef: GridColumnDef | null;
+  isSelected?: boolean;
+  onSelect?: (index: number) => void;
   onRemove: (index: number) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -110,17 +114,33 @@ function DroppableColumnHeader({
   return (
     <th
       ref={setNodeRef}
-      className={`border border-slate-200 px-3 py-3 text-left text-sm font-medium min-w-37.5`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect?.(index);
+      }}
+      className={`border border-slate-200 px-3 py-3 text-left text-sm font-medium min-w-37.5 relative group cursor-pointer transition-colors ${
+        isSelected ? "bg-sky-50 border-sky-300 ring-2 ring-inset ring-sky-300" : "hover:bg-slate-50"
+      }`}
     >
       {columnDef ? (
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-slate-700 truncate">{columnDef.label}</div>
-            <div className="text-xs text-slate-400 truncate">{columnDef.type}</div>
+            <div className={`font-medium truncate ${isSelected ? "text-sky-700" : "text-slate-700"}`}>
+              {columnDef.label}
+            </div>
+            <div className={`text-xs truncate ${isSelected ? "text-sky-500" : "text-slate-400"}`}>
+              {columnDef.type}
+              {columnDef.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
           </div>
           <button
-            onClick={() => onRemove(index)}
-            className="p-1 text-slate-400 hover:text-red-500 transition-colors shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(index);
+            }}
+            className={`p-1 transition-colors shrink-0 ${
+              isSelected ? "text-sky-400 hover:text-red-500" : "text-slate-400 opacity-0 group-hover:opacity-100 hover:text-red-500"
+            }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -128,7 +148,8 @@ function DroppableColumnHeader({
           </button>
         </div>
       ) : (
-        <div className="text-slate-400 text-center py-2">
+        <div className="text-slate-400 text-center py-2 relative">
+           <div className={`absolute inset-0 bg-sky-50 opacity-0 transition-opacity ${isOver ? "opacity-30" : ""}`} />
           <div className="text-xs">Drop field here</div>
           <div className="text-[10px] text-slate-300">Column {index + 1}</div>
         </div>
@@ -163,7 +184,7 @@ function FieldSidebar({
           placeholder="Search fields..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
       </div>
       <div className="flex-1 overflow-y-auto p-3">
@@ -186,12 +207,55 @@ function GridInspectorSidebar({
   gridColumns,
   columnDefs,
   rowCount,
+  selectedColumnIndex,
+  onUpdateColumn,
 }: {
   layoutName: string;
   gridColumns: number;
   columnDefs: GridColumnDef[];
   rowCount: number;
+  selectedColumnIndex: number | null;
+  onUpdateColumn: (index: number, updates: Partial<GridColumnDef>) => void;
 }) {
+  const selectedColumn = selectedColumnIndex !== null ? columnDefs[selectedColumnIndex] : null;
+
+  if (selectedColumnIndex !== null && selectedColumn) {
+    return (
+      <aside className="w-72 bg-white border-l border-slate-200 flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Label */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Label</label>
+            <input
+              type="text"
+              value={selectedColumn.label}
+              onChange={(e) => onUpdateColumn(selectedColumnIndex, { label: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+            />
+          </div>
+
+          {/* Placeholder */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Placeholder</label>
+            <input
+              type="text"
+              value={selectedColumn.placeholder || ""}
+              onChange={(e) => onUpdateColumn(selectedColumnIndex, { placeholder: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+              placeholder="Enter placeholder..."
+            />
+          </div>
+          
+          <div className="pt-4 mt-auto">
+             <button
+               onClick={() => onUpdateColumn(selectedColumnIndex, {})}
+             />
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
   const definedColumns = columnDefs.filter((c) => c !== null).length;
 
   return (
@@ -199,7 +263,7 @@ function GridInspectorSidebar({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Layout Name</label>
-          <div className="text-sm text-slate-700">{layoutName}</div>
+          <div className="text-sm text-slate-700 font-medium">{layoutName}</div>
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">Total Columns</label>
@@ -241,6 +305,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
   const [customFields, setCustomFields] = useState<CustomFieldData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeDrag, setActiveDrag] = useState<{ type: string; label: string } | null>(null);
+  const [selectedColumnIndex, setSelectedColumnIndex] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -248,14 +313,23 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
     })
   );
 
-  // Initialize column defs array
   useEffect(() => {
     if (gridColumns > 0 && columnDefs.length !== gridColumns) {
       setColumnDefs(Array(gridColumns).fill(null));
     }
   }, [gridColumns]);
 
-  // Fetch layout data
+  const handleUpdateColumn = (index: number, updates: Partial<GridColumnDef>) => {
+    setColumnDefs((prev) => {
+        const newDefs = [...prev];
+        if (newDefs[index]) {
+            newDefs[index] = { ...newDefs[index]!, ...updates };
+        }
+        return newDefs;
+    });
+    setHasUnsavedChanges(true);
+  };
+
   useEffect(() => {
     const fetchLayout = async () => {
       try {
@@ -269,7 +343,6 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
           
           // Initialize columnDefs from saved config
           if (config.columnDefs && config.columnDefs.length > 0) {
-            // Pad with nulls if needed
             const savedDefs = [...config.columnDefs];
             while (savedDefs.length < (config.gridColumns || 5)) {
               savedDefs.push(null);
@@ -309,7 +382,6 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
     fetchCustomFields();
   }, []);
 
-  // Track changes
   useEffect(() => {
     if (layoutData) {
       const currentConfig = { gridColumns, columnDefs, rows };
@@ -318,7 +390,6 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
     }
   }, [gridColumns, columnDefs, rows, layoutData]);
 
-  // Push to undo stack
   const pushUndo = () => {
     setUndoStack((stack) => [...stack.slice(-19), { gridColumns, columnDefs: [...columnDefs] as GridColumnDef[], rows: [...rows] }]);
     setRedoStack([]);
@@ -367,17 +438,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
     pushUndo();
     setRows((prev) => prev.filter((r) => r.id !== rowId));
   };
-
-  // Remove column definition
-  const handleRemoveColumnDef = (index: number) => {
-    pushUndo();
-    setColumnDefs((prev) => {
-      const newDefs = [...prev];
-      newDefs[index] = null;
-      return newDefs;
-    });
-  };
-
+ 
   // Handle drag start
   const handleDragStart = (event: any) => {
     const data = event.active.data.current;
@@ -426,6 +487,8 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
         newDefs[index] = newColumnDef;
         return newDefs;
       });
+      // Auto select the new column
+      setSelectedColumnIndex(index);
     }
   };
 
@@ -435,7 +498,6 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
 
     setSaving(true);
     try {
-      // Convert columnDefs to VueformColumn format for table rendering
       const tableColumns = columnDefs
         .filter((col): col is GridColumnDef => col !== null)
         .map((col) => ({
@@ -445,6 +507,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
           customFieldId: col.customFieldId,
           options: col.options,
           required: col.required,
+          placeholder: col.placeholder,
         }));
 
       // Create a table field that represents this grid layout
@@ -463,7 +526,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fields: [gridAsTableField], // Store as a single table field for form compatibility
+          fields: [gridAsTableField],
           layoutConfig: { 
             gridColumns, 
             columnDefs: columnDefs.filter((c) => c !== null),
@@ -488,30 +551,6 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="text-lg text-slate-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg text-red-600 mb-4">{error}</div>
-          <button
-            onClick={() => router.push("/layouts")}
-            className="px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700"
-          >
-            Back to Layouts
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Get column rendering for data rows
   const renderCellContent = (col: GridColumnDef | null, rowValues: Record<string, any>) => {
@@ -560,9 +599,24 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
       case "textarea":
         return <textarea className="w-full px-2 py-1 text-sm border border-slate-200 rounded resize-none" rows={2} />;
       default:
-        return <input type="text" className="w-full px-2 py-1 text-sm border border-slate-200 rounded" placeholder={col.label} />;
+        return <input type="text" className="w-full px-2 py-1 text-sm border border-slate-200 rounded" placeholder={col.placeholder || col.label} />;
     }
   };
+
+  // Remove column definition
+  const handleRemoveColumnDef = (index: number) => {
+    pushUndo();
+    setColumnDefs((prev) => {
+      const newDefs = [...prev];
+      newDefs[index] = null;
+      return newDefs;
+    });
+    if (selectedColumnIndex === index) {
+        setSelectedColumnIndex(null);
+    }
+  };
+
+
 
   return (
     <DndContext
@@ -607,11 +661,13 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
-          {/* Main Content - Grid Builder */}
-          <main className="flex-1 overflow-auto p-6">
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 min-h-full">
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto p-6" onClick={() => setSelectedColumnIndex(null)}>
+            <div 
+                className="bg-white shadow-sm border border-slate-200 p-6 min-h-full"
+            >
 
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
+              <div className="overflow-x-auto border border-slate-200">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
@@ -623,6 +679,8 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
                           key={i}
                           index={i}
                           columnDef={columnDefs[i] || null}
+                          isSelected={selectedColumnIndex === i}
+                          onSelect={setSelectedColumnIndex}
                           onRemove={handleRemoveColumnDef}
                         />
                       ))}
@@ -687,7 +745,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
             </div>
           </main>
 
-          {/* Right Sidebar - Grid Inspector */}
+          {/* Right Sidebar */}
           <div
             className={`flex h-full flex-col border-l border-slate-200 bg-white transition-[width] duration-300 ease-out ${
               isRightSidebarOpen ? "w-72" : "w-0 min-w-0 overflow-hidden"
@@ -703,6 +761,8 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
                 gridColumns={gridColumns}
                 columnDefs={columnDefs.filter((c): c is GridColumnDef => c !== null)}
                 rowCount={rows.length}
+                selectedColumnIndex={selectedColumnIndex}
+                onUpdateColumn={handleUpdateColumn}
               />
             </div>
           </div>
@@ -711,7 +771,7 @@ export default function GridLayoutBuilderPage({ params }: { params: Promise<{ id
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-lg">
+            <div className="flex items-center gap-2 border rounded-lg border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-lg">
               <div className="min-w-0">
                 <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
               </div>

@@ -37,6 +37,13 @@ interface FormLayoutData {
   layoutType: 'form-group' | 'grid-layout' | 'box-layout';
   category?: string;
   fields: any[];
+  layoutConfig?: {
+    groups?: { id: string; name: string; fields: any[] }[];
+    boxes?: { id: string; title: string; fields: any[] }[];
+    gridColumns?: number;
+    columnDefs?: any[];
+    rows?: any[];
+  };
 }
 
 interface FormData {
@@ -86,6 +93,20 @@ function CustomFieldCard({ field }: { field: CustomFieldData }) {
 }
 
 function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
+  // For form-group layouts, extract fields from layoutConfig.groups
+  // For other layouts, use the top-level fields array
+  const getLayoutFields = () => {
+    if (layout.layoutType === 'form-group' && layout.layoutConfig?.groups) {
+      // Flatten all fields from all groups into a single array
+      return layout.layoutConfig.groups.flatMap(group => group.fields || []);
+    }
+    if (layout.layoutType === 'box-layout' && layout.layoutConfig?.boxes) {
+      // Flatten all fields from all boxes into a single array
+      return layout.layoutConfig.boxes.flatMap(box => box.fields || []);
+    }
+    return layout.fields || [];
+  };
+
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `form-layout-${layout._id}`,
     data: { 
@@ -93,7 +114,8 @@ function FormLayoutCard({ layout }: { layout: FormLayoutData }) {
       layoutId: layout._id,
       layoutType: layout.layoutType,
       layoutName: layout.layoutName,
-      fields: layout.fields,
+      fields: getLayoutFields(),
+      layoutConfig: layout.layoutConfig,
     },
   });
 

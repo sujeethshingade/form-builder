@@ -9,31 +9,14 @@ import {
   closestCenter,
   useSensor,
   useSensors,
-  useDroppable,
   useDraggable,
 } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { arrayMove } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
 import { BuilderNavbar } from "@/app/components/builder/BuilderNavbar";
-
-interface GroupField {
-  id: string;
-  type: string;
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  width?: "full" | "half";
-  widthColumns?: number;
-  customFieldId?: string;
-  lovItems?: any[];
-  items?: any[];
-  // For nested layouts
-  isLayout?: boolean;
-  layoutType?: "grid-layout" | "box-layout";
-  layoutId?: string;
-  layoutConfig?: any;
-}
+import { LayoutCanvas } from "@/app/components/canvas/LayoutCanvas";
+import { LayoutField } from "@/app/components/canvas/LayoutCanvasCard";
+import { LayoutFieldInspector } from "@/app/components/element/LayoutFieldInspector";
 
 interface FormGroup {
   id: string;
@@ -41,7 +24,7 @@ interface FormGroup {
   subtitle?: string;
   icon?: string;
   status?: "completed" | "in-progress" | "pending";
-  fields: GroupField[];
+  fields: LayoutField[];
   subgroups?: { id: string; name: string }[];
 }
 
@@ -74,6 +57,8 @@ interface FormLayoutData {
   layoutName: string;
   layoutType: "grid-layout" | "box-layout";
   category?: string;
+  fields?: any[];
+  layoutConfig?: any;
 }
 
 // Draggable Field Card
@@ -96,13 +81,13 @@ function DraggableFieldCard({ field }: { field: CustomFieldData }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-2 border rounded-sm px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing bg-white border-slate-200 hover:bg-slate-50 ${
-        isDragging ? "opacity-50 shadow-md" : ""
+      className={`flex items-center gap-3 border rounded-lg px-3 py-2.5 cursor-grab transition hover:shadow-md active:cursor-grabbing bg-white border-slate-200 hover:border-sky-300 hover:bg-sky-50/50 ${
+        isDragging ? "opacity-50 shadow-lg" : ""
       }`}
     >
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium text-slate-700 truncate">{field.fieldLabel}</div>
-        <div className="text-xs text-slate-400 truncate">{field.dataType}</div>
+        <div className="text-xs text-slate-400 truncate capitalize">{field.dataType}</div>
       </div>
     </div>
   );
@@ -117,6 +102,8 @@ function DraggableLayoutCard({ layout }: { layout: FormLayoutData }) {
       layoutId: layout._id,
       layoutType: layout.layoutType,
       layoutName: layout.layoutName,
+      fields: layout.fields || [],
+      layoutConfig: layout.layoutConfig,
     },
   });
 
@@ -125,8 +112,8 @@ function DraggableLayoutCard({ layout }: { layout: FormLayoutData }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-2 border rounded-sm px-2 py-2 cursor-grab transition hover:shadow-sm active:cursor-grabbing bg-white border-slate-200 hover:bg-slate-50 ${
-        isDragging ? "opacity-50 shadow-md" : ""
+      className={`flex items-center gap-3 border rounded-lg px-3 py-2.5 cursor-grab transition hover:shadow-md active:cursor-grabbing bg-white border-slate-200 hover:border-sky-300 hover:bg-sky-50/50 ${
+        isDragging ? "opacity-50 shadow-lg" : ""
       }`}
     >
       <div className="min-w-0 flex-1">
@@ -135,130 +122,6 @@ function DraggableLayoutCard({ layout }: { layout: FormLayoutData }) {
           {layout.layoutType === "grid-layout" ? "Grid Layout" : "Box Layout"}
         </div>
       </div>
-    </div>
-  );
-}
-
-// Sortable Field in Group
-function SortableGroupField({
-  field,
-  onRemove,
-  onUpdateWidth,
-}: {
-  field: GroupField;
-  onRemove: () => void;
-  onUpdateWidth: (width: number) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: field.id,
-    data: { from: "group-field", fieldId: field.id },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    gridColumn: `span ${field.widthColumns || 6}`,
-  };
-
-  const isLayoutField = field.isLayout;
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`bg-white border rounded-md p-3 ${
-        isLayoutField
-          ? field.layoutType === "grid-layout"
-            ? "border-sky-300 bg-sky-50"
-            : "border-amber-300 bg-amber-50"
-          : "border-slate-200"
-      } ${isDragging ? "opacity-50 shadow-lg" : ""}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div {...attributes} {...listeners} className="cursor-grab p-1">
-          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {isLayoutField && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                field.layoutType === "grid-layout" ? "bg-sky-100 text-sky-700" : "bg-amber-100 text-amber-700"
-              }`}>
-                {field.layoutType === "grid-layout" ? "Grid" : "Box"}
-              </span>
-            )}
-            <div className="text-sm font-medium text-slate-700 truncate">{field.label}</div>
-          </div>
-          <div className="text-xs text-slate-400 truncate">{field.type}</div>
-        </div>
-        <div className="flex items-center gap-1">
-          {!isLayoutField && (
-            <select
-              value={field.widthColumns || 6}
-              onChange={(e) => onUpdateWidth(parseInt(e.target.value))}
-              className="text-xs border border-slate-200 rounded px-1 py-0.5 focus:outline-none"
-            >
-              <option value={3}>1/4</option>
-              <option value={4}>1/3</option>
-              <option value={6}>1/2</option>
-              <option value={8}>2/3</option>
-              <option value={12}>Full</option>
-            </select>
-          )}
-          <button
-            onClick={onRemove}
-            className="p-1 text-slate-400 hover:text-red-500 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Group Content Area
-function GroupContent({
-  group,
-  onRemoveField,
-  onUpdateFieldWidth,
-}: {
-  group: FormGroup;
-  onRemoveField: (fieldId: string) => void;
-  onUpdateFieldWidth: (fieldId: string, width: number) => void;
-}) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: `group-${group.id}`,
-    data: { groupId: group.id },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`flex-1 p-6 min-h-75 ${isOver ? "bg-sky-50" : "bg-white"} transition-colors`}
-    >
-      {group.fields.length > 0 ? (
-        <SortableContext items={group.fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-12 gap-3">
-            {group.fields.map((field) => (
-              <SortableGroupField
-                key={field.id}
-                field={field}
-                onRemove={() => onRemoveField(field.id)}
-                onUpdateWidth={(width) => onUpdateFieldWidth(field.id, width)}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      ) : (
-        <div className="flex items-center justify-center h-full text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-lg">
-          Drag and drop fields or layouts here
-        </div>
-      )}
     </div>
   );
 }
@@ -275,12 +138,12 @@ function FieldSidebar({
   searchTerm: string;
   onSearchChange: (term: string) => void;
 }) {
-  const excludedDataTypes = ["heading", "spacer", "divider", "table"];
+  const [activeTab, setActiveTab] = useState<"fields" | "layouts">("fields");
+  
   const filteredFields = customFields.filter(
     (field) =>
-      !excludedDataTypes.includes(field.dataType.toLowerCase()) &&
-      (field.fieldLabel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        field.fieldName.toLowerCase().includes(searchTerm.toLowerCase()))
+      field.fieldLabel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      field.fieldName.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const filteredLayouts = formLayouts.filter((layout) =>
     layout.layoutName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -288,100 +151,163 @@ function FieldSidebar({
 
   return (
     <aside className="w-72 bg-white flex flex-col h-full border-r border-slate-200">
+      {/* Tabs - matching builder style */}
+      <div className="border-b border-gray-200 px-2 py-2 flex gap-1">
+        <button
+          onClick={() => setActiveTab("fields")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === "fields"
+              ? "bg-sky-100 text-sky-700"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          Fields
+        </button>
+        <button
+          onClick={() => setActiveTab("layouts")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === "layouts"
+              ? "bg-sky-100 text-sky-700"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          Layouts
+        </button>
+      </div>
+
+      {/* Search inside tab */}
       <div className="p-3">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder={activeTab === "fields" ? "Search fields..." : "Search layouts..."}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
         />
       </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        {/* Custom Fields */}
-        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-          Custom Fields
-        </h3>
-        <div className="space-y-2 mb-6">
-          {filteredFields.map((field) => (
-            <DraggableFieldCard key={field._id} field={field} />
-          ))}
-          {filteredFields.length === 0 && (
-            <p className="text-sm text-slate-400 text-center py-2">No fields found</p>
-          )}
-        </div>
 
-        {/* Layouts */}
-        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-          Layouts
-        </h3>
-        <div className="space-y-2">
-          {filteredLayouts.map((layout) => (
-            <DraggableLayoutCard key={layout._id} layout={layout} />
-          ))}
-          {filteredLayouts.length === 0 && (
-            <p className="text-sm text-slate-400 text-center py-2">No layouts found</p>
-          )}
-        </div>
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-3">
+        {activeTab === "fields" ? (
+          <div className="space-y-2">
+            {filteredFields.map((field) => (
+              <DraggableFieldCard key={field._id} field={field} />
+            ))}
+            {filteredFields.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-sm text-slate-500">No fields found</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredLayouts.map((layout) => (
+              <DraggableLayoutCard key={layout._id} layout={layout} />
+            ))}
+            {filteredLayouts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-sm text-slate-500">No layouts found</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </aside>
   );
 }
 
+// Group Navigation Item
+function GroupNavItem({
+  group,
+  isActive,
+  onClick,
+  onDelete,
+}: {
+  group: FormGroup;
+  isActive: boolean;
+  onClick: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className={`group flex items-center gap-2 px-3 py-2.5 cursor-pointer transition-colors ${
+        isActive
+          ? "bg-white border-r-2 border-sky-500"
+          : "hover:bg-slate-100"
+      }`}
+    >
+      <span className="flex-1 text-sm text-slate-700 truncate">{group.name}</span>
+      <span className="text-xs text-slate-400">{group.fields.length}</span>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 // Group Inspector Sidebar
 function GroupInspectorSidebar({
-  layoutName,
-  groupCount,
   activeGroup,
   onUpdateGroupName,
   onUpdateGroupSubtitle,
 }: {
-  layoutName: string;
-  groupCount: number;
   activeGroup: FormGroup | null;
   onUpdateGroupName: (name: string) => void;
   onUpdateGroupSubtitle: (subtitle: string) => void;
 }) {
-  return (
-    <aside className="w-72 bg-white flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1">Layout Name</label>
-          <div className="text-sm text-slate-700">{layoutName}</div>
+  if (!activeGroup) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+        <div className="mb-4 p-4">
+          <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1">Total Groups</label>
-          <div className="text-sm text-slate-700">{groupCount}</div>
-        </div>
-        {activeGroup && (
-          <>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Group Name</label>
-              <input
-                type="text"
-                value={activeGroup.name}
-                onChange={(e) => onUpdateGroupName(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Subtitle</label>
-              <input
-                type="text"
-                value={activeGroup.subtitle || ""}
-                onChange={(e) => onUpdateGroupSubtitle(e.target.value)}
-                placeholder="Optional subtitle"
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Fields Count</label>
-              <div className="text-sm text-slate-700">{activeGroup.fields.length}</div>
-            </div>
-          </>
-        )}
+        <p className="text-sm font-medium text-slate-700">No group selected</p>
+        <p className="mt-2 text-xs text-slate-500">
+          Select a group to edit its properties
+        </p>
       </div>
-    </aside>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <div className="p-4 space-y-5">
+        {/* Group Name */}
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1.5">Name</label>
+          <input
+            type="text"
+            value={activeGroup.name}
+            onChange={(e) => onUpdateGroupName(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+            placeholder="Group name"
+          />
+        </div>
+
+        {/* Subtitle */}
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1.5">Subtitle</label>
+          <input
+            type="text"
+            value={activeGroup.subtitle || ""}
+            onChange={(e) => onUpdateGroupSubtitle(e.target.value)}
+            placeholder="Subtitle"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -402,6 +328,8 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
 
   const [groups, setGroups] = useState<FormGroup[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [inspectorMode, setInspectorMode] = useState<"group" | "field">("group");
   const [customFields, setCustomFields] = useState<CustomFieldData[]>([]);
   const [formLayouts, setFormLayouts] = useState<FormLayoutData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -416,6 +344,7 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
   );
 
   const activeGroup = groups.find((g) => g.id === activeGroupId);
+  const selectedField = activeGroup?.fields.find((f) => f.id === selectedFieldId) || null;
 
   // Fetch layout data
   useEffect(() => {
@@ -489,7 +418,7 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
 
   // Push to undo stack
   const pushUndo = () => {
-    setUndoStack((stack) => [...stack.slice(-19), [...groups]]);
+    setUndoStack((stack) => [...stack.slice(-19), JSON.parse(JSON.stringify(groups))]);
     setRedoStack([]);
   };
 
@@ -497,18 +426,20 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
   const handleUndo = () => {
     if (undoStack.length === 0) return;
     const prev = undoStack[undoStack.length - 1];
-    setRedoStack((stack) => [...stack, groups]);
+    setRedoStack((stack) => [...stack, JSON.parse(JSON.stringify(groups))]);
     setUndoStack((stack) => stack.slice(0, -1));
     setGroups(prev);
+    setSelectedFieldId(null);
   };
 
   // Redo
   const handleRedo = () => {
     if (redoStack.length === 0) return;
     const next = redoStack[redoStack.length - 1];
-    setUndoStack((stack) => [...stack, groups]);
+    setUndoStack((stack) => [...stack, JSON.parse(JSON.stringify(groups))]);
     setRedoStack((stack) => stack.slice(0, -1));
     setGroups(next);
+    setSelectedFieldId(null);
   };
 
   // Add new group
@@ -545,50 +476,155 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
     if (activeGroupId === groupId) {
       setActiveGroupId(groups.find((g) => g.id !== groupId)?.id || null);
     }
+    setSelectedFieldId(null);
   };
 
   // Update group name
-  const handleUpdateGroupName = (groupId: string, name: string) => {
+  const handleUpdateGroupName = (name: string) => {
+    if (!activeGroupId) return;
     setGroups((prev) =>
-      prev.map((g) => (g.id === groupId ? { ...g, name } : g))
+      prev.map((g) => (g.id === activeGroupId ? { ...g, name } : g))
     );
   };
 
   // Update group subtitle
-  const handleUpdateGroupSubtitle = (groupId: string, subtitle: string) => {
+  const handleUpdateGroupSubtitle = (subtitle: string) => {
+    if (!activeGroupId) return;
     setGroups((prev) =>
-      prev.map((g) => (g.id === groupId ? { ...g, subtitle } : g))
+      prev.map((g) => (g.id === activeGroupId ? { ...g, subtitle } : g))
     );
   };
 
-  // Remove field from group
-  const handleRemoveField = (groupId: string, fieldId: string) => {
+  // Field operations
+  const handleDeleteField = (fieldId: string) => {
+    if (!activeGroupId) return;
     pushUndo();
     setGroups((prev) =>
       prev.map((group) => {
-        if (group.id === groupId) {
+        if (group.id === activeGroupId) {
           return { ...group, fields: group.fields.filter((f) => f.id !== fieldId) };
+        }
+        return group;
+      })
+    );
+    if (selectedFieldId === fieldId) {
+      setSelectedFieldId(null);
+      setInspectorMode("group");
+    }
+  };
+
+  const handleDuplicateField = (fieldId: string) => {
+    if (!activeGroupId || !activeGroup) return;
+    const fieldIndex = activeGroup.fields.findIndex((f) => f.id === fieldId);
+    if (fieldIndex === -1) return;
+
+    pushUndo();
+    const fieldToDuplicate = activeGroup.fields[fieldIndex];
+    const duplicatedField = { ...fieldToDuplicate, id: nanoid() };
+
+    setGroups((prev) =>
+      prev.map((group) => {
+        if (group.id === activeGroupId) {
+          const newFields = [...group.fields];
+          newFields.splice(fieldIndex + 1, 0, duplicatedField);
+          return { ...group, fields: newFields };
+        }
+        return group;
+      })
+    );
+    setSelectedFieldId(duplicatedField.id);
+    setInspectorMode("field");
+  };
+
+  const handleMoveFieldUp = (fieldId: string) => {
+    if (!activeGroupId || !activeGroup) return;
+    const fieldIndex = activeGroup.fields.findIndex((f) => f.id === fieldId);
+    if (fieldIndex <= 0) return;
+
+    pushUndo();
+    setGroups((prev) =>
+      prev.map((group) => {
+        if (group.id === activeGroupId) {
+          return { ...group, fields: arrayMove(group.fields, fieldIndex, fieldIndex - 1) };
         }
         return group;
       })
     );
   };
 
-  // Update field width
-  const handleUpdateFieldWidth = (groupId: string, fieldId: string, width: number) => {
+  const handleMoveFieldDown = (fieldId: string) => {
+    if (!activeGroupId || !activeGroup) return;
+    const fieldIndex = activeGroup.fields.findIndex((f) => f.id === fieldId);
+    if (fieldIndex === -1 || fieldIndex >= activeGroup.fields.length - 1) return;
+
+    pushUndo();
     setGroups((prev) =>
       prev.map((group) => {
-        if (group.id === groupId) {
+        if (group.id === activeGroupId) {
+          return { ...group, fields: arrayMove(group.fields, fieldIndex, fieldIndex + 1) };
+        }
+        return group;
+      })
+    );
+  };
+
+  const handleUpdateField = (updates: Partial<LayoutField>) => {
+    if (!activeGroupId || !selectedFieldId) return;
+    setGroups((prev) =>
+      prev.map((group) => {
+        if (group.id === activeGroupId) {
           return {
             ...group,
             fields: group.fields.map((f) =>
-              f.id === fieldId ? { ...f, widthColumns: width } : f
+              f.id === selectedFieldId ? { ...f, ...updates } : f
             ),
           };
         }
         return group;
       })
     );
+  };
+
+  // Handle adding a new box instance to a box layout field
+  const handleAddBoxInstance = (fieldId: string) => {
+    if (!activeGroupId) return;
+    
+    setGroups((prev) =>
+      prev.map((group) => {
+        if (group.id === activeGroupId) {
+          return {
+            ...group,
+            fields: group.fields.map((f) => {
+              if (f.id === fieldId && f.layoutConfig?.boxes) {
+                const templateBox = f.layoutConfig.boxes[0];
+                if (templateBox) {
+                  const newBox = {
+                    id: nanoid(),
+                    title: `${templateBox.title || 'Box'} ${f.layoutConfig.boxes.length + 1}`,
+                    fields: templateBox.fields.map((field: any) => ({ ...field, id: nanoid() })),
+                  };
+                  return {
+                    ...f,
+                    layoutConfig: {
+                      ...f.layoutConfig,
+                      boxes: [...f.layoutConfig.boxes, newBox],
+                    },
+                  };
+                }
+              }
+              return f;
+            }),
+          };
+        }
+        return group;
+      })
+    );
+  };
+
+  // Handle field selection
+  const handleSelectField = (fieldId: string | null) => {
+    setSelectedFieldId(fieldId);
+    setInspectorMode(fieldId ? "field" : "group");
   };
 
   // Handle drag start
@@ -598,7 +634,7 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
       setActiveDrag({ type: data.type, label: data.fieldLabel || "Field" });
     } else if (data?.from === "layout") {
       setActiveDrag({ type: data.layoutType, label: data.layoutName || "Layout" });
-    } else if (data?.from === "group-field") {
+    } else if (data?.from === "canvas-field") {
       setActiveDrag({ type: "field", label: "Field" });
     }
   };
@@ -608,19 +644,18 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
     const { active, over } = event;
     setActiveDrag(null);
 
-    if (!over) return;
+    if (!over || !activeGroupId) return;
 
     const activeData = active.data.current;
-    const overData = over.data.current;
 
     // Drop custom field into group
-    if (activeData?.from === "custom-field" && overData?.groupId) {
+    if (activeData?.from === "custom-field") {
       pushUndo();
-      const newField: GroupField = {
+      const newField: LayoutField = {
         id: nanoid(),
         type: activeData.type,
         label: activeData.fieldLabel || activeData.fieldName,
-        widthColumns: 6,
+        widthColumns: 12,
         customFieldId: activeData.customFieldId,
         lovItems: activeData.lovItems,
       };
@@ -636,46 +671,76 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
 
       setGroups((prev) =>
         prev.map((group) => {
-          if (group.id === overData.groupId) {
+          if (group.id === activeGroupId) {
             return { ...group, fields: [...group.fields, newField] };
           }
           return group;
         })
       );
+      setSelectedFieldId(newField.id);
+      setInspectorMode("field");
     }
 
-    // Drop layout into group
-    if (activeData?.from === "layout" && overData?.groupId) {
+    if (activeData?.from === "layout") {
       pushUndo();
-      const newField: GroupField = {
+      
+      const layoutFields = activeData?.fields;
+      
+      if (layoutFields && Array.isArray(layoutFields) && layoutFields.length > 0) {
+      const newFields: LayoutField[] = layoutFields.map((field: any) => ({
+        ...field, 
         id: nanoid(),
-        type: activeData.layoutType,
-        label: activeData.layoutName,
-        widthColumns: 12,
-        isLayout: true,
-        layoutType: activeData.layoutType,
-        layoutId: activeData.layoutId,
-      };
+        widthColumns: field.widthColumns || 12,
+      }));
 
-      setGroups((prev) =>
-        prev.map((group) => {
-          if (group.id === overData.groupId) {
-            return { ...group, fields: [...group.fields, newField] };
-          }
-          return group;
-        })
-      );
+        setGroups((prev) =>
+          prev.map((group) => {
+            if (group.id === activeGroupId) {
+              return { ...group, fields: [...group.fields, ...newFields] };
+            }
+            return group;
+          })
+        );
+        
+        if (newFields.length > 0) {
+          setSelectedFieldId(newFields[0].id);
+          setInspectorMode("field");
+        }
+      } else {
+        const newField: LayoutField = {
+          id: nanoid(),
+          type: activeData.layoutType,
+          label: activeData.layoutName,
+          widthColumns: 12,
+          isLayout: true,
+          layoutType: activeData.layoutType,
+          layoutId: activeData.layoutId,
+          layoutConfig: activeData.layoutConfig,
+        };
+
+        setGroups((prev) =>
+          prev.map((group) => {
+            if (group.id === activeGroupId) {
+              return { ...group, fields: [...group.fields, newField] };
+            }
+            return group;
+          })
+        );
+        setSelectedFieldId(newField.id);
+        setInspectorMode("field");
+      }
     }
 
-    // Reorder fields within group
-    if (activeData?.from === "group-field" && active.id !== over.id) {
+    if (activeData?.from === "canvas-field" && active.id !== over.id) {
       pushUndo();
       setGroups((prev) =>
         prev.map((group) => {
-          const oldIndex = group.fields.findIndex((f) => f.id === active.id);
-          const newIndex = group.fields.findIndex((f) => f.id === over.id);
-          if (oldIndex !== -1 && newIndex !== -1) {
-            return { ...group, fields: arrayMove(group.fields, oldIndex, newIndex) };
+          if (group.id === activeGroupId) {
+            const oldIndex = group.fields.findIndex((f) => f.id === active.id);
+            const newIndex = group.fields.findIndex((f) => f.id === over.id);
+            if (oldIndex !== -1 && newIndex !== -1) {
+              return { ...group, fields: arrayMove(group.fields, oldIndex, newIndex) };
+            }
           }
           return group;
         })
@@ -782,10 +847,10 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
             </div>
           </div>
 
-          {/* Vertical Navigation Bar for Groups */}
+          {/* Group Navigation */}
           <div className="w-56 bg-slate-50 border-r border-slate-200 flex flex-col">
             <div className="p-3 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-sm font-medium text-slate-700">Groups</h3>
+              <h3 className="text-sm font-semibold text-slate-700">Groups</h3>
               <button
                 onClick={() => setShowAddGroupModal(true)}
                 className="p-1.5 text-sky-600 hover:bg-sky-50 rounded transition-colors"
@@ -796,48 +861,42 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
                 </svg>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto py-2">
+            <div className="flex-1 overflow-y-auto">
               {groups.map((group) => (
-                <div
+                <GroupNavItem
                   key={group.id}
-                  className={`group flex items-center gap-2 px-3 py-2.5 cursor-pointer transition-colors ${
-                    activeGroupId === group.id
-                      ? "bg-white border-r-2 border-sky-500"
-                      : "hover:bg-slate-100"
-                  }`}
-                  onClick={() => setActiveGroupId(group.id)}
-                >
-                  <span className="flex-1 text-sm text-slate-700 truncate">{group.name}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteGroup(group.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+                  group={group}
+                  isActive={activeGroupId === group.id}
+                  onClick={() => {
+                    setActiveGroupId(group.id);
+                    setSelectedFieldId(null);
+                    setInspectorMode("group");
+                  }}
+                  onDelete={() => handleDeleteGroup(group.id)}
+                />
               ))}
             </div>
           </div>
 
-          {/* Main Content - Group Fields */}
-          <main className="flex-1 flex flex-col overflow-hidden bg-slate-100">
-            {activeGroup && (
-              <>
-                {/* Group Content */}
-                <GroupContent
-                  group={activeGroup}
-                  onRemoveField={(fieldId) => handleRemoveField(activeGroup.id, fieldId)}
-                  onUpdateFieldWidth={(fieldId, width) =>
-                    handleUpdateFieldWidth(activeGroup.id, fieldId, width)
-                  }
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto p-6 bg-slate-100">
+            <div className="max-w-5xl mx-auto">
+              {/* Canvas */}
+              {activeGroup && (
+                <LayoutCanvas
+                  fields={activeGroup.fields}
+                  selectedId={selectedFieldId}
+                  onSelect={handleSelectField}
+                  onDelete={handleDeleteField}
+                  onDuplicate={handleDuplicateField}
+                  onMoveUp={handleMoveFieldUp}
+                  onMoveDown={handleMoveFieldDown}
+                  onAddBox={handleAddBoxInstance}
+                  droppableId={`group-${activeGroup.id}`}
+                  emptyMessage=""
                 />
-              </>
-            )}
+              )}
+            </div>
           </main>
 
           {/* Right Sidebar - Inspector */}
@@ -847,17 +906,51 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
             }`}
           >
             <div
-              className={`flex h-full flex-col ${
+              className={`flex h-full w-72 flex-col ${
                 isRightSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
               } transition-opacity duration-200 ${isRightSidebarOpen ? "delay-100" : ""}`}
             >
-              <GroupInspectorSidebar
-                layoutName={layoutData?.layoutName || ""}
-                groupCount={groups.length}
-                activeGroup={activeGroup || null}
-                onUpdateGroupName={(name) => activeGroup && handleUpdateGroupName(activeGroup.id, name)}
-                onUpdateGroupSubtitle={(subtitle) => activeGroup && handleUpdateGroupSubtitle(activeGroup.id, subtitle)}
-              />
+              {/* Mode Tabs - matching builder style */}
+              <div className="border-b border-gray-200 px-2 py-2 flex gap-1">
+                <button
+                  onClick={() => setInspectorMode("group")}
+                  className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    inspectorMode === "group"
+                      ? "bg-sky-100 text-sky-700"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  Group
+                </button>
+                <button
+                  onClick={() => setInspectorMode("field")}
+                  disabled={!selectedField}
+                  className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    inspectorMode === "field"
+                      ? "bg-sky-100 text-sky-700"
+                      : "text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  Field
+                </button>
+              </div>
+
+              {inspectorMode === "group" ? (
+                <GroupInspectorSidebar
+                  activeGroup={activeGroup || null}
+                  onUpdateGroupName={handleUpdateGroupName}
+                  onUpdateGroupSubtitle={handleUpdateGroupSubtitle}
+                />
+              ) : (
+                <LayoutFieldInspector
+                  field={selectedField}
+                  onUpdate={handleUpdateField}
+                  onClose={() => {
+                    setSelectedFieldId(null);
+                    setInspectorMode("group");
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -865,7 +958,7 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
         {/* Add Group Modal */}
         {showAddGroupModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <div className="bg-white rounded-xl p-6 w-96 shadow-2xl">
               <h3 className="text-lg font-semibold text-slate-800 mb-4">Add New Group</h3>
               <input
                 type="text"
@@ -903,10 +996,8 @@ export default function FormGroupBuilderPage({ params }: { params: Promise<{ id:
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={null}>
           {activeDrag ? (
-            <div className="flex items-center gap-2 border rounded-sm border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-lg">
-              <div className="min-w-0">
-                <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
-              </div>
+            <div className="flex items-center gap-2 border rounded-lg border-sky-300 bg-white px-3 py-2 text-slate-900 shadow-xl">
+              <div className="text-sm font-medium text-slate-700 truncate">{activeDrag.label}</div>
             </div>
           ) : null}
         </DragOverlay>

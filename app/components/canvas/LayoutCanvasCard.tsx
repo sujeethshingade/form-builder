@@ -2,8 +2,6 @@
 
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import type { FormField, FormStyles } from "../../lib/types";
-import { getFieldColumnSpan } from "../../lib/form";
 import { CardControls } from "../shared/CardControls";
 import {
   FormFieldRenderer,
@@ -11,13 +9,37 @@ import {
   SpacerRenderer,
   HeadingRenderer,
   TableRenderer,
-  BoxLayoutRenderer,
   GridLayoutRenderer,
+  BoxLayoutRenderer,
   FormGroupRenderer,
 } from "../shared/FieldRenderer";
+import type { FormField } from "../../lib/types";
 
-type CanvasCardProps = {
-  field: FormField;
+export interface LayoutField {
+  id: string;
+  type: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  widthColumns?: number;
+  customFieldId?: string;
+  lovItems?: any[];
+  items?: any[];
+  isLayout?: boolean;
+  layoutType?: "grid-layout" | "box-layout" | "form-group";
+  layoutId?: string;
+  layoutConfig?: any;
+  height?: string;
+  tag?: string;
+  align?: string;
+  description?: string;
+  tableColumns?: any[];
+  tableRows?: any[];
+  columns?: any[];
+}
+
+type LayoutCanvasCardProps = {
+  field: LayoutField;
   selected: boolean;
   onSelect: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -26,11 +48,12 @@ type CanvasCardProps = {
   onMoveDown?: (id: string) => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
-  styles: FormStyles;
-  onUpdateField?: (fieldId: string, updates: Partial<FormField>) => void;
+  onUpdateWidth?: (id: string, width: number) => void;
+  onAddBox?: (fieldId: string) => void;
+  disabled?: boolean;
 };
 
-export function CanvasCard({
+export function LayoutCanvasCard({
   field,
   selected,
   onSelect,
@@ -40,8 +63,9 @@ export function CanvasCard({
   onMoveDown,
   canMoveUp = true,
   canMoveDown = true,
-  onUpdateField,
-}: CanvasCardProps) {
+  onAddBox,
+  disabled = false,
+}: LayoutCanvasCardProps) {
   const {
     attributes,
     listeners,
@@ -51,7 +75,8 @@ export function CanvasCard({
     isDragging,
   } = useSortable({
     id: field.id,
-    data: { from: "canvas", fieldId: field.id },
+    data: { from: "canvas-field", fieldId: field.id },
+    disabled,
   });
 
   const style = {
@@ -84,11 +109,13 @@ export function CanvasCard({
     if (onMoveDown) onMoveDown(field.id);
   };
 
+  const columnSpan = field.widthColumns || 12;
+  const isLayoutField = field.isLayout || field.type === "grid-layout" || field.type === "box-layout" || field.type === "form-group";
+
   const wrapperClasses = `group relative cursor-pointer transition ${
     selected ? "ring-2 ring-sky-400" : "hover:ring-2 hover:ring-slate-200"
   } ${isDragging ? "opacity-50" : ""}`;
 
-  const columnSpan = getFieldColumnSpan(field);
   const gridStyle = {
     gridColumn: `span ${columnSpan} / span ${columnSpan}`,
   };
@@ -106,6 +133,54 @@ export function CanvasCard({
     />
   );
 
+  // Convert LayoutField to FormField for the renderer
+  const formField: FormField = {
+    id: field.id,
+    type: field.type as any,
+    label: field.label,
+    placeholder: field.placeholder,
+    required: field.required,
+    widthColumns: field.widthColumns,
+    items: field.items,
+    customFieldId: field.customFieldId,
+    lovItems: field.lovItems,
+    height: field.height,
+    tag: field.tag as any,
+    align: field.align as any,
+    description: field.description,
+    tableColumns: field.tableColumns,
+    tableRows: field.tableRows,
+    columns: field.columns,
+  };
+
+  // For layout fields (nested grid-layout, box-layout, or form-group)
+  if (isLayoutField) {
+    const layoutType = field.layoutType || field.type;
+    
+    return (
+      <div
+        ref={setNodeRef}
+        style={{ ...style, ...gridStyle }}
+        onClick={handleClick}
+        className={`${wrapperClasses} p-2 ${isDragging ? "shadow-lg" : ""}`}
+      >
+        {controls}
+        {layoutType === "grid-layout" ? (
+          <GridLayoutRenderer label={field.label} config={field.layoutConfig} />
+        ) : layoutType === "form-group" ? (
+          <FormGroupRenderer label={field.label} config={field.layoutConfig} />
+        ) : (
+          <BoxLayoutRenderer 
+            label={field.label} 
+            config={field.layoutConfig} 
+            onAddBox={onAddBox ? () => onAddBox(field.id) : undefined}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Special handling for divider
   if (field.type === "divider") {
     return (
       <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-3`}>
@@ -115,31 +190,28 @@ export function CanvasCard({
     );
   }
 
+  // Special handling for spacer
   if (field.type === "spacer") {
     return (
       <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
-        <SpacerRenderer field={field} selected={selected} />
+        <SpacerRenderer field={formField} selected={selected} />
       </div>
     );
   }
 
+  // Special handling for heading
   if (field.type === "heading") {
     return (
       <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
-        <HeadingRenderer field={field} />
+        <HeadingRenderer field={formField} />
       </div>
     );
   }
 
+  // Special handling for table
   if (field.type === "table") {
-    const handleRowsUpdate = (rows: Record<string, unknown>[]) => {
-      if (onUpdateField) {
-        onUpdateField(field.id, { tableRows: rows });
-      }
-    };
-
     return (
       <div ref={setNodeRef} style={{ ...style, ...gridStyle }} onClick={handleClick} className={`${wrapperClasses} p-2`}>
         {controls}
@@ -152,43 +224,12 @@ export function CanvasCard({
             <p className="text-xs text-slate-500">{field.description}</p>
           )}
         </div>
-        <TableRenderer field={field} disabled={false} preview={false} onUpdateRows={handleRowsUpdate} />
+        <TableRenderer field={formField} disabled={false} preview={false} />
       </div>
     );
   }
 
-  // Handle layout fields (box-layout, grid-layout, form-group)
-  const fieldType = field.type as string;
-  const isLayoutField = (field as any).isLayout || 
-    fieldType === "box-layout" || 
-    fieldType === "grid-layout" || 
-    fieldType === "form-group";
-  
-  if (isLayoutField) {
-    const layoutType = (field as any).layoutType || fieldType;
-    const layoutConfig = (field as any).layoutConfig;
-    
-    return (
-      <div
-        ref={setNodeRef}
-        style={{ ...style, ...gridStyle }}
-        onClick={handleClick}
-        className={`${wrapperClasses} p-2 ${isDragging ? "shadow-lg" : ""}`}
-      >
-        {controls}
-        {layoutType === "box-layout" && (
-          <BoxLayoutRenderer label={field.label} config={layoutConfig} />
-        )}
-        {layoutType === "grid-layout" && (
-          <GridLayoutRenderer label={field.label} config={layoutConfig} />
-        )}
-        {layoutType === "form-group" && (
-          <FormGroupRenderer label={field.label} config={layoutConfig} />
-        )}
-      </div>
-    );
-  }
-
+  // Default: use FormFieldRenderer for all other field types
   return (
     <div
       ref={setNodeRef}
@@ -197,7 +238,7 @@ export function CanvasCard({
       className={`${wrapperClasses} p-2 ${isDragging ? "shadow-lg" : ""}`}
     >
       {controls}
-      <FormFieldRenderer field={field} disabled />
+      <FormFieldRenderer field={formField} disabled />
     </div>
   );
 }

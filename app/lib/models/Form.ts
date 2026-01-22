@@ -23,7 +23,6 @@ export interface IFormField {
   default?: any;
   disabled?: boolean;
   readonly?: boolean;
-
   inputType?: string;
   addons?: { before?: string; after?: string };
   min?: number | string | null;
@@ -41,7 +40,6 @@ export interface IFormField {
   height?: string;
   columns?: any[];
   rows?: Record<string, any>[];
-  // Custom field reference for LOV-based fields (dropdown, checkbox, radio)
   customFieldId?: string;
   lovItems?: ILOVItem[];
 }
@@ -78,7 +76,6 @@ const FormSchema = new Schema<IForm>({
     required: true,
     unique: true,
     trim: true,
-    uppercase: true,
   },
   formJson: {
     type: Schema.Types.Mixed,

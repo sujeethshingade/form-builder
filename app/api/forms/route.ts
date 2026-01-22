@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/app/lib/mongodb';
 import Form from '@/app/lib/models/Form';
 
@@ -70,11 +71,29 @@ export async function POST(request: NextRequest) {
       },
     };
 
+    const finalFormJson = formJson || defaultFormJson;
+
     const form = await Form.create({
       collectionName,
       formName: formName,
-      formJson: formJson || defaultFormJson,
+      formJson: finalFormJson,
     });
+
+    const db = mongoose.connection.db;
+    if (db) {
+      try {
+        const targetCollection = db.collection(collectionName);
+        await targetCollection.insertOne({
+          formId: form._id,
+          formName: formName,
+          formJson: finalFormJson,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (insertError) {
+        console.warn('Warning saving to collection:', insertError);
+      }
+    }
 
     return NextResponse.json({ success: true, data: form }, { status: 201 });
   } catch (error) {

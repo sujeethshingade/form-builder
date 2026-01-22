@@ -8,12 +8,11 @@ export interface ICollection extends Document {
 }
 
 const CollectionSchema = new Schema<ICollection>({
-  name: { 
-    type: String, 
+  name: {
+    type: String,
     required: true,
     unique: true,
     trim: true,
-    uppercase: true,
   },
   description: {
     type: String,
